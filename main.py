@@ -133,6 +133,7 @@ button_imgs = {
     'restart': pygame.image.load(os.path.join('./Assets/', 'restart.png')),
     'start': pygame.image.load(os.path.join('./Assets/', 'start.png')),
     'discord': pygame.image.load(os.path.join('./Assets/', 'discord.png')),
+    'credits': pygame.image.load(os.path.join('./Assets/', 'credits.png')),
 
 }
 logo = pygame.image.load(os.path.join('./Assets/', 'logo.png'))
@@ -200,6 +201,7 @@ login_button = Button(500,50,button_imgs['login'],3)
 restart = Button(500,150,button_imgs['restart'],3)
 start = Button(500,150,button_imgs['start'],3)
 discord = Button(20,20,button_imgs['discord'],3)
+creditss = Button(500,350,button_imgs['credits'],3)
 
 moving_sprites = pygame.sprite.Group()
      
@@ -276,10 +278,15 @@ def main():
     crit = False
     startclicked = False
     value = 0
+    creditsactive = False
     while run:
-        if not startclicked:
+        if not startclicked and not creditsactive:
             start.draw(win)
             discord.draw(win)
+            creditss.draw(win)           
+            if creditss.clicked:
+                creditsactive = True
+
             if discord.clicked:
                 disc = requests.get("https://maxor.xyz/geneva/discord.txt")                        
                 disco = disc.text
@@ -288,6 +295,17 @@ def main():
             if start.clicked:
                 startclicked = True
                 
+        if creditsactive:
+          
+            duncan = font3.render("AvgJew - Lead Dev", (0, 5), BLACK)
+            william = font3.render("William - Co Dev", (0, 5), BLACK)
+            jusuf = font3.render("Jusuf - Playtesting/Bugfinding", (0, 5), BLACK)
+            archer = font3.render("Archer - Art" , (0, 5), BLACK)
+            win.blit(duncan, (200, 50))
+            win.blit(william, (200, 150))
+            win.blit(jusuf, (200, 250))
+            win.blit(archer, (200, 350))
+
 
         hp = font3.render("hp: " + str(p.hp), (0, 5), BLACK)
         spd = font3.render("spd: " + str(p.speed), (0, 5), BLACK)
@@ -309,7 +327,7 @@ def main():
         if yeezus:
             p2.yeezus = True
             p.yeezus = True
-        if paused or not startclicked:
+        if paused or not startclicked and not creditsactive:
             settings_button.draw(win)
             if(settings_button.clicked):
                 if not settings:
@@ -487,13 +505,8 @@ def main():
         if not paused:
             p2.move(p.x, p2.x)
 
-        for bullet in bullets:
 
-            if bullet.x < 1240 and bullet.x > 0: 
-                bullet.x += bullet.vel  # Moves the bullet by its vel
 
-            else:
-                bullets.pop(bullets.index(bullet))  # This will remove the bullet if it is off 
         if(p.y < 460):
             p.y += 1
 
@@ -547,7 +560,14 @@ def main():
             value = 0
 
         for bullet in bullets:
+
             bullet.draw(win)
+
+            if bullet.x < 1240 and bullet.x > 0: 
+                bullet.x += bullet.vel  # Moves the bullet by its vel
+            else:
+                bullets.pop(bullets.index(bullet))  # This will remove the bullet if it is off 
+
             if not lost and not won and not paused:
                 if bullet.y + bullet.radius < p2.hitbox[1] + 60 + p2.hitbox[3] and bullet.y + bullet.radius > p2.hitbox[1] - 60 or prect.colliderect(erect):
                     if bullet.x + bullet.radius > p2.hitbox[0] + 13 and bullet.x - bullet.radius < p2.hitbox[0] + p2.hitbox[2] - 13 or prect.colliderect(erect):
@@ -599,6 +619,7 @@ def main():
 
         clock.tick(60)
         pygame.display.update()
+
         win.fill(WHITE)
 
     pygame.quit()

@@ -1,5 +1,6 @@
 # Geneva
 ## DOWNLOAD [Here](https://maxorr.itch.io/geneva)
+
 ### REQUIREMENTS
 - VSCODE
 - PYTHON
@@ -9,3 +10,9 @@
 - Step 2: run 'pyinstaller main.py --icon=logo.ico --onefile --noconsole' in cmd in the folder
 - Step 3: Move 'assets' into the dist folder once it's done.
 - Step 4: RUN!
+
+### Credits
+[avgjew](https://maxor.xyz) - lead dev
+william - dev(?)
+jusuf - playtester/bugfinder
+groses - art
