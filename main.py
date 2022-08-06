@@ -31,7 +31,7 @@ class GameController():
 
 gc = GameController(1,0)
 
-size = (1320 , 724)
+size = (1320,737)
 win = pygame.display.set_mode(size)
 
 pygame.mouse.set_visible(False)
@@ -134,8 +134,12 @@ button_imgs = {
     'start': pygame.image.load(os.path.join('./Assets/', 'start.png')),
     'discord': pygame.image.load(os.path.join('./Assets/', 'discord.png')),
     'credits': pygame.image.load(os.path.join('./Assets/', 'credits.png')),
+    'resolution': pygame.image.load(os.path.join('./Assets/', 'resolution.png')),
+    'resolution1': pygame.image.load(os.path.join('./Assets/', 'resolution1.png')),
+    'resolution2': pygame.image.load(os.path.join('./Assets/', 'resolution2.png')),
 
 }
+
 logo = pygame.image.load(os.path.join('./Assets/', 'logo.png'))
 pygame.display.set_icon(logo)
 
@@ -147,7 +151,7 @@ erect = pygame.Rect(p2.x, p2.y, p2.img.get_width(), p2.img.get_height())
 prect = pygame.Rect(p.x, p.y, p.img.get_width(), p.img.get_height())
 
 mouserect = pygame.Rect((300, 300),(20,20))
-grassRect = pygame.Rect((0,500),(1330,300))
+grassRect = pygame.Rect((0,500),(size[0],300))
 mouserect = pygame.Rect((300, 300),(20,20))
 statsrect = pygame.Rect((900, 100),(330,220))
 
@@ -202,6 +206,9 @@ restart = Button(500,150,button_imgs['restart'],3)
 start = Button(500,150,button_imgs['start'],3)
 discord = Button(20,20,button_imgs['discord'],3)
 creditss = Button(500,350,button_imgs['credits'],3)
+resolution = Button(500,150,button_imgs['resolution'],3)
+resolution1 = Button(500,150,button_imgs['resolution1'],3)
+resolution2 = Button(500,250,button_imgs['resolution2'],3)
 
 moving_sprites = pygame.sprite.Group()
      
@@ -279,8 +286,10 @@ def main():
     startclicked = False
     value = 0
     creditsactive = False
+    resolutionclicked = False
     while run:
-        if not startclicked and not creditsactive:
+        
+        if not startclicked and not creditsactive and not settings:
             start.draw(win)
             discord.draw(win)
             creditss.draw(win)           
@@ -305,6 +314,22 @@ def main():
             win.blit(william, (200, 150))
             win.blit(jusuf, (200, 250))
             win.blit(archer, (200, 350))
+        
+        if settings and not resolutionclicked:
+            resolution.draw(win)           
+            if resolution.clicked:
+                resolutionclicked = True
+        
+        if resolutionclicked:
+            resolution1.draw(win)           
+            resolution2.draw(win)           
+
+            if resolution1.clicked:
+                size = (1320, 737)
+                pygame.display.set_mode(size)
+            if resolution2.clicked:
+                size = (1460, 900)
+                pygame.display.set_mode(size)               
 
 
         hp = font3.render("hp: " + str(p.hp), (0, 5), BLACK)
@@ -327,7 +352,7 @@ def main():
         if yeezus:
             p2.yeezus = True
             p.yeezus = True
-        if paused or not startclicked and not creditsactive:
+        if paused or not startclicked and not creditsactive and not settings:
             settings_button.draw(win)
             if(settings_button.clicked):
                 if not settings:
@@ -356,6 +381,7 @@ def main():
                     login = False
 
         for event in pygame.event.get():
+
             if event.type == pygame.QUIT:
                 run = False
             if event.type == pygame.MOUSEBUTTONDOWN:
