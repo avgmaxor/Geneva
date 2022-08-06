@@ -1,5 +1,5 @@
 # Geneva
-## DOWNLOAD [Here] (https://maxorr.itch.io/geneva)
+## DOWNLOAD [Here](https://maxorr.itch.io/geneva)
 ### REQUIREMENTS
 - VSCODE
 - PYTHON
