@@ -1,4 +1,5 @@
 
+from cgitb import text
 import pygame, os, requests, math
 from pygame import K_BACKSPACE , font
 from random import randint
@@ -28,8 +29,10 @@ class GameController():
         self.points = points
         self.size = 1320, 724
         self.BULLCOLOR = BLACK
+        self.dialogue = False
 
-gc = GameController(1,0)
+
+gc = GameController(1,70)
 
 size = (1320,737)
 win = pygame.display.set_mode(size)
@@ -82,7 +85,7 @@ class EnemyPlayer(pygame.sprite.Sprite):
             self.facing = 1
 
 class Player():
-    def __init__(self, img, x, y, v, m, speed, facing, hp, dmg, bulletcnt, cc):
+    def __init__(self, img, x, y, v, m, speed, facing, hp, dmg, bulletcnt, cc, abilitycount):
         self.img = img
         self.x = x
         self.y = y
@@ -147,7 +150,7 @@ button_imgs = {
 logo = pygame.image.load(os.path.join('./Assets/', 'logo.png'))
 pygame.display.set_icon(logo)
 
-p = Player(players['PlayerRED'], 120, 460, 5, 1, 4.5, -1, 100, 10, 5, 10)
+p = Player(players['PlayerRED'], 120, 460, 5, 1, 4.5, -1, 100, 10, 5, 10, 0)
 p2 = EnemyPlayer(players['PlayerBLUE'], 1020, 460, 5, 1, 100, 2, -1, 1)
 
 # - SHOP -
@@ -174,7 +177,6 @@ class projectile(object):
 
     def draw(self,win):
         pygame.draw.circle(win, self.color, (self.x,self.y), self.radius)
-
 
 class Button():
 	def __init__(self, x, y, image, scale):
@@ -219,10 +221,21 @@ back = Button(900,350,button_imgs['back'],3)
 
 moving_sprites = pygame.sprite.Group()
 
-def getRandom():
-    rand1 = randint(1,10)
-    return rand1
+class dialogue():
+    def __init__(self,text,text1):
+        self.text = text
+        self.text1 = text1
 
+    def draw(self):
+        txt = font3.render(self.text,(0,5), BLACK)
+        txt1 = font4.render(self.text1,(0,5), BLACK)
+        win.blit(txt,(500,200))
+        win.blit(txt1,(500,260))
+    def changeText(self, t1, t2):
+        self.text = t1
+        self.text1 = t2
+
+d = dialogue('', '')
 
 def restartgame():
     p.hp = 100
@@ -282,15 +295,21 @@ def resetRes():
     grassRect.height = 0
 
 def getAbility():
-    ability = getRandom()
+    ability = randint(1,2)
     if ability == 1:
         if(p.lightspecial == False):
             p.lightspecial = True
+            gc.dialogue = True
+            d.changeText('You unlocked ability light!', 'when you die you will get a free revive!')
+            p.abilitycnt += 1
         else:
             getAbility()
     if ability == 2:
         if(p.darkspecial == False):
             p.darkspecial = True
+            gc.dialogue = True
+            d.changeText('You unlocked ability dark!', 'every 20 hits this will kill the enemy for you!')
+            p.abilitycnt += 1
         else:
             getAbility()
 
@@ -320,6 +339,7 @@ def main():
     resolutionclicked = False
     unlockedability = False
     darkvalue = 0
+    lightused = False
 
     while run:
         
@@ -352,7 +372,8 @@ def main():
             if back.clicked:
                 creditsactive = False
                 
-        
+
+
         if settings and not resolutionclicked:
             resolution.draw(win)           
             if resolution.clicked:
@@ -454,10 +475,13 @@ def main():
                 
 
                     if event.key == pygame.K_SPACE:
-                        if(p.y == 460):
-                            p.y -= 40
-                        if login:
-                            passtime = True
+                        if gc.dialogue:
+                            gc.dialogue = False
+                        else:
+                            if(p.y == 460):
+                                p.y -= 40
+                            if login:
+                                passtime = True
 
 
                     if event.key == pygame.K_RETURN:
@@ -526,9 +550,11 @@ def main():
                                 gc.points -= s.five
                                 s.five += 10 
                                 p.cc += 5
-                        if(event.key == pygame.K_6):
+                        if(event.key == pygame.K_6 and p.abilitycount <= 9):
                             if(gc.points >= s.six):
                                 gc.points -= s.six
+                                gc.dialogue = True
+                                s.six *= 2
                                 getAbility()
                         if(event.key == pygame.K_y):
                             if(gc.points >= s.yeezus):
@@ -582,6 +608,10 @@ def main():
         if p.hp <= 0:
             lost = font.render("Ratio U LOST", (20,20), BLACK)
             win.blit(lost, (150, 20))
+            if p.lightspecial == True:
+                if lightused == False:
+                    p.hp = 100
+                    won = True
 
         if not paused:
             p2.move(p.x, p2.x)
@@ -704,6 +734,8 @@ def main():
             else:
              win.blit(players['PlayerBLUEswing2'], (p2.x, p2.y - 60))
             p.hp -= p2.dmg
+        if gc.dialogue == True:
+            d.draw()    
         pygame.draw.rect(win,(0,200,0), grassRect)
         mouserect.x ,mouserect.y = pygame.mouse.get_pos()
         pygame.draw.rect(win, (0,0,0),mouserect)
