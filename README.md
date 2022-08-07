@@ -12,7 +12,10 @@
 - Step 4: RUN!
 
 ### Credits
-[avgjew](https://maxor.xyz) - lead dev
-william - dev(?)
-jusuf - playtester/bugfinder
-groses - art
+- [avgjew](https://maxor.xyz) - lead dev
+
+- william - dev(?)
+
+- jusuf - playtester/bugfinder
+
+- groses - art

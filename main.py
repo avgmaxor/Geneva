@@ -109,35 +109,35 @@ class Player():
 
 pygame.display.set_caption("Geneva")
 players = {
-    'PlayerRED' :  pygame.image.load(os.path.join('./Assets/', 'player.png')),
-    'PlayerRED2' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/', 'player.png')), True, False),
-    'PlayerBLUE' :  pygame.image.load(os.path.join('./Assets/', 'PlayerBLUE.png')),
-    'PlayerBLUEswing' :  pygame.image.load(os.path.join('./Assets/', 'PlayerBLUEswing.png')),
-    'PlayerBLUEswing2' :  pygame.image.load(os.path.join('./Assets/', 'PlayerBLUEswing2.png')),
-    'PlayerBLUE2' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/', 'PlayerBLUE.png')), True, False)
+    'PlayerRED' :  pygame.image.load(os.path.join('./Assets/character/', 'player.png')).convert_alpha(),
+    'PlayerRED2' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/character/', 'player.png')), True, False).convert_alpha(),
+    'PlayerBLUE' :  pygame.image.load(os.path.join('./Assets/character/', 'PlayerBLUE.png')).convert_alpha(),
+    'PlayerBLUEswing' :  pygame.image.load(os.path.join('./Assets/character/', 'PlayerBLUEswing.png')).convert_alpha(),
+    'PlayerBLUEswing2' :  pygame.image.load(os.path.join('./Assets/character/', 'PlayerBLUEswing2.png')).convert_alpha(),
+    'PlayerBLUE2' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/character/', 'PlayerBLUE.png')), True, False).convert_alpha()
 
 }
 yeezusimg = {
-    'yeezus' :  pygame.image.load(os.path.join('./Assets/', 'yeezuz.png')),
-    'yeezus2' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/', 'yeezuz.png')), True, False),
-    'yeezus3' :  pygame.image.load(os.path.join('./Assets/', 'yeezus2.png')),
-    'yeezusswing2' :  pygame.image.load(os.path.join('./Assets/', 'yeezusSwing2.png')),
-    'yeezusswing' :  pygame.image.load(os.path.join('./Assets/', 'yeezusSwing.png')),
-    'yeezus6' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/', 'yeezus2.png')), True, False)
+    'yeezus' :  pygame.image.load(os.path.join('./Assets/yeezus/', 'yeezuz.png')).convert_alpha(),
+    'yeezus2' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/yeezus/', 'yeezuz.png')), True, False).convert_alpha(),
+    'yeezus3' :  pygame.image.load(os.path.join('./Assets/yeezus/', 'yeezus2.png')).convert_alpha(),
+    'yeezusswing2' :  pygame.image.load(os.path.join('./Assets/yeezus/', 'yeezusSwing2.png')).convert_alpha(),
+    'yeezusswing' :  pygame.image.load(os.path.join('./Assets/yeezus/', 'yeezusSwing.png')).convert_alpha(),
+    'yeezus6' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/yeezus/', 'yeezus2.png')), True, False).convert_alpha()
 
 }
 
 button_imgs = {
-    'settings_button': pygame.image.load(os.path.join('./Assets/', 'settings.png')),
-    'login': pygame.image.load(os.path.join('./Assets/', 'Login.png')),
-    'restart': pygame.image.load(os.path.join('./Assets/', 'restart.png')),
-    'start': pygame.image.load(os.path.join('./Assets/', 'start.png')),
-    'discord': pygame.image.load(os.path.join('./Assets/', 'discord.png')),
-    'credits': pygame.image.load(os.path.join('./Assets/', 'credits.png')),
-    'resolution': pygame.image.load(os.path.join('./Assets/', 'resolution.png')),
-    'resolution1': pygame.image.load(os.path.join('./Assets/', 'resolution1.png')),
-    'resolution2': pygame.image.load(os.path.join('./Assets/', 'resolution2.png')),
-    'back': pygame.image.load(os.path.join('./Assets/', 'back.png')),
+    'settings_button': pygame.image.load(os.path.join('./Assets/buttons/', 'settings.png')).convert_alpha(),
+    'login': pygame.image.load(os.path.join('./Assets/buttons/', 'Login.png')).convert_alpha(),
+    'restart': pygame.image.load(os.path.join('./Assets/buttons/', 'restart.png')).convert_alpha(),
+    'start': pygame.image.load(os.path.join('./Assets/buttons/', 'start.png')).convert_alpha(),
+    'discord': pygame.image.load(os.path.join('./Assets/buttons/', 'discord.png')).convert_alpha(),
+    'credits': pygame.image.load(os.path.join('./Assets/buttons/', 'credits.png')).convert_alpha(),
+    'resolution': pygame.image.load(os.path.join('./Assets/buttons/', 'resolution.png')).convert_alpha(),
+    'resolution1': pygame.image.load(os.path.join('./Assets/buttons/', 'resolution1.png')).convert_alpha(),
+    'resolution2': pygame.image.load(os.path.join('./Assets/buttons/', 'resolution2.png')).convert_alpha(),
+    'back': pygame.image.load(os.path.join('./Assets/buttons/', 'back.png')).convert_alpha(),
 
 
 }
@@ -299,7 +299,7 @@ def main():
 
     while run:
         
-        if not startclicked and not creditsactive and not settings:
+        if not startclicked and not creditsactive and not settings and not resolutionclicked:
             start.draw(win)
             discord.draw(win)
             creditss.draw(win)           
