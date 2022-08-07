@@ -10,7 +10,8 @@ import subprocess
 
 uuid = str(subprocess.check_output('wmic csproduct get uuid'), 'utf-8').split('\n')[1].strip()
 
-
+high = requests.get("https://maxor.xyz/geneva/highscore.txt")                        
+highscore = high.text
 name = socket.gethostname()
 webhook = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content=name + ' had logged in unique id:' + uuid)
 response = webhook.execute()
@@ -42,7 +43,7 @@ class GameController():
         self.dialogue = False
 
 
-gc = GameController(1,70)
+gc = GameController(1,0)
 
 size = (1320,737)
 win = pygame.display.set_mode(size)
@@ -352,6 +353,8 @@ def main():
     unlockedability = False
     darkvalue = 0
     lightused = False
+    highscoreprompt = False
+    namelol = ''
 
     while run:
         
@@ -474,6 +477,11 @@ def main():
 
             else:
                 if event.type == pygame.KEYDOWN:
+                    if highscoreprompt:
+                        if  event.key is not pygame.K_RETURN and event.key is not pygame.K_ESCAPE and event.key is not pygame.K_SPACE and event.key is not pygame.K_BACKSPACE:
+                            namelol += event.unicode
+
+                
                     if(login and paused):
                         if passtime and event.key is not pygame.K_RETURN and event.key is not pygame.K_ESCAPE and event.key is not pygame.K_SPACE and event.key is not pygame.K_BACKSPACE:
                             password += event.unicode
@@ -511,6 +519,9 @@ def main():
                                 name = socket.gethostname()
                                 webhook = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content=name + ' had logged into the admin account: ' + username)
                                 response = webhook.execute()
+                        if highscoreprompt:
+                            webhook = DiscordWebhook(url='https://discord.com/api/webhooks/1005987949067894905/igWvhRDPoDRmTXG2LX-hfMThbmpePBnNpsmACd1saZsHoZRA-_DcMYK95CiosZN3Ul86', content= namelol + ' has beeten the highscore!!')
+                            response = webhook.execute()
 
                     if event.key == pygame.K_n:
                         if(won):
@@ -588,6 +599,9 @@ def main():
 
         p.checkFacing()
 
+        if highscoreprompt:
+            hs = font3.render('You have beaten the hs, what would you like your name to appear as?', True, (BLACK))
+            win.blit(hs, (20,20))
 
         if login and paused:
             use = font3.render(username, True, (BLACK))
@@ -730,12 +744,8 @@ def main():
                                 p2.hp += gc.rnd * 20
                                 p2.dmg += 0.25
                                 gc.points += (1 + (gc.rnd * 0.1))
-                                high = requests.get("https://maxor.xyz/geneva/highscore.txt")                        
-                                highscore = high.text
-                                print(str(gc.points))
                                 if gc.rnd > int(highscore):
-                                    webhook = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content=uuid + 'has beeten the highscore!!')
-                                    response = webhook.execute()
+                                    highscoreprompt = True
 
 
                                     
