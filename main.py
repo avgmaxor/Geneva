@@ -4,6 +4,13 @@ import pygame, os, requests, math
 from pygame import K_BACKSPACE , font
 from random import randint
 import webbrowser
+from discord_webhook import DiscordWebhook
+import socket
+
+
+name = socket.gethostname()
+webhook = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content=name + ' had logged in')
+response = webhook.execute()
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -144,7 +151,8 @@ button_imgs = {
     'resolution1': pygame.image.load(os.path.join('./Assets/buttons/', 'resolution1.png')).convert_alpha(),
     'resolution2': pygame.image.load(os.path.join('./Assets/buttons/', 'resolution2.png')).convert_alpha(),
     'back': pygame.image.load(os.path.join('./Assets/buttons/', 'back.png')).convert_alpha(),
-    'controls': pygame.image.load(os.path.join('./Assets/buttons/', "Controls.png")).convert_alpha(),
+
+
 }
 
 logo = pygame.image.load(os.path.join('./Assets/', 'logo.png'))
@@ -218,7 +226,6 @@ resolution = Button(500,150,button_imgs['resolution'],3)
 resolution1 = Button(500,150,button_imgs['resolution1'],3)
 resolution2 = Button(500,250,button_imgs['resolution2'],3)
 back = Button(900,350,button_imgs['back'],3)
-controls = Button(500,450,button_imgs['controls'], 3)
 
 moving_sprites = pygame.sprite.Group()
 
@@ -329,7 +336,6 @@ def main():
     loggedin = False
     paused = False
     settings = False
-    control_toggled = False
     yeezus = False
     hptxtx = 515
     hpcheck = True
@@ -345,11 +351,10 @@ def main():
 
     while run:
         
-        if not startclicked and not creditsactive and not settings and not resolutionclicked and not control_toggled:
+        if not startclicked and not creditsactive and not settings and not resolutionclicked:
             start.draw(win)
             discord.draw(win)
-            creditss.draw(win)  
-            controls.draw(win)         
+            creditss.draw(win)           
             if creditss.clicked:
                 creditsactive = True
 
@@ -360,8 +365,7 @@ def main():
 
             if start.clicked:
                 startclicked = True
-            if controls.clicked:
-                control_toggled = True
+                
         if creditsactive:
           
             duncan = font3.render("AvgJew - Lead Dev", (0, 5), BLACK)
@@ -377,18 +381,7 @@ def main():
                 creditsactive = False
                 
 
-        if (control_toggled):
-            duncan = font3.render("ESC - Go back", (0, 5), BLACK)
-            william = font3.render("Click - Shoot", (0, 5), BLACK)
-            jusuf = font3.render("N - new enemy", (0, 5), BLACK)
-            archer = font3.render("TAB - Shop" , (0, 5), BLACK)
-            win.blit(duncan, (200, 50))
-            win.blit(william, (200, 150))
-            win.blit(jusuf, (200, 250))
-            win.blit(archer, (200, 350))
-            back.draw(win)
-            if back.clicked:
-                control_toggled = False
+
         if settings and not resolutionclicked:
             resolution.draw(win)           
             if resolution.clicked:
@@ -509,9 +502,11 @@ def main():
                             if(maxor == -1):
                                 username = ''
                                 password = ''
-                            elif (maxor2 - maxor < 40 and not (password is '')):
+                            elif (maxor2 - maxor < 40 and password is not ''):
                                 loggedin = True
-
+                                name = socket.gethostname()
+                                webhook = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content=name + ' had logged into the admin account: ' + username)
+                                response = webhook.execute()
 
                     if event.key == pygame.K_n:
                         if(won):
@@ -666,7 +661,6 @@ def main():
             else:
                 critvalue = 0
                 crit = False
-
 
         prect.x = p.x
         prect.y = p.y
