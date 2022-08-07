@@ -14,7 +14,7 @@
 ### Credits
 - [avgjew](https://maxor.xyz) - lead dev
 
-- william - dev
+- william - dev2
 
 - jusuf - playtester/bugfinder
 
