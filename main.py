@@ -37,7 +37,7 @@ win = pygame.display.set_mode(size)
 pygame.mouse.set_visible(False)
 
 class Shop():
-    def __init__(self, one, two, three, four, yeezus, five, hpadd):
+    def __init__(self, one, two, three, four, yeezus, five, hpadd, six):
         self.one = one
         self.two = two
         self.three = three
@@ -45,7 +45,7 @@ class Shop():
         self.yeezus = yeezus
         self.five = five
         self.hpadd = hpadd
-
+        self.six = six
 
 class EnemyPlayer(pygame.sprite.Sprite):
     def __init__(self, img, x, y, v, m, hp, speed, facing, dmg):
@@ -97,6 +97,8 @@ class Player():
         self.cc = cc
         self.faceval1 = 1
         self.faceval2 = -1
+        self.darkspecial = False
+        self.lightspecial = False
     def changeImg(self, newimg):
         self.img = newimg 
 
@@ -147,7 +149,9 @@ pygame.display.set_icon(logo)
 
 p = Player(players['PlayerRED'], 120, 460, 5, 1, 4.5, -1, 100, 10, 5, 10)
 p2 = EnemyPlayer(players['PlayerBLUE'], 1020, 460, 5, 1, 100, 2, -1, 1)
-s = Shop(1,2,3,10,30,20, 10)
+
+# - SHOP -
+s = Shop(1,2,3,10,30,20,10,50)
 
 erect = pygame.Rect(p2.x, p2.y, p2.img.get_width(), p2.img.get_height())
 prect = pygame.Rect(p.x, p.y, p.img.get_width(), p.img.get_height())
@@ -214,7 +218,12 @@ resolution2 = Button(500,250,button_imgs['resolution2'],3)
 back = Button(900,350,button_imgs['back'],3)
 
 moving_sprites = pygame.sprite.Group()
-     
+
+def getRandom():
+    rand1 = randint(1,10)
+    return rand1
+
+
 def restartgame():
     p.hp = 100
     p2.hp = 100
@@ -272,6 +281,19 @@ def resetRes():
     grassRect.width = 0
     grassRect.height = 0
 
+def getAbility():
+    ability = getRandom()
+    if ability == 1:
+        if(p.lightspecial == False):
+            p.lightspecial = True
+        else:
+            getAbility()
+    if ability == 2:
+        if(p.darkspecial == False):
+            p.darkspecial = True
+        else:
+            getAbility()
+
 
 def main():
 
@@ -296,6 +318,8 @@ def main():
     value = 0
     creditsactive = False
     resolutionclicked = False
+    unlockedability = False
+    darkvalue = 0
 
     while run:
         
@@ -368,6 +392,9 @@ def main():
         shoptxt4 = font3.render("DMG: KEY: 3 PRC:" + str(s.three), (0, 5), BLACK)
         shoptxt5 = font3.render("WEAPON: KEY: 4 PRC:" + str(s.four), (0, 5), BLACK)
         shoptxt6 = font3.render("CC: KEY: 5 PRC:" + str(s.five), (0, 5), BLACK)
+        shoptxt7 = font3.render("Ability: KEY: 6 PRC:" + str(s.six), (0, 5), BLACK)
+
+
         weaponstats = font6.render("Weapon Stats", (0, 5), BLACK)
         weaponstats2= font3.render("Bullet Count: " + str(p.bulletcnt), (0, 5), BLACK)
         weaponstats3 = font3.render("BulletSpeed: " + str(p.speed), (0, 5), BLACK)
@@ -499,7 +526,10 @@ def main():
                                 gc.points -= s.five
                                 s.five += 10 
                                 p.cc += 5
-
+                        if(event.key == pygame.K_6):
+                            if(gc.points >= s.six):
+                                gc.points -= s.six
+                                getAbility()
                         if(event.key == pygame.K_y):
                             if(gc.points >= s.yeezus):
                                 gc.points -= s.yeezus
@@ -534,6 +564,7 @@ def main():
             win.blit(shoptxt5, (20, 270))
             win.blit(points, (985, 10))
             win.blit(shoptxt6, (20, 310))
+            win.blit(shoptxt7, (20, 350))           
             pygame.draw.rect(win, (120,120,120),statsrect)
             win.blit(weaponstats, (900, 100))
             win.blit(weaponstats2, (920, 190))
@@ -624,10 +655,23 @@ def main():
                         if(randint(1, 100) <= p.cc):
                             p2.hp -= (p.dmg * 2)
                             crit = True
+                            if p.darkspecial == True:
+                                darkvalue += 1
+                                if darkvalue == 20:
+                                    p2.hp = 0
+                                    darkvalue = 0
                         else:
+                            if p.darkspecial == True:
+                                darkvalue += 1
+                                if darkvalue == 20:
+                                    p2.hp = 0
+                                    darkvalue = 0
+
                             p2.hp -= p.dmg
+
                         if not won:
                             bullets.pop(bullets.index(bullet))
+
                         if not won:
                             if(p2.hp <= 0):
                                 won = True
