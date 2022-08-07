@@ -760,6 +760,7 @@ def main():
 
     pygame.quit()
 
+
 if int(versioncheck) < int(float(versi)):
     update()
 else:
