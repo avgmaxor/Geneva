@@ -109,8 +109,8 @@ class Player():
 
 pygame.display.set_caption("Geneva")
 players = {
-    'PlayerRED' :  pygame.image.load(os.path.join('./Assets/', 'PlayerRED.png')),
-    'PlayerRED2' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/', 'PlayerRED.png')), True, False),
+    'PlayerRED' :  pygame.image.load(os.path.join('./Assets/', 'player.png')),
+    'PlayerRED2' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/', 'player.png')), True, False),
     'PlayerBLUE' :  pygame.image.load(os.path.join('./Assets/', 'PlayerBLUE.png')),
     'PlayerBLUEswing' :  pygame.image.load(os.path.join('./Assets/', 'PlayerBLUEswing.png')),
     'PlayerBLUEswing2' :  pygame.image.load(os.path.join('./Assets/', 'PlayerBLUEswing2.png')),
@@ -137,6 +137,8 @@ button_imgs = {
     'resolution': pygame.image.load(os.path.join('./Assets/', 'resolution.png')),
     'resolution1': pygame.image.load(os.path.join('./Assets/', 'resolution1.png')),
     'resolution2': pygame.image.load(os.path.join('./Assets/', 'resolution2.png')),
+    'back': pygame.image.load(os.path.join('./Assets/', 'back.png')),
+
 
 }
 
@@ -209,6 +211,7 @@ creditss = Button(500,350,button_imgs['credits'],3)
 resolution = Button(500,150,button_imgs['resolution'],3)
 resolution1 = Button(500,150,button_imgs['resolution1'],3)
 resolution2 = Button(500,250,button_imgs['resolution2'],3)
+back = Button(900,350,button_imgs['back'],3)
 
 moving_sprites = pygame.sprite.Group()
      
@@ -321,6 +324,10 @@ def main():
             win.blit(william, (200, 150))
             win.blit(jusuf, (200, 250))
             win.blit(archer, (200, 350))
+            back.draw(win)
+            if back.clicked:
+                creditsactive = False
+                
         
         if settings and not resolutionclicked:
             resolution.draw(win)           
@@ -401,7 +408,7 @@ def main():
 
             if event.type == pygame.QUIT:
                 run = False
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONDOWN and startclicked:
                     if len(bullets) < p.bulletcnt and not paused and not lost:  # This will make sure we cannot exceed 5 bullets on the screen at once
                             bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60), 6, (gc.BULLCOLOR), p.facing))
 
