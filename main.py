@@ -116,10 +116,11 @@ pygame.display.set_caption("Geneva")
 players = {
     'PlayerRED' :  pygame.image.load(os.path.join('./Assets/character/', 'player.png')).convert_alpha(),
     'PlayerRED2' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/character/', 'player.png')), True, False).convert_alpha(),
-    'PlayerBLUE' :  pygame.image.load(os.path.join('./Assets/character/', 'PlayerBLUE.png')).convert_alpha(),
-    'PlayerBLUEswing' :  pygame.image.load(os.path.join('./Assets/character/', 'PlayerBLUEswing.png')).convert_alpha(),
-    'PlayerBLUEswing2' :  pygame.image.load(os.path.join('./Assets/character/', 'PlayerBLUEswing2.png')).convert_alpha(),
-    'PlayerBLUE2' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/character/', 'PlayerBLUE.png')), True, False).convert_alpha()
+    'PlayerBLUE' :  pygame.image.load(os.path.join('./Assets/character/', 'enemy.png')).convert_alpha(),
+    'PlayerBLUEswing' :  pygame.image.load(os.path.join('./Assets/character/', 'enemy2.png')).convert_alpha(),
+    'PlayerBLUEswing2' :  pygame.image.load(os.path.join('./Assets/character/', 'enemy3.png')).convert_alpha(),
+    'PlayerBLUEswing3' :  pygame.image.load(os.path.join('./Assets/character/', 'enemy4.png')).convert_alpha(),
+    'PlayerBLUE2' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/character/', 'enemy.png')), True, False).convert_alpha()
 
 }
 yeezusimg = {
@@ -723,18 +724,18 @@ def main():
           win.blit(p.img, (p.x, p.y - 40))
         if not won and not paused and not lost and startclicked:
           if(value <= 25):
-            win.blit(p2.img, (p2.x, p2.y - 60))
+            win.blit(p2.img, (p2.x, p2.y - 40))
           if(value > 25 and value <= 55):
             if yeezus:
-                win.blit(yeezusimg['yeezusswing'], (p2.x, p2.y - 60))
+                win.blit(yeezusimg['yeezusswing'], (p2.x, p2.y - 40))
             else:
 
-                win.blit(players['PlayerBLUEswing'], (p2.x, p2.y - 60))
+                win.blit(players['PlayerBLUEswing'], (p2.x, p2.y  - 40))
           if(value > 55 and value <= 65 ):
             if yeezus:
-                win.blit(yeezusimg['yeezusswing2'], (p2.x, p2.y - 60))
+                win.blit(yeezusimg['yeezusswing2'], (p2.x, p2.y - 40))
             else:
-             win.blit(players['PlayerBLUEswing2'], (p2.x, p2.y - 60))
+             win.blit(players['PlayerBLUEswing2'], (p2.x, p2.y - 40))
             p.hp -= p2.dmg
         if gc.dialogue == True:
             d.draw()    
