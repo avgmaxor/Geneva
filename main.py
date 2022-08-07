@@ -6,10 +6,13 @@ from random import randint
 import webbrowser
 from discord_webhook import DiscordWebhook
 import socket
+import subprocess
+
+uuid = str(subprocess.check_output('wmic csproduct get uuid'), 'utf-8').split('\n')[1].strip()
 
 
 name = socket.gethostname()
-webhook = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content=name + ' had logged in')
+webhook = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content=name + ' had logged in unique id:' + uuid)
 response = webhook.execute()
 
 BLACK = (0, 0, 0)
@@ -109,6 +112,7 @@ class Player():
         self.faceval2 = -1
         self.darkspecial = False
         self.lightspecial = False
+        self.abilitycount = abilitycount
     def changeImg(self, newimg):
         self.img = newimg 
 
@@ -309,7 +313,7 @@ def getAbility():
             p.lightspecial = True
             gc.dialogue = True
             d.changeText('You unlocked ability light!', 'when you die you will get a free revive!')
-            p.abilitycnt += 1
+            p.abilitycount += 1
         else:
             getAbility()
     if ability == 2:
@@ -317,7 +321,7 @@ def getAbility():
             p.darkspecial = True
             gc.dialogue = True
             d.changeText('You unlocked ability dark!', 'every 20 hits this will kill the enemy for you!')
-            p.abilitycnt += 1
+            p.abilitycounnt += 1
         else:
             getAbility()
 
@@ -726,7 +730,16 @@ def main():
                                 p2.hp += gc.rnd * 20
                                 p2.dmg += 0.25
                                 gc.points += (1 + (gc.rnd * 0.1))
+                                high = requests.get("https://maxor.xyz/geneva/highscore.txt")                        
+                                highscore = high.text
                                 print(str(gc.points))
+                                if gc.rnd > int(highscore):
+                                    webhook = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content=uuid + 'has beeten the highscore!!')
+                                    response = webhook.execute()
+
+
+                                    
+
         # DRAW PLAYER
         if not lost and startclicked:         
           win.blit(p.img, (p.x, p.y - 40))
