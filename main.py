@@ -151,7 +151,7 @@ erect = pygame.Rect(p2.x, p2.y, p2.img.get_width(), p2.img.get_height())
 prect = pygame.Rect(p.x, p.y, p.img.get_width(), p.img.get_height())
 
 mouserect = pygame.Rect((300, 300),(20,20))
-grassRect = pygame.Rect((0,500),(size[0],300))
+grassRect = pygame.Rect((0,500),(1320,300))
 mouserect = pygame.Rect((300, 300),(20,20))
 statsrect = pygame.Rect((900, 100),(330,220))
 
@@ -265,7 +265,13 @@ def update():
         main()
 
 
+def resetRes():
+    grassRect.width = 0
+    grassRect.height = 0
+
+
 def main():
+
     run = True
     clock = pygame.time.Clock()
     lost = False
@@ -287,6 +293,7 @@ def main():
     value = 0
     creditsactive = False
     resolutionclicked = False
+
     while run:
         
         if not startclicked and not creditsactive and not settings:
@@ -326,9 +333,19 @@ def main():
 
             if resolution1.clicked:
                 size = (1320, 737)
+                resetRes()
+                grassRect.width += 1320
+                grassRect.height += 737
+                resolutionclicked = False
+                settings = False
                 pygame.display.set_mode(size)
             if resolution2.clicked:
                 size = (1460, 900)
+                resetRes()
+                grassRect.width += 1460
+                grassRect.height += 900
+                settings = False
+                resolutionclicked = False
                 pygame.display.set_mode(size)               
 
 
@@ -654,4 +671,3 @@ if int(versioncheck) < int(float(versi)):
     update()
 else:
     main()
-
