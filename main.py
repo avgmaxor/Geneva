@@ -617,15 +617,16 @@ def main():
             p2.move(p.x, p2.x)
 
 
-
+        # JUMP
         if(p.y < 460):
             p.y += 1
 
+        # WIN TEXT
 
         if(won and not shop and not paused):
             win.blit(wintxt, (180, 20))
 
-
+        # KEY HANDLING 2
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a] or keys[pygame.K_LEFT]:
             if(p.x > 2):
@@ -659,7 +660,8 @@ def main():
         if(p.x > p2.x):
          erect.x = (p2.x - 80)
         erect.y = p2.y
-
+        
+        # HITBOXES
         p2.hitbox = (p2.x + 17, p2.y + 11, 29, 52) # NEW
         if (erect.colliderect(prect)):
             p2.attack = True
