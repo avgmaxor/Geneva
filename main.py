@@ -495,7 +495,7 @@ def main():
                             if(maxor == -1):
                                 username = ''
                                 password = ''
-                            elif (maxor2 - maxor < 40 and password is not ''):
+                            elif (maxor2 - maxor < 40 and not (password is '')):
                                 loggedin = True
 
 
