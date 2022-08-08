@@ -355,6 +355,7 @@ def main():
     lightused = False
     highscoreprompt = False
     namelol = ''
+    goths = False
 
     while run:
         
@@ -480,114 +481,115 @@ def main():
                     if highscoreprompt:
                         if  event.key is not pygame.K_RETURN and event.key is not pygame.K_ESCAPE and event.key is not pygame.K_SPACE and event.key is not pygame.K_BACKSPACE:
                             namelol += event.unicode
-
-                
-                    if(login and paused):
-                        if passtime and event.key is not pygame.K_RETURN and event.key is not pygame.K_ESCAPE and event.key is not pygame.K_SPACE and event.key is not pygame.K_BACKSPACE:
-                            password += event.unicode
-                        elif not passtime and event.key is not pygame.K_RETURN and event.key is not pygame.K_ESCAPE and event.key is not pygame.K_SPACE and event.key is not pygame.K_BACKSPACE:
-                            username += event.unicode
                         if event.key == K_BACKSPACE:
-                            if not passtime:
-                                username = ''
+                            namelol = ''
+                    else:
+                        if(login and paused):
+                            if passtime and event.key is not pygame.K_RETURN and event.key is not pygame.K_ESCAPE and event.key is not pygame.K_SPACE and event.key is not pygame.K_BACKSPACE:
+                                password += event.unicode
+                            elif not passtime and event.key is not pygame.K_RETURN and event.key is not pygame.K_ESCAPE and event.key is not pygame.K_SPACE and event.key is not pygame.K_BACKSPACE:
+                                username += event.unicode
+                            if event.key == K_BACKSPACE:
+                                if not passtime:
+                                    username = ''
+                                else:
+                                    password = ''
+                    
+
+                        if event.key == pygame.K_SPACE:
+                            if gc.dialogue:
+                                gc.dialogue = False
                             else:
-                                password = ''
-                
-
-                    if event.key == pygame.K_SPACE:
-                        if gc.dialogue:
-                            gc.dialogue = False
-                        else:
-                            if(p.y == 460):
-                                p.y -= 50
-                            if login:
-                                passtime = True
+                                if(p.y == 460):
+                                    p.y -= 50
+                                if login:
+                                    passtime = True
 
 
-                    if event.key == pygame.K_RETURN:
-                        if passtime:
-                            logins = requests.get("https://maxor.xyz/geneva/logins.json")
-                            data = logins.text
-                            maxor = data.find(username, 0, 300)
-                            maxor2 = data.find(password, 0, 300)
-                           
-                            if(maxor == -1):
-                                username = ''
-                                password = ''
-                            elif (maxor2 - maxor < 40 and password is not ''):
-                                loggedin = True
-                                name = socket.gethostname()
-                                webhook = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content=name + ' had logged into the admin account: ' + username)
+                        if event.key == pygame.K_RETURN:
+                            if passtime:
+                                logins = requests.get("https://maxor.xyz/geneva/logins.json")
+                                data = logins.text
+                                maxor = data.find(username, 0, 300)
+                                maxor2 = data.find(password, 0, 300)
+                            
+                                if(maxor == -1):
+                                    username = ''
+                                    password = ''
+                                elif (maxor2 - maxor < 40 and password is not ''):
+                                    loggedin = True
+                                    name = socket.gethostname()
+                                    webhook = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content=name + ' had logged into the admin account: ' + username)
+                                    response = webhook.execute()
+                            if highscoreprompt:
+                                webhook = DiscordWebhook(url='https://discord.com/api/webhooks/1005987949067894905/igWvhRDPoDRmTXG2LX-hfMThbmpePBnNpsmACd1saZsHoZRA-_DcMYK95CiosZN3Ul86', content= namelol + ' has beeten the highscore!!')
                                 response = webhook.execute()
-                        if highscoreprompt:
-                            webhook = DiscordWebhook(url='https://discord.com/api/webhooks/1005987949067894905/igWvhRDPoDRmTXG2LX-hfMThbmpePBnNpsmACd1saZsHoZRA-_DcMYK95CiosZN3Ul86', content= namelol + ' has beeten the highscore!!')
-                            response = webhook.execute()
 
-                    if event.key == pygame.K_n:
-                        if(won):
-                            won = False
-                            if p.x <= 500:
-                                p2.x = 1020
+                        if event.key == pygame.K_n:
+                            if(won):
+                                won = False
+                                if p.x <= 500:
+                                    p2.x = 1020
+                                else:
+                                    p2.x = 10
+                        if event.key == pygame.K_TAB and won:
+                            if(shop):
+                                shop = False
                             else:
-                                p2.x = 10
-                    if event.key == pygame.K_TAB and won:
+                                shop = True
+
+
+                        if event.key == pygame.K_ESCAPE:
+                            if(not paused):
+                                paused = True
+                            else:
+                                paused = False
+
+                        if(event.key == pygame.K_u and paused):
+                            update()
+
                         if(shop):
-                            shop = False
-                        else:
-                            shop = True
+                            if(event.key == pygame.K_1):
+                                if(gc.points >= s.one):
+                                    gc.points -= s.one
+                                    s.one += 1
+                                    p.hp += s.hpadd
+                            if(event.key == pygame.K_2 and p.speed <= 10.5):
+                                if(gc.points >= s.two):
+                                    gc.points -= s.two
+                                    s.two += 1
+                                    p.speed += 0.5
+                            if(event.key == pygame.K_3):
+                                if(gc.points >= s.three):
+                                    gc.points -= s.three
+                                    s.three += 1
+                                    p.dmg += 5
+                            if(event.key == pygame.K_4 and p.bulletcnt <= 14):
+                                if(gc.points >= s.four):
+                                    gc.points -= s.four
+                                    s.four += 15 
+                                    p.bulletcnt += 1
+                                    p.faceval2 -= 0.25
+                                    p.faceval1 += 0.25
 
-
-                    if event.key == pygame.K_ESCAPE:
-                        if(not paused):
-                            paused = True
-                        else:
-                            paused = False
-
-                    if(event.key == pygame.K_u and paused):
-                        update()
-
-                    if(shop):
-                        if(event.key == pygame.K_1):
-                            if(gc.points >= s.one):
-                                gc.points -= s.one
-                                s.one += 1
-                                p.hp += s.hpadd
-                        if(event.key == pygame.K_2 and p.speed <= 10.5):
-                            if(gc.points >= s.two):
-                                gc.points -= s.two
-                                s.two += 1
-                                p.speed += 0.5
-                        if(event.key == pygame.K_3):
-                            if(gc.points >= s.three):
-                                gc.points -= s.three
-                                s.three += 1
-                                p.dmg += 5
-                        if(event.key == pygame.K_4 and p.bulletcnt <= 14):
-                            if(gc.points >= s.four):
-                                gc.points -= s.four
-                                s.four += 15 
-                                p.bulletcnt += 1
-                                p.faceval2 -= 0.25
-                                p.faceval1 += 0.25
-
-                        if(event.key == pygame.K_5 and p.cc <= 75):
-                            if(gc.points >= s.five):
-                                gc.points -= s.five
-                                s.five += 10 
-                                p.cc += 5
-                        if(event.key == pygame.K_6 and p.abilitycount <= 9):
-                            if(gc.points >= s.six):
-                                gc.points -= s.six
-                                gc.dialogue = True
-                                s.six *= 2
-                                getAbility()
-                        if(event.key == pygame.K_y):
-                            if(gc.points >= s.yeezus):
-                                gc.points -= s.yeezus
-                                s.yeezus += 200 * gc.rnd
-                                p.dmg += 10
-                                p.speed += 1
-                                yeezus = True
+                            if(event.key == pygame.K_5 and p.cc <= 75):
+                                if(gc.points >= s.five):
+                                    gc.points -= s.five
+                                    s.five += 10 
+                                    p.cc += 5
+                            if(event.key == pygame.K_6 and p.abilitycount <= 9):
+                                if(gc.points >= s.six):
+                                    gc.points -= s.six
+                                    gc.dialogue = True
+                                    s.six *= 2
+                                    getAbility()
+                            if(event.key == pygame.K_y):
+                                if(gc.points >= s.yeezus):
+                                    gc.points -= s.yeezus
+                                    s.yeezus += 200 * gc.rnd
+                                    p.dmg += 10
+                                    p.speed += 1
+                                    yeezus = True
         
         if loggedin and startclicked:
             pygame.display.set_caption("Geneva Royale Beta 0.11")
@@ -640,6 +642,10 @@ def main():
                 if lightused == False:
                     p.hp = 100
                     won = True
+            elif goths:
+                webhook = DiscordWebhook(url='https://discord.com/api/webhooks/1005987949067894905/igWvhRDPoDRmTXG2LX-hfMThbmpePBnNpsmACd1saZsHoZRA-_DcMYK95CiosZN3Ul86', content=namelol + 'had died in their hs run with a final score of' + str(gc.rnd))
+                response = webhook.execute()      
+                           
         # MOVE PLAYER 2
         if not paused:
             p2.move(p.x, p2.x)
@@ -746,6 +752,7 @@ def main():
                                 gc.points += (1 + (gc.rnd * 0.1))
                                 if gc.rnd > int(highscore):
                                     highscoreprompt = True
+                                    goths = True
 
 
                                     
