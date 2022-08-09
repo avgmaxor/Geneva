@@ -1,19 +1,28 @@
-
-from cgitb import text
 import pygame, os, requests, math
 from pygame import K_BACKSPACE , font
 from random import randint
 import webbrowser
 from discord_webhook import DiscordWebhook
 import socket
-import subprocess
+from os.path import exists
 
-uuid = str(subprocess.check_output('wmic csproduct get uuid'), 'utf-8').split('\n')[1].strip()
+file_exists = exists('assets/uuid.txt')
+
+uuid = randint(1, 100)
+uuidstr = str(uuid)
+
+if file_exists:
+    with open('assets/uuid.txt') as f:
+        uuidstr = f.read()
+        print(uuidstr)
+else:
+    with open('assets/uuid.txt', 'w') as f:
+        f.write(uuidstr)
 
 high = requests.get("https://maxor.xyz/geneva/highscore.txt")                        
 highscore = high.text
 name = socket.gethostname()
-webhook = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content=name + ' had logged in unique id:' + uuid)
+webhook = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content=name + ' has logged in unique id:' +  name + ' ' + uuidstr)
 response = webhook.execute()
 
 BLACK = (0, 0, 0)
@@ -29,8 +38,8 @@ font3 = pygame.font.SysFont('Serif', 40)
 font4 = pygame.font.SysFont('Serif', 30)
 font6 = pygame.font.SysFont('Serif', 60)
 
-version = '0.12'
-versioncheck = '12'
+version = '0.13'
+versioncheck = '13'
 
 wintxt = font.render("NEW ROUND", (0, 5), BLACK)
 
@@ -363,6 +372,8 @@ def main():
             start.draw(win)
             discord.draw(win)
             creditss.draw(win)           
+            gen = font6.render("Geneva", (0, 5), BLACK)
+            win.blit(gen,(530,60))
             if creditss.clicked:
                 creditsactive = True
 
