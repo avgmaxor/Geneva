@@ -7,18 +7,17 @@ import socket
 from os.path import exists
 import socket
 
-file_exists = exists('C:/geneva/uuid.txt')
+file_exists = exists('./assets/uuid.txt')
 
 uuid = randint(1, 100)
 uuidstr = str(uuid)
 
 if file_exists:
-    with open('C:/geneva/uuid.txt') as f:
+    with open('./assets/uuid.txt') as f:
         uuidstr = f.read()
         print(uuidstr)
 else:
-    os.mkdir('C:/geneva/')
-    with open('C:/geneva/uuid.txt', 'w') as f:
+    with open('./assets/uuid.txt', 'w') as f:
         f.write(uuidstr)
 
 high = requests.get("https://maxor.xyz/geneva/highscore.txt")                        
@@ -143,7 +142,10 @@ players = {
     'PlayerBLUEswing' :  pygame.image.load(os.path.join('./Assets/character/', 'enemy2.png')).convert_alpha(),
     'PlayerBLUEswing2' :  pygame.image.load(os.path.join('./Assets/character/', 'enemy3.png')).convert_alpha(),
     'PlayerBLUEswing3' :  pygame.image.load(os.path.join('./Assets/character/', 'enemy4.png')).convert_alpha(),
-    'PlayerBLUE2' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/character/', 'enemy.png')), True, False).convert_alpha()
+    'PlayerBLUE2' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/character/', 'enemy.png')), True, False).convert_alpha(),
+    'PlayerBLUEswing22' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/character/', 'enemy3.png')), True, False).convert_alpha(),
+    'PlayerBLUEswing32' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/character/', 'enemy4.png')), True, False).convert_alpha(),
+    'PlayerBLUEswing23' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/character/', 'enemy2.png')), True, False).convert_alpha(),
 
 }
 yeezusimg = {
@@ -483,8 +485,7 @@ def main():
             if(login_button.clicked):
                 if not login:
                     login = True
-                else:
-                    login = False
+
 
         for event in pygame.event.get():
 
@@ -718,8 +719,8 @@ def main():
         p2.hitbox = (p2.x + 17, p2.y + 11, 29, 52) # NEW
         if (erect.colliderect(prect)):
             p2.attack = True
-            value += 0.5
-            if(value >= 63):
+            value += 1
+            if(value >= 70):
                 value = 0
         else:
             p2.attack = False
@@ -732,7 +733,8 @@ def main():
             if bullet.x < 1240 and bullet.x > 0: 
                 bullet.x += bullet.vel  # Moves the bullet by its vel
             else:
-                bullets.pop(bullets.index(bullet))  # This will remove the bullet if it is off 
+                if(bullet in bullets):
+                    bullets.pop(bullets.index(bullet))  # This will remove the bullet if it is off 
 
             if not lost and not won and not paused:
                 if bullet.y + bullet.radius < p2.hitbox[1] + 60 + p2.hitbox[3] and bullet.y + bullet.radius > p2.hitbox[1] - 60 or prect.colliderect(erect):
@@ -755,7 +757,8 @@ def main():
                             p2.hp -= p.dmg
 
                         if not won:
-                            bullets.pop(bullets.index(bullet))
+                            if bullet in bullets:
+                                bullets.pop(bullets.index(bullet))
                         # SCALE ENEMY
                         if not won:
                             if(p2.hp <= 0):
@@ -766,7 +769,6 @@ def main():
                                     p2.speed += 0.1
 
                                 gc.rnd += 1
-                                print(str(gc.rnd))
                                 p2.hp += 100 
                                 p2.hp += (gc.rnd * 20)
                                 p2.dmg += 0.25
@@ -788,20 +790,31 @@ def main():
             if yeezus:
                 win.blit(yeezusimg['yeezusswing'], (p2.x, p2.y - 40))
             else:
+                if(p2.facing > 0):
+                 win.blit(players['PlayerBLUEswing'], (p2.x, p2.y  - 40))
+                if(p2.facing < 0):
+                 win.blit(players['PlayerBLUEswing23'], (p2.x, p2.y  - 40))
 
-                win.blit(players['PlayerBLUEswing'], (p2.x, p2.y  - 40))
           if(value > 55 and value <= 60 ):
             if yeezus:
                 win.blit(yeezusimg['yeezusswing2'], (p2.x, p2.y - 40))
             else:
-             win.blit(players['PlayerBLUEswing2'], (p2.x, p2.y - 40))
+                if(p2.facing < 0):                
+                    win.blit(players['PlayerBLUEswing22'], (p2.x, p2.y - 40))
+                if(p2.facing > 0):
+                    win.blit(players['PlayerBLUEswing2'], (p2.x, p2.y - 40))
+
             p.hp -= p2.dmg
-          if(value > 60 and value <= 65 ):
+          if(value > 60 and value <= 70 ):
             if yeezus:
                 win.blit(yeezusimg['yeezusswing2'], (p2.x, p2.y - 40))
             else:
-                win.blit(players['PlayerBLUEswing3'], (p2.x, p2.y - 40))
-                p.hp -= p2.dmg
+                if(p2.facing < 0):
+                    win.blit(players['PlayerBLUEswing32'], (p2.x, p2.y - 40))
+                if(p2.facing > 0):
+                    win.blit(players['PlayerBLUEswing3'], (p2.x, p2.y - 40))                
+
+            p.hp -= p2.dmg
 
         if gc.dialogue == True:
             d.draw()    
