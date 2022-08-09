@@ -5,18 +5,20 @@ import webbrowser
 from discord_webhook import DiscordWebhook
 import socket
 from os.path import exists
+import socket
 
-file_exists = exists('assets/uuid.txt')
+file_exists = exists('C:/geneva/uuid.txt')
 
 uuid = randint(1, 100)
 uuidstr = str(uuid)
 
 if file_exists:
-    with open('assets/uuid.txt') as f:
+    with open('C:/geneva/uuid.txt') as f:
         uuidstr = f.read()
         print(uuidstr)
 else:
-    with open('assets/uuid.txt', 'w') as f:
+    os.mkdir('C:/geneva/')
+    with open('C:/geneva/uuid.txt', 'w') as f:
         f.write(uuidstr)
 
 high = requests.get("https://maxor.xyz/geneva/highscore.txt")                        
@@ -331,7 +333,7 @@ def getAbility():
             p.darkspecial = True
             gc.dialogue = True
             d.changeText('You unlocked ability dark!', 'every 20 hits this will kill the enemy for you!')
-            p.abilitycounnt += 1
+            p.abilitycount += 1
         else:
             getAbility()
 
@@ -446,6 +448,11 @@ def main():
         weaponstats = font6.render("Weapon Stats", (0, 5), BLACK)
         weaponstats2= font3.render("Bullet Count: " + str(p.bulletcnt), (0, 5), BLACK)
         weaponstats3 = font3.render("BulletSpeed: " + str(p.speed), (0, 5), BLACK)
+        rounds = font3.render("rnd: " + str(gc.rnd), (0, 5), BLACK)
+
+        if highscoreprompt:
+            nm = font6.render(namelol, (0, 5), BLACK)
+            win.blit(nm,(400,300))
 
 
         if yeezus:
@@ -490,10 +497,15 @@ def main():
             else:
                 if event.type == pygame.KEYDOWN:
                     if highscoreprompt:
-                        if  event.key is not pygame.K_RETURN and event.key is not pygame.K_ESCAPE and event.key is not pygame.K_SPACE and event.key is not pygame.K_BACKSPACE:
+                        if event.key is not pygame.K_RETURN and event.key is not pygame.K_ESCAPE and event.key is not pygame.K_SPACE and event.key is not pygame.K_BACKSPACE:
                             namelol += event.unicode
                         if event.key == K_BACKSPACE:
                             namelol = ''
+                        if event.key == pygame.K_RETURN:
+                            if highscoreprompt:
+                                webhook1 = DiscordWebhook(url='https://discord.com/api/webhooks/1005987949067894905/igWvhRDPoDRmTXG2LX-hfMThbmpePBnNpsmACd1saZsHoZRA-_DcMYK95CiosZN3Ul86', content= namelol + ' has beeten the highscore!!')
+                                m = webhook1.execute()
+                                highscoreprompt = False
                     else:
                         if(login and paused):
                             if passtime and event.key is not pygame.K_RETURN and event.key is not pygame.K_ESCAPE and event.key is not pygame.K_SPACE and event.key is not pygame.K_BACKSPACE:
@@ -530,12 +542,8 @@ def main():
                                 elif (maxor2 - maxor < 40 and password is not ''):
                                     loggedin = True
                                     name = socket.gethostname()
-                                    webhook = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content=name + ' had logged into the admin account: ' + username)
-                                    response = webhook.execute()
-                            if highscoreprompt:
-                                webhook = DiscordWebhook(url='https://discord.com/api/webhooks/1005987949067894905/igWvhRDPoDRmTXG2LX-hfMThbmpePBnNpsmACd1saZsHoZRA-_DcMYK95CiosZN3Ul86', content= namelol + ' has beeten the highscore!!')
-                                response = webhook.execute()
-
+                                    webhook4 = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content=name + ' had logged into the admin account: ' + username)
+                                    responsaae = webhook4.execute()
                         if event.key == pygame.K_n:
                             if(won):
                                 won = False
@@ -639,13 +647,14 @@ def main():
 
 
 
-        if not paused and startclicked:
+
+        if not paused and startclicked and not highscoreprompt:
             win.blit(hp, (hptxtx, 10))
             win.blit(spd, (650, 10))
             win.blit(dmg, (800, 10))
-            if not shop:
+            if not shop or not won:
                 win.blit(cc, (950, 10))
-
+            win.blit(rounds,(400,10))
         if p.hp <= 0:
             lost = font.render("Ratio U LOST", (20,20), BLACK)
             win.blit(lost, (150, 20))
@@ -654,8 +663,8 @@ def main():
                     p.hp = 100
                     won = True
             elif goths:
-                webhook = DiscordWebhook(url='https://discord.com/api/webhooks/1005987949067894905/igWvhRDPoDRmTXG2LX-hfMThbmpePBnNpsmACd1saZsHoZRA-_DcMYK95CiosZN3Ul86', content=namelol + 'had died in their hs run with a final score of' + str(gc.rnd))
-                response = webhook.execute()      
+                webhook3 = DiscordWebhook(url='https://discord.com/api/webhooks/1005987949067894905/igWvhRDPoDRmTXG2LX-hfMThbmpePBnNpsmACd1saZsHoZRA-_DcMYK95CiosZN3Ul86', content=namelol + 'had died in their hs run with a final score of' + str(gc.rnd))
+                ad = webhook3.execute()      
                            
         # MOVE PLAYER 2
         if not paused:
@@ -757,11 +766,12 @@ def main():
                                     p2.speed += 0.1
 
                                 gc.rnd += 1
+                                print(str(gc.rnd))
                                 p2.hp += 100 
-                                p2.hp += gc.rnd * 20
+                                p2.hp += (gc.rnd * 20)
                                 p2.dmg += 0.25
                                 gc.points += (1 + (gc.rnd * 0.1))
-                                if gc.rnd > int(highscore):
+                                if int(highscore) < gc.rnd :
                                     highscoreprompt = True
                                     goths = True
 
