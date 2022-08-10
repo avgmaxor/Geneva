@@ -5,7 +5,7 @@ currentdir = str(Path().absolute())
 
 class MyClient(discord.Client):
     async def on_ready(self):
-        print('Logged on as', self.user)
+        print('Logged on as p2: ', self.user)
 
     async def on_message(self, message):
         # don't respond to ourselves
@@ -13,7 +13,7 @@ class MyClient(discord.Client):
             return
 
         await message.channel.send('updating player data')
-        with open(currentdir + '/server/maxor.txt', 'w') as f:
+        with open(currentdir + 'multiplayer/server/maxor.txt', 'w') as f:
             f.write(message.content)
 
 client = MyClient()

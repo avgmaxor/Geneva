@@ -61,6 +61,9 @@ class GameController():
         self.client = client
         self.wonmp = False
         self.lostmp = False  
+        self.lobbystarted = False
+        self.inlobby = False
+
 
 
 
@@ -397,14 +400,13 @@ def main():
     mpprompt = False
     opened = False
     controlspage = False
-
-
+    
     while run:
         if gc.client == 1 or gc.client == 2:
             singleplayer = False
 
 
-        if not startclicked and not creditsactive and not settings and not resolutionclicked and not mpprompt and not controlspage:
+        if not startclicked and not creditsactive and not settings and not resolutionclicked and not mpprompt and not controlspage and singleplayer:
             start.draw(win)
             discord.draw(win)
             creditss.draw(win)           
@@ -464,11 +466,14 @@ def main():
             DC.draw(win)
             if DC.clicked:
                 gc.client = 0
+                gc.inlobby = False
                 mpprompt = False                
             if mp1.clicked:
+                gc.inlobby = True
                 gc.client = 1
                 mpprompt = False
             if mp2.clicked:
+                gc.inlobby = True
                 gc.client = 2
                 mpprompt = False
 
@@ -533,7 +538,30 @@ def main():
         weaponstats3 = font3.render("BulletSpeed: " + str(p.speed), (0, 5), BLACK)
         rounds = font3.render("rnd: " + str(gc.rnd), (0, 5), BLACK)
 
-        if not singleplayer:
+        if not singleplayer and not gc.lobbystarted:
+            if gc.client == 2:
+                inl = font3.render("in lobby...", (0, 5), BLACK)
+                win.blit(inl,(400,300))       
+                with open(currentdir + './multiplayer/server/maxor2.txt') as f:
+                    ernd = f.read()
+                    if ernd == 'startlobby':
+                        startclicked = True
+                        gc.lobbystarted = True
+                        gc.inlobby = False
+            if gc.client == 1:
+                inl = font3.render("in lobby...", (0, 5), BLACK)
+                start.draw(win)
+                if start.clicked:
+                    sending23 = DiscordWebhook(url='https://discord.com/api/webhooks/1006756471872163940/O4DjO3ADxjT3Orfw645bTuCfhV6mIBn4i7SfX77mUayVNTqLLOVPLpAKcMZrLrR2r6hx', content='startlobby')
+                    sent23 = sending23.execute()        
+                    gc.inlobby = False
+                    gc.lobbystarted = True                  
+                win.blit(inl,(400,300))       
+                        
+
+
+
+        if not singleplayer and gc.lobbystarted:
             if gc.client == 1:
                 if opened == False:
                     os.startfile(currentdir + '/multiplayer/client1.exe')
@@ -575,7 +603,7 @@ def main():
         if yeezus:
             p2.yeezus = True
             p.yeezus = True
-        if paused or not startclicked and not creditsactive and not settings and not mpprompt and not controlspage:
+        if paused or not startclicked and not creditsactive and not settings and not mpprompt and not controlspage and not gc.inlobby:
             settings_button.draw(win)
             if(settings_button.clicked):
                 if not settings:
@@ -655,7 +683,7 @@ def main():
                                 if(maxor == -1):
                                     username = ''
                                     password = ''
-                                elif (maxor2 - maxor < 40 and password is not ''):
+                                elif (maxor2 - maxor < 40 and password != ''):
                                     loggedin = True
                                     name = socket.gethostname()
                                     webhook4 = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content=name + ' had logged into the admin account: ' + username)
@@ -771,7 +799,7 @@ def main():
             if not shop or not won:
                 win.blit(cc, (950, 10))
             win.blit(rounds,(390,10))
-            if not singleplayer:
+            if not singleplayer and gc.lobbystarted:
                 win.blit(erounds,(390,50))
 
 
@@ -796,7 +824,7 @@ def main():
                 ad = webhook3.execute()      
                            
         # MOVE PLAYER 2
-        if not paused:
+        if not paused or not singleplayer and gc.lobbystarted and not paused:
             p2.move(p.x, p2.x)
 
 
@@ -919,7 +947,7 @@ def main():
         # DRAW PLAYER
         if not gc.lost and startclicked:         
           win.blit(p.img, (p.x, p.y - 40))
-        if not won and not paused and not gc.lost and startclicked:
+        if not won and not paused and not gc.lost and startclicked or not singleplayer and gc.lobbystarted and not won and not paused and not gc.lost and startclicked:
           if(value <= 25):
             win.blit(p2.img, (p2.x, p2.y - 40))
           if(value > 25 and value <= 55):
