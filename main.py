@@ -181,6 +181,7 @@ button_imgs = {
     'multi1': pygame.image.load(os.path.join('./Assets/buttons/', 'client1.png')).convert_alpha(),
     'multi2': pygame.image.load(os.path.join('./Assets/buttons/', 'client2.png')).convert_alpha(),
     'DC': pygame.image.load(os.path.join('./Assets/buttons/', 'DC.png')).convert_alpha(),
+    'Controls': pygame.image.load(os.path.join('./Assets/buttons/', 'Controls.png')).convert_alpha(),
 
 }
 
@@ -260,6 +261,8 @@ mp = Button(500,450,button_imgs['multi'],3)
 mp1 = Button(500,50,button_imgs['multi1'],3)
 mp2 = Button(500,150,button_imgs['multi2'],3)
 DC = Button(500,250,button_imgs['DC'],3)
+controls = Button(500,550,button_imgs['Controls'],3)
+
 
 moving_sprites = pygame.sprite.Group()
 
@@ -388,22 +391,27 @@ def main():
     singleplayer = True
     mpprompt = False
     opened = False
+    controlspage = False
+
     while run:
         if gc.client == 1 or gc.client == 2:
             singleplayer = False
 
 
-        if not startclicked and not creditsactive and not settings and not resolutionclicked and not mpprompt:
+        if not startclicked and not creditsactive and not settings and not resolutionclicked and not mpprompt and not controlspage:
             start.draw(win)
             discord.draw(win)
             creditss.draw(win)           
             mp.draw(win)           
+            controls.draw(win)
+            if controls.clicked:
+                controlspage = True
 
             if mp.clicked:
                 mpprompt = True
 
-            gen = font6.render("Geneva", (0, 5), BLACK)
-            win.blit(gen,(530,60))
+            gen = font2.render("Geneva", (0, 5), BLACK)
+            win.blit(gen,(430,0))
 
 
             if creditss.clicked:
@@ -417,6 +425,19 @@ def main():
             if start.clicked:
                 startclicked = True
                 
+        if controlspage:
+          
+            control1 = font3.render("TAB - shop", (0, 5), BLACK)
+            control2 = font3.render("N - start new round", (0, 5), BLACK)
+            control3 = font3.render("ESC - pause", (0, 5), BLACK)
+            win.blit(control1, (200, 50))
+            win.blit(control2, (200, 150))
+            win.blit(control3, (200, 250))
+            back.draw(win)
+            if back.clicked:
+                controlspage = False
+                
+
         if creditsactive:
           
             duncan = font3.render("AvgJew - Lead Dev", (0, 5), BLACK)
@@ -530,7 +551,7 @@ def main():
         if yeezus:
             p2.yeezus = True
             p.yeezus = True
-        if paused or not startclicked and not creditsactive and not settings and not mpprompt:
+        if paused or not startclicked and not creditsactive and not settings and not mpprompt and not controlspage:
             settings_button.draw(win)
             if(settings_button.clicked):
                 if not settings:
@@ -734,10 +755,10 @@ def main():
             lost = font.render("Ratio U LOST", (20,20), BLACK)
             win.blit(lost, (150, 20))
             if gc.client == 2:
-                sending1 = DiscordWebhook(url='https://discord.com/api/webhooks/1006739051082166373/0C-x9_DMsqD8-5KtdtQIheDmVQUtsrU2Ml4ktNh5vpoYKfHZdSI4_JowVUrqhinTgsrd', content='lost at round ' + gc.rnd)
+                sending1 = DiscordWebhook(url='https://discord.com/api/webhooks/1006739051082166373/0C-x9_DMsqD8-5KtdtQIheDmVQUtsrU2Ml4ktNh5vpoYKfHZdSI4_JowVUrqhinTgsrd', content='lost at round ' + str(gc.rnd))
                 sent1 = sending1.execute()         
             if gc.client == 1:
-                sending22 = DiscordWebhook(url='https://discord.com/api/webhooks/1006756471872163940/O4DjO3ADxjT3Orfw645bTuCfhV6mIBn4i7SfX77mUayVNTqLLOVPLpAKcMZrLrR2r6hx', content='lost at round ' + gc.rnd)
+                sending22 = DiscordWebhook(url='https://discord.com/api/webhooks/1006756471872163940/O4DjO3ADxjT3Orfw645bTuCfhV6mIBn4i7SfX77mUayVNTqLLOVPLpAKcMZrLrR2r6hx', content='lost at round ' + str(gc.rnd))
                 sent22 = sending22.execute()                  
             if p.lightspecial == True:
                 if lightused == False:
