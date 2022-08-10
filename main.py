@@ -6,9 +6,12 @@ from discord_webhook import DiscordWebhook
 import socket
 from os.path import exists
 import socket
+from pathlib import Path
 
 
 file_exists = exists('./assets/uuid.txt')
+
+currentdir = str(Path().absolute())
 
 uuid = randint(1, 100)
 uuidstr = str(uuid)
@@ -41,8 +44,8 @@ font3 = pygame.font.SysFont('Serif', 40)
 font4 = pygame.font.SysFont('Serif', 30)
 font6 = pygame.font.SysFont('Serif', 60)
 
-version = '0.13'
-versioncheck = '13'
+version = '0.14'
+versioncheck = '14'
 
 wintxt = font.render("NEW ROUND", (0, 5), BLACK)
 
@@ -384,7 +387,7 @@ def main():
     goths = False
     singleplayer = True
     mpprompt = False
-
+    opened = False
     while run:
         if gc.client == 1 or gc.client == 2:
             singleplayer = False
@@ -505,11 +508,17 @@ def main():
 
         if not singleplayer:
             if gc.client == 1:
-                with open('./maxor.txt') as f:
+                if opened == False:
+                    os.startfile(currentdir + '/multiplayer/client1.exe')
+                    opened = True
+                with open('./multiplayer/server/maxor.txt') as f:
                     ernd = f.read()
                     erounds = font3.render("ernd: " + str(ernd), (0, 5), BLACK)
             if gc.client == 2:
-                with open('./maxor2.txt') as f:
+                if opened == False:
+                    os.startfile(currentdir + '/multiplayer/client2.exe')
+                    opened = True
+                with open('./multiplayer/server/maxor2.txt') as f:
                     ernd = f.read()
                     erounds = font3.render("ernd: " + str(ernd), (0, 5), BLACK)
                     

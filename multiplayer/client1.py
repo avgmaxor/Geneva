@@ -10,7 +10,7 @@ class MyClient(discord.Client):
             return
 
         await message.channel.send('updating player data')
-        with open('./servers/maxor.txt', 'w') as f:
+        with open('./server/maxor.txt', 'w') as f:
             f.write(message.content)
 
 client = MyClient()
