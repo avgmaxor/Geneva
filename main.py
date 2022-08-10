@@ -553,7 +553,7 @@ def main():
             if event.type == pygame.QUIT:
                 run = False
             if event.type == pygame.MOUSEBUTTONDOWN and startclicked:
-                    if len(bullets) < p.bulletcnt and not paused and not gc.lost:  # This will make sure we cannot exceed 5 bullets on the screen at once
+                    if len(bullets) < p.bulletcnt and not paused and p.hp > 0:  # This will make sure we cannot exceed 5 bullets on the screen at once
                             bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60), 6, (gc.BULLCOLOR), p.facing))
 
             else:
@@ -724,6 +724,12 @@ def main():
         if p.hp <= 0:
             lost = font.render("Ratio U LOST", (20,20), BLACK)
             win.blit(lost, (150, 20))
+            if gc.client == 2:
+                sending1 = DiscordWebhook(url='https://discord.com/api/webhooks/1006739051082166373/0C-x9_DMsqD8-5KtdtQIheDmVQUtsrU2Ml4ktNh5vpoYKfHZdSI4_JowVUrqhinTgsrd', content='lost at round ' + gc.rnd)
+                sent1 = sending1.execute()         
+            if gc.client == 1:
+                sending22 = DiscordWebhook(url='https://discord.com/api/webhooks/1006756471872163940/O4DjO3ADxjT3Orfw645bTuCfhV6mIBn4i7SfX77mUayVNTqLLOVPLpAKcMZrLrR2r6hx', content='lost at round ' + gc.rnd)
+                sent22 = sending22.execute()                  
             if p.lightspecial == True:
                 if lightused == False:
                     p.hp = 100
