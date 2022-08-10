@@ -511,14 +511,14 @@ def main():
                 if opened == False:
                     os.startfile(currentdir + '/multiplayer/client1.exe')
                     opened = True
-                with open('./multiplayer/server/maxor.txt') as f:
+                with open(currentdir + './multiplayer/server/maxor.txt') as f:
                     ernd = f.read()
                     erounds = font3.render("ernd: " + str(ernd), (0, 5), BLACK)
             if gc.client == 2:
                 if opened == False:
                     os.startfile(currentdir + '/multiplayer/client2.exe')
                     opened = True
-                with open('./multiplayer/server/maxor2.txt') as f:
+                with open(currentdir + './multiplayer/server/maxor2.txt') as f:
                     ernd = f.read()
                     erounds = font3.render("ernd: " + str(ernd), (0, 5), BLACK)
                     

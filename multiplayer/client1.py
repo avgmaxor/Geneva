@@ -1,4 +1,7 @@
 import discord
+from pathlib import Path
+
+currentdir = str(Path().absolute())
 
 class MyClient(discord.Client):
     async def on_ready(self):
@@ -10,7 +13,7 @@ class MyClient(discord.Client):
             return
 
         await message.channel.send('updating player data')
-        with open('./server/maxor.txt', 'w') as f:
+        with open(currentdir + '/server/maxor.txt', 'w') as f:
             f.write(message.content)
 
 client = MyClient()
