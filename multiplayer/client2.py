@@ -11,9 +11,13 @@ class MyClient(discord.Client):
         # don't respond to ourselves
         if message.author == self.user:
             return
-
+        if message.content == 'u1join':
+            with open(currentdir + '/multiplayer/server/otherpeople.txt', 'w') as f:
+                f.write(message.content)
+            return
+            
         await message.channel.send('updating player data')
-        with open(currentdir + 'multiplayer/server/maxor.txt', 'w') as f:
+        with open(currentdir + '/multiplayer/server/maxor.txt', 'w') as f:
             f.write(message.content)
 
 client = MyClient()
