@@ -30,7 +30,8 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
-
+BLUE = (0, 0, 255)
+LBLUE =(5, 169, 235)
 pygame.font.init()
 pygame.init()
 font = pygame.font.SysFont('Serif', 170)
@@ -51,6 +52,8 @@ class GameController():
         self.size = 1320, 724
         self.BULLCOLOR = BLACK
         self.dialogue = False
+        self.lost = False
+
 
 
 gc = GameController(1,0)
@@ -266,7 +269,7 @@ d = dialogue('', '')
 def restartgame():
     p.hp = 100
     p2.hp = 100
-    gc.rnd = 100
+    gc.rnd = 1
     gc.points = 0
     p.speed = 4.5
     p2.speed = 2
@@ -280,6 +283,7 @@ def restartgame():
     s.four = 10
     s.five = 20
     s.yeezus = 30
+    gc.lost = False
 
 vers = requests.get("https://maxor.xyz/geneva/version.txt")
 versi = vers.text
@@ -344,7 +348,6 @@ def main():
 
     run = True
     clock = pygame.time.Clock()
-    lost = False
     won = False
     login = False
     shop = False
@@ -438,9 +441,21 @@ def main():
         points = font3.render("points: " + str(round(gc.points)), (0, 5), BLACK)
         cc = font3.render("critchance: " + str(p.cc), (0, 5), BLACK)
 
-        shoptxt = font2.render("SHOP", (0, 5), BLACK)
-        shoptxt2 = font3.render("HP: KEY 1 PRC:" + str(s.one), (0, 5), BLACK)
+
+        if p.speed == 10:
+            shoptxt3 = font3.render("Speed: KEY 2 PRC:" + str(s.two), (0, 5), GREEN)
+        if p.dmg == 250:
+            shoptxt4 = font3.render("DMG: KEY: 3 PRC:" + str(s.three), (0, 5), GREEN)
+        if p.bulletcnt == 15:
+            shoptxt5 = font3.render("WEAPON: KEY: 4 PRC:" + str(s.four), (0, 5), GREEN)
+        if p.cc == 80:
+            shoptxt6 = font3.render("CC: KEY: 5 PRC:" + str(s.five), (0, 5), GREEN)
+        if p.abilitycount == 10:
+            shoptxt7 = font3.render("ABILITY: KEY: 6 PRC:" + str(s.six), (0, 5), GREEN)
+
+        shoptxt = font2.render("SHOP", (0, 5), BLUE)
         shoptxt3 = font3.render("Speed: KEY 2 PRC:" + str(s.two), (0, 5), BLACK)
+        shoptxt2 = font3.render("HP: KEY 1 PRC:" + str(s.one), (0, 5), BLACK)
         shoptxt4 = font3.render("DMG: KEY: 3 PRC:" + str(s.three), (0, 5), BLACK)
         shoptxt5 = font3.render("WEAPON: KEY: 4 PRC:" + str(s.four), (0, 5), BLACK)
         shoptxt6 = font3.render("CC: KEY: 5 PRC:" + str(s.five), (0, 5), BLACK)
@@ -492,7 +507,7 @@ def main():
             if event.type == pygame.QUIT:
                 run = False
             if event.type == pygame.MOUSEBUTTONDOWN and startclicked:
-                    if len(bullets) < p.bulletcnt and not paused and not lost:  # This will make sure we cannot exceed 5 bullets on the screen at once
+                    if len(bullets) < p.bulletcnt and not paused and not gc.lost:  # This will make sure we cannot exceed 5 bullets on the screen at once
                             bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60), 6, (gc.BULLCOLOR), p.facing))
 
             else:
@@ -504,7 +519,7 @@ def main():
                             namelol = ''
                         if event.key == pygame.K_RETURN:
                             if highscoreprompt:
-                                webhook1 = DiscordWebhook(url='https://discord.com/api/webhooks/1005987949067894905/igWvhRDPoDRmTXG2LX-hfMThbmpePBnNpsmACd1saZsHoZRA-_DcMYK95CiosZN3Ul86', content= namelol + ' has beeten the highscore!!')
+                                webhook1 = DiscordWebhook(url='https://discord.com/api/webhooks/1005987949067894905/igWvhRDPoDRmTXG2LX-hfMThbmpePBnNpsmACd1saZsHoZRA-_DcMYK95CiosZN3Ul86', content= namelol + ' has beaten the highscore!!')
                                 m = webhook1.execute()
                                 highscoreprompt = False
                     else:
@@ -531,7 +546,7 @@ def main():
 
 
                         if event.key == pygame.K_RETURN:
-                            if passtime:
+                            if passtime and not loggedin:
                                 logins = requests.get("https://maxor.xyz/geneva/logins.json")
                                 data = logins.text
                                 maxor = data.find(username, 0, 300)
@@ -579,7 +594,7 @@ def main():
                                     gc.points -= s.two
                                     s.two += 1
                                     p.speed += 0.5
-                            if(event.key == pygame.K_3):
+                            if(event.key == pygame.K_3 and p.dmg <= 245):
                                 if(gc.points >= s.three):
                                     gc.points -= s.three
                                     s.three += 1
@@ -614,10 +629,10 @@ def main():
         if loggedin and startclicked:
             pygame.display.set_caption("Geneva Royale Beta 0.11")
             if hpcheck:
-                p.hp = 30000
+                p.hp = 3000
                 hptxtx -= 30
                 hpcheck = False
-                lost = False
+                gc.lost = False
 
         p.checkFacing()
 
@@ -655,7 +670,7 @@ def main():
             win.blit(dmg, (800, 10))
             if not shop or not won:
                 win.blit(cc, (950, 10))
-            win.blit(rounds,(400,10))
+            win.blit(rounds,(390,10))
         if p.hp <= 0:
             lost = font.render("Ratio U LOST", (20,20), BLACK)
             win.blit(lost, (150, 20))
@@ -736,7 +751,7 @@ def main():
                 if(bullet in bullets):
                     bullets.pop(bullets.index(bullet))  # This will remove the bullet if it is off 
 
-            if not lost and not won and not paused:
+            if not gc.lost and not won and not paused:
                 if bullet.y + bullet.radius < p2.hitbox[1] + 60 + p2.hitbox[3] and bullet.y + bullet.radius > p2.hitbox[1] - 60 or prect.colliderect(erect):
                     if bullet.x + bullet.radius > p2.hitbox[0] + 13 and bullet.x - bullet.radius < p2.hitbox[0] + p2.hitbox[2] - 13 or prect.colliderect(erect):
                         if(randint(1, 100) <= p.cc):
@@ -771,9 +786,9 @@ def main():
                                 gc.rnd += 1
                                 p2.hp += 100 
                                 p2.hp += (gc.rnd * 20)
-                                p2.dmg += 0.25
+                                p2.dmg += 0.2
                                 gc.points += (1 + (gc.rnd * 0.1))
-                                if int(highscore) < gc.rnd :
+                                if int(highscore) < gc.rnd and not goths :
                                     highscoreprompt = True
                                     goths = True
 
@@ -781,9 +796,9 @@ def main():
                                     
 
         # DRAW PLAYER
-        if not lost and startclicked:         
+        if not gc.lost and startclicked:         
           win.blit(p.img, (p.x, p.y - 40))
-        if not won and not paused and not lost and startclicked:
+        if not won and not paused and not gc.lost and startclicked:
           if(value <= 25):
             win.blit(p2.img, (p2.x, p2.y - 40))
           if(value > 25 and value <= 55):
@@ -805,6 +820,8 @@ def main():
                     win.blit(players['PlayerBLUEswing2'], (p2.x, p2.y - 40))
 
             p.hp -= p2.dmg
+            round(p.hp, 1)
+
           if(value > 60 and value <= 70 ):
             if yeezus:
                 win.blit(yeezusimg['yeezusswing2'], (p2.x, p2.y - 40))
@@ -815,6 +832,7 @@ def main():
                     win.blit(players['PlayerBLUEswing3'], (p2.x, p2.y - 40))                
 
             p.hp -= p2.dmg
+            round(p.hp, 1)
 
         if gc.dialogue == True:
             d.draw()    
@@ -828,7 +846,7 @@ def main():
         clock.tick(60)
         pygame.display.update()
 
-        win.fill(WHITE)
+        win.fill(LBLUE)
 
     pygame.quit()
 
