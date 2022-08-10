@@ -7,6 +7,7 @@ import socket
 from os.path import exists
 import socket
 
+
 file_exists = exists('./assets/uuid.txt')
 
 uuid = randint(1, 100)
@@ -23,7 +24,7 @@ else:
 high = requests.get("https://maxor.xyz/geneva/highscore.txt")                        
 highscore = high.text
 name = socket.gethostname()
-webhook = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content=name + ' has logged in unique id:' +  name + ' ' + uuidstr)
+webhook = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content=name + ' has logged in unique id: ' +  name + ' ' + uuidstr)
 response = webhook.execute()
 
 BLACK = (0, 0, 0)
@@ -46,17 +47,18 @@ versioncheck = '13'
 wintxt = font.render("NEW ROUND", (0, 5), BLACK)
 
 class GameController():
-    def __init__(self, rnd, points):
+    def __init__(self, rnd, points, client):
         self.rnd = rnd
         self.points = points
         self.size = 1320, 724
         self.BULLCOLOR = BLACK
         self.dialogue = False
         self.lost = False
+        self.client = client
 
 
 
-gc = GameController(1,0)
+gc = GameController(1,0,0)
 
 size = (1320,737)
 win = pygame.display.set_mode(size)
@@ -172,7 +174,10 @@ button_imgs = {
     'resolution1': pygame.image.load(os.path.join('./Assets/buttons/', 'resolution1.png')).convert_alpha(),
     'resolution2': pygame.image.load(os.path.join('./Assets/buttons/', 'resolution2.png')).convert_alpha(),
     'back': pygame.image.load(os.path.join('./Assets/buttons/', 'back.png')).convert_alpha(),
-
+    'multi': pygame.image.load(os.path.join('./Assets/buttons/', 'multi.png')).convert_alpha(),
+    'multi1': pygame.image.load(os.path.join('./Assets/buttons/', 'client1.png')).convert_alpha(),
+    'multi2': pygame.image.load(os.path.join('./Assets/buttons/', 'client2.png')).convert_alpha(),
+    'DC': pygame.image.load(os.path.join('./Assets/buttons/', 'DC.png')).convert_alpha(),
 
 }
 
@@ -181,6 +186,7 @@ pygame.display.set_icon(logo)
 
 p = Player(players['PlayerRED'], 120, 460, 5, 1, 4.5, -1, 100, 10, 5, 10, 0)
 p2 = EnemyPlayer(players['PlayerBLUE'], 1020, 460, 5, 1, 100, 2, -1, 1)
+p3 = Player(players['PlayerRED'], 120, 1060, 5, 1, 4.5, -1, 100, 10, 5, 10, 0)
 
 # - SHOP -
 s = Shop(1,2,3,10,30,20,10,50)
@@ -247,6 +253,10 @@ resolution = Button(500,150,button_imgs['resolution'],3)
 resolution1 = Button(500,150,button_imgs['resolution1'],3)
 resolution2 = Button(500,250,button_imgs['resolution2'],3)
 back = Button(900,350,button_imgs['back'],3)
+mp = Button(500,450,button_imgs['multi'],3)
+mp1 = Button(500,50,button_imgs['multi1'],3)
+mp2 = Button(500,150,button_imgs['multi2'],3)
+DC = Button(500,250,button_imgs['DC'],3)
 
 moving_sprites = pygame.sprite.Group()
 
@@ -372,15 +382,27 @@ def main():
     highscoreprompt = False
     namelol = ''
     goths = False
+    singleplayer = True
+    mpprompt = False
 
     while run:
-        
-        if not startclicked and not creditsactive and not settings and not resolutionclicked:
+        if gc.client == 1 or gc.client == 2:
+            singleplayer = False
+
+
+        if not startclicked and not creditsactive and not settings and not resolutionclicked and not mpprompt:
             start.draw(win)
             discord.draw(win)
             creditss.draw(win)           
+            mp.draw(win)           
+
+            if mp.clicked:
+                mpprompt = True
+
             gen = font6.render("Geneva", (0, 5), BLACK)
             win.blit(gen,(530,60))
+
+
             if creditss.clicked:
                 creditsactive = True
 
@@ -406,6 +428,20 @@ def main():
             if back.clicked:
                 creditsactive = False
                 
+        if mpprompt:
+            mp1.draw(win)           
+            mp2.draw(win)          
+            DC.draw(win)
+            if DC.clicked:
+                gc.client = 0
+                mpprompt = False                
+            if mp1.clicked:
+                gc.client = 1
+                mpprompt = False
+            if mp2.clicked:
+                gc.client = 2
+                mpprompt = False
+
 
 
         if settings and not resolutionclicked:
@@ -467,6 +503,16 @@ def main():
         weaponstats3 = font3.render("BulletSpeed: " + str(p.speed), (0, 5), BLACK)
         rounds = font3.render("rnd: " + str(gc.rnd), (0, 5), BLACK)
 
+        if not singleplayer:
+            if gc.client == 1:
+                with open('./maxor.txt') as f:
+                    ernd = f.read()
+                    erounds = font3.render("ernd: " + str(ernd), (0, 5), BLACK)
+            if gc.client == 2:
+                with open('./maxor2.txt') as f:
+                    ernd = f.read()
+                    erounds = font3.render("ernd: " + str(ernd), (0, 5), BLACK)
+                    
         if highscoreprompt:
             nm = font6.render(namelol, (0, 5), BLACK)
             win.blit(nm,(400,300))
@@ -475,7 +521,7 @@ def main():
         if yeezus:
             p2.yeezus = True
             p.yeezus = True
-        if paused or not startclicked and not creditsactive and not settings:
+        if paused or not startclicked and not creditsactive and not settings and not mpprompt:
             settings_button.draw(win)
             if(settings_button.clicked):
                 if not settings:
@@ -671,6 +717,10 @@ def main():
             if not shop or not won:
                 win.blit(cc, (950, 10))
             win.blit(rounds,(390,10))
+            if not singleplayer:
+                win.blit(erounds,(390,50))
+
+
         if p.hp <= 0:
             lost = font.render("Ratio U LOST", (20,20), BLACK)
             win.blit(lost, (150, 20))
@@ -784,6 +834,14 @@ def main():
                                     p2.speed += 0.1
 
                                 gc.rnd += 1
+                                if not singleplayer:
+                                    if gc.client == 2:
+                                        sending = DiscordWebhook(url='https://discord.com/api/webhooks/1006739051082166373/0C-x9_DMsqD8-5KtdtQIheDmVQUtsrU2Ml4ktNh5vpoYKfHZdSI4_JowVUrqhinTgsrd', content=str(gc.rnd))
+                                        sent = sending.execute()         
+                                    if gc.client == 1:
+                                        sending2 = DiscordWebhook(url='https://discord.com/api/webhooks/1006756471872163940/O4DjO3ADxjT3Orfw645bTuCfhV6mIBn4i7SfX77mUayVNTqLLOVPLpAKcMZrLrR2r6hx', content=str(gc.rnd))
+                                        sent2 = sending2.execute()      
+
                                 p2.hp += 100 
                                 p2.hp += (gc.rnd * 20)
                                 p2.dmg += 0.2
@@ -833,10 +891,11 @@ def main():
 
             p.hp -= p2.dmg
             round(p.hp, 1)
+        if startclicked:
+            if gc.dialogue == True:
+                d.draw()    
+            pygame.draw.rect(win,(0,200,0), grassRect)
 
-        if gc.dialogue == True:
-            d.draw()    
-        pygame.draw.rect(win,(0,200,0), grassRect)
         mouserect.x ,mouserect.y = pygame.mouse.get_pos()
         pygame.draw.rect(win, (0,0,0),mouserect)
 
@@ -846,7 +905,10 @@ def main():
         clock.tick(60)
         pygame.display.update()
 
-        win.fill(LBLUE)
+        if startclicked:
+            win.fill(LBLUE)
+        else:
+            win.fill(WHITE)
 
     pygame.quit()
 

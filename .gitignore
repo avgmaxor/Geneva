@@ -16,3 +16,5 @@ build/main/PKG-00.toc
 build/main/main.pkg
 dist/Geneva.zip
 assets/uuid.txt
+client2.spec
+client1.spec
