@@ -1,3 +1,4 @@
+from winreg import REG_DWORD
 import pygame, os, requests, math
 from pygame import K_BACKSPACE , font
 from random import randint
@@ -58,6 +59,8 @@ class GameController():
         self.dialogue = False
         self.lost = False
         self.client = client
+        self.wonmp = False
+        self.lostmp = False  
 
 
 
@@ -132,6 +135,9 @@ class Player():
         self.darkspecial = False
         self.lightspecial = False
         self.abilitycount = abilitycount
+        self.lightused = False
+
+
     def changeImg(self, newimg):
         self.img = newimg 
 
@@ -384,7 +390,6 @@ def main():
     resolutionclicked = False
     unlockedability = False
     darkvalue = 0
-    lightused = False
     highscoreprompt = False
     namelol = ''
     goths = False
@@ -392,6 +397,7 @@ def main():
     mpprompt = False
     opened = False
     controlspage = False
+
 
     while run:
         if gc.client == 1 or gc.client == 2:
@@ -534,19 +540,37 @@ def main():
                     opened = True
                 with open(currentdir + './multiplayer/server/maxor.txt') as f:
                     ernd = f.read()
-                    erounds = font3.render("ernd: " + str(ernd), (0, 5), BLACK)
+                    erounds = font3.render("ernd: " + str(ernd), (0, 5), RED)
+                    if int(ernd) >= 50 and gc.rnd < 50:
+                        gc.lostmp = True
+                        gc.wonmp = False
+                    if int(ernd) < 50 and gc.rnd >= 50:
+                        lostmp = False
+                        gc.wonmp = True
             if gc.client == 2:
                 if opened == False:
                     os.startfile(currentdir + '/multiplayer/client2.exe')
                     opened = True
                 with open(currentdir + './multiplayer/server/maxor2.txt') as f:
                     ernd = f.read()
-                    erounds = font3.render("ernd: " + str(ernd), (0, 5), BLACK)
-                    
+                    erounds = font3.render("ernd: " + str(ernd), (0, 5), RED)
+                    if int(ernd) >= 50 and gc.rnd < 50:
+                        gc.lostmp = True
+                        gc.wonmp = False
+                    if int(ernd) < 50 and gc.rnd >= 50:
+                        gc.lostmp = False
+                        gc.wonmp = True
+                                        
         if highscoreprompt:
             nm = font6.render(namelol, (0, 5), BLACK)
             win.blit(nm,(400,300))
 
+        if gc.lostmp:
+            lmp = font6.render("You Lost this game!", (0, 5), RED)
+            win.blit(lmp,(400,300))
+        if gc.wonmp:
+            wmp = font6.render("You Won this game!", (0, 5), GREEN)
+            win.blit(wmp,(400,300))
 
         if yeezus:
             p2.yeezus = True
@@ -761,9 +785,12 @@ def main():
                 sending22 = DiscordWebhook(url='https://discord.com/api/webhooks/1006756471872163940/O4DjO3ADxjT3Orfw645bTuCfhV6mIBn4i7SfX77mUayVNTqLLOVPLpAKcMZrLrR2r6hx', content='lost at round ' + str(gc.rnd))
                 sent22 = sending22.execute()                  
             if p.lightspecial == True:
-                if lightused == False:
+                if p.lightused == False:
                     p.hp = 100
                     won = True
+                    p.lightused = True
+                else:
+                    lost = True
             elif goths:
                 webhook3 = DiscordWebhook(url='https://discord.com/api/webhooks/1005987949067894905/igWvhRDPoDRmTXG2LX-hfMThbmpePBnNpsmACd1saZsHoZRA-_DcMYK95CiosZN3Ul86', content=namelol + 'had died in their hs run with a final score of' + str(gc.rnd))
                 ad = webhook3.execute()      
@@ -877,7 +904,7 @@ def main():
                                     if gc.client == 1:
                                         sending2 = DiscordWebhook(url='https://discord.com/api/webhooks/1006756471872163940/O4DjO3ADxjT3Orfw645bTuCfhV6mIBn4i7SfX77mUayVNTqLLOVPLpAKcMZrLrR2r6hx', content=str(gc.rnd))
                                         sent2 = sending2.execute()      
-
+                                        
                                 p2.hp += 100 
                                 p2.hp += (gc.rnd * 20)
                                 p2.dmg += 0.2
