@@ -381,6 +381,12 @@ def getAbility():
             getAbility()
 
 
+def resetServer():
+    with open(currentdir + '/multiplayer/server/maxor2.txt', 'w') as f:
+        f.write('1')
+    with open(currentdir + '/multiplayer/server/maxor1.txt', 'w') as f:
+        f.write('1')   
+
 def main():
 
     run = True
@@ -584,6 +590,7 @@ def main():
                     inl21 = font3.render(ernd,(0,5), BLACK)
 
                     if ernd == 'startlobby':
+                        resetServer()                        
                         gc.inlobby = False
                         startclicked = True
                         gc.lobbystarted = True            
@@ -602,12 +609,12 @@ def main():
                     inl21 = font3.render(ernd,(0,5), BLACK)
 
                     win.blit(inl21,(200,30))
-                    if start.clicked:
-                        f.write('1')
+  
 
                 inl = font3.render("in lobby...", (0, 5), BLACK)
                 start.draw(win)
                 if start.clicked:
+                    resetServer()                    
                     sending23 = DiscordWebhook(url='https://discord.com/api/webhooks/1006756471872163940/O4DjO3ADxjT3Orfw645bTuCfhV6mIBn4i7SfX77mUayVNTqLLOVPLpAKcMZrLrR2r6hx', content='startlobby')
                     sent23 = sending23.execute()        
                     gc.inlobby = False
@@ -666,7 +673,10 @@ def main():
 
             if event.type == pygame.QUIT:
 
+                resetServer()
+
                 run = False
+
 
             if event.type == pygame.MOUSEBUTTONDOWN and startclicked:
                     if len(bullets) < p.bulletcnt and not paused and p.hp > 0:  # This will make sure we cannot exceed 5 bullets on the screen at once
@@ -995,12 +1005,13 @@ def main():
                         gc.ernd = ernd
                         if gc.rnd == 1:
                             ernd = 1
-                            f.write('1')
+
                         erounds = font3.render("ernd: " + str(ernd), (0, 5), RED)
+
                         if int(ernd) >= 50 and gc.rnd < 50:
                             gc.lostmp = True
                             gc.wonmp = False
-                            
+
                         if int(ernd) < 50 and gc.rnd >= 50:
                             lostmp = False
                             gc.wonmp = True
@@ -1016,7 +1027,6 @@ def main():
                     
                         if gc.rnd == 1:
                             ernd = 1
-                            f.write('1')
 
                         erounds = font3.render("ernd: " + str(ernd), (0, 5), RED)
                         if int(ernd) >= 50 and gc.rnd < 50:
