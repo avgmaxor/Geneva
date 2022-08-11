@@ -383,10 +383,11 @@ def getAbility():
 
 
 def resetServer():
+    
     with open(currentdir + '/multiplayer/server/maxor2.txt', 'w') as f:
-        f.write(str(gc.rnd))
+        f.write('1')
     with open(currentdir + '/multiplayer/server/maxor1.txt', 'w') as f:
-        f.write(str(gc.rnd))
+        f.write('1')   
 
 def main():
 
@@ -1001,11 +1002,11 @@ def main():
                     os.startfile(currentdir + '/multiplayer/client1.exe')
                     opened = True
                 if gc.lobbystarted:
-                    resetServer()
                     with open(currentdir + '/multiplayer/server/maxor1.txt') as f:
                         ernd = f.read()
                         gc.ernd = ernd
-        
+                        if gc.rnd == 1:
+                            resetServer()
 
                         erounds = font3.render("ernd: " + str(ernd), (0, 5), RED)
 
@@ -1022,16 +1023,18 @@ def main():
                     os.startfile(currentdir + '/multiplayer/client2.exe')
                     opened = True
                 if gc.lobbystarted:
-                    resetServer()
                     with open(currentdir + '/multiplayer/server/maxor2.txt') as f:
                         ernd = f.read()
                         gc.ernd = ernd
-                
+                    
+                        if gc.rnd == 1:
+                           resetServer()
+
                         erounds = font3.render("ernd: " + str(ernd), (0, 5), RED)
                         if int(ernd) >= 50 and gc.rnd < 50:
                             gc.lostmp = True
                             gc.wonmp = False
-                        if not gc.lostmp  and gc.rnd >= 50:
+                        if not lostmp  and gc.rnd >= 50:
                             gc.lostmp = False
                             gc.wonmp = True
 
