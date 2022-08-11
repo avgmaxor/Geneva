@@ -203,6 +203,8 @@ button_imgs = {
 
 gsiz = (1320, 300)
 
+one50 = ['1', '2', '3','4', '5', '6','7', '8', '9','10', '11', '12','13', '14', '15','16', '17', '18','19', '20', '21','22', '23', '24','25','26','27','28', '29', '30', '31' '32','33','34', '35','36', '37', '38','39', '40', '41','42','43','44','45', '46', '47', '48' '49','50']
+
 
 logo = pygame.image.load(os.path.join('./Assets/', 'logo.png'))
 pygame.display.set_icon(logo)
@@ -383,7 +385,7 @@ def getAbility():
 
 
 def resetServer():
-    
+
     with open(currentdir + '/multiplayer/server/maxor2.txt', 'w') as f:
         f.write('1')
     with open(currentdir + '/multiplayer/server/maxor1.txt', 'w') as f:
@@ -1009,14 +1011,14 @@ def main():
                             resetServer()
 
                         erounds = font3.render("ernd: " + str(ernd), (0, 5), RED)
+                        if ernd in one50:
+                            if int(ernd) >= 50 and gc.rnd < 50:
+                                gc.lostmp = True
+                                gc.wonmp = False
 
-                        if int(ernd) >= 50 and gc.rnd < 50:
-                            gc.lostmp = True
-                            gc.wonmp = False
-
-                        if not gc.lostmp and gc.rnd >= 50:
-                            gc.lostmp = False
-                            gc.wonmp = True
+                            if not gc.lostmp and gc.rnd >= 50:
+                                gc.lostmp = False
+                                gc.wonmp = True
 
             if gc.client == 2:
                 if opened == False:
@@ -1031,12 +1033,13 @@ def main():
                            resetServer()
 
                         erounds = font3.render("ernd: " + str(ernd), (0, 5), RED)
-                        if int(ernd) >= 50 and gc.rnd < 50:
-                            gc.lostmp = True
-                            gc.wonmp = False
-                        if not lostmp  and gc.rnd >= 50:
-                            gc.lostmp = False
-                            gc.wonmp = True
+                        if ernd in one50:
+                            if int(ernd) >= 50 and gc.rnd < 50:
+                                gc.lostmp = True
+                                gc.wonmp = False
+                            if not gc.lostmp  and gc.rnd >= 50:
+                                gc.lostmp = False
+                                gc.wonmp = True
 
         if not paused and startclicked and not highscoreprompt:
             win.blit(hp, (hptxtx, 10))
