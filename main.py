@@ -35,7 +35,7 @@ WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
-LBLUE =(5, 169, 235)
+LBLUE =(75, 127, 199)
 pygame.font.init()
 pygame.init()
 font = pygame.font.SysFont('Serif', 170)
@@ -170,7 +170,12 @@ yeezusimg = {
     'yeezus3' :  pygame.image.load(os.path.join('./Assets/yeezus/', 'yeezus2.png')).convert_alpha(),
     'yeezusswing2' :  pygame.image.load(os.path.join('./Assets/yeezus/', 'yeezusSwing2.png')).convert_alpha(),
     'yeezusswing' :  pygame.image.load(os.path.join('./Assets/yeezus/', 'yeezusSwing.png')).convert_alpha(),
-    'yeezus6' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/yeezus/', 'yeezus2.png')), True, False).convert_alpha()
+    'yeezus6' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/yeezus/', 'yeezus2.png')), True, False).convert_alpha(),
+    'deezz' : pygame.image.load(os.path.join('./Assets/', 'ground.png')).convert_alpha(),
+    'deez' : pygame.transform.scale(pygame.image.load(os.path.join('./Assets/', 'ground.png')),(1320,300)).convert_alpha(),
+    'cloudx' : pygame.image.load(os.path.join('./Assets/', 'cloud.png')).convert_alpha(),
+    'cloud' : pygame.transform.scale(pygame.image.load(os.path.join('./Assets/', 'cloud.png')),(300,200)).convert_alpha(),
+
 
 }
 
@@ -193,6 +198,9 @@ button_imgs = {
 
 }
 
+gsiz = (1320, 300)
+
+
 logo = pygame.image.load(os.path.join('./Assets/', 'logo.png'))
 pygame.display.set_icon(logo)
 
@@ -207,7 +215,7 @@ erect = pygame.Rect(p2.x, p2.y, p2.img.get_width(), p2.img.get_height())
 prect = pygame.Rect(p.x, p.y, p.img.get_width(), p.img.get_height())
 
 mouserect = pygame.Rect((300, 300),(20,20))
-grassRect = pygame.Rect((0,500),(1320,300))
+grassRect = pygame.Rect((0,550),(1320,300))
 mouserect = pygame.Rect((300, 300),(20,20))
 statsrect = pygame.Rect((900, 100),(330,220))
 
@@ -401,11 +409,10 @@ def main():
     mpprompt = False
     opened = False
     controlspage = False
-    
+    cloudx = 0
     while run:
         if gc.client == 1 or gc.client == 2:
             singleplayer = False
-
 
         if not startclicked and not creditsactive and not settings and not resolutionclicked and not mpprompt and not controlspage and singleplayer:
             start.draw(win)
@@ -433,7 +440,14 @@ def main():
 
             if start.clicked:
                 startclicked = True
-                
+
+        if startclicked:
+            win.blit(yeezusimg['deez'],(0,350))
+            win.blit(yeezusimg['cloud'],(cloudx,30))
+            cloudx += 0.1
+            pygame.draw.rect(win, (0,0,0),grassRect)
+
+
         if controlspage:
           
             control1 = font3.render("TAB - shop", (0, 5), BLACK)
@@ -552,7 +566,7 @@ def main():
                 win.blit(inl,(400,300))       
                 
 
-                with open(currentdir + '/multiplayer/server/maxor2.txt') as f:
+                with open(currentdir + '/multiplayer/server/maxor2.txt', 'w+') as f:
                     ernd = f.read()
                     inl21 = font3.render(ernd,(0,5), BLACK)
 
@@ -560,6 +574,7 @@ def main():
 
 
                     if ernd == 'startlobby':
+                        f.write('1')
                         startclicked = True
                         gc.lobbystarted = True
                         gc.inlobby = False
@@ -578,6 +593,9 @@ def main():
                     inl21 = font3.render(ernd,(0,5), BLACK)
 
                     win.blit(inl21,(200,30))
+                    if start.clicked:
+                        f.write('1')
+
                 inl = font3.render("in lobby...", (0, 5), BLACK)
                 start.draw(win)
                 if start.clicked:
@@ -601,6 +619,8 @@ def main():
                 if gc.lobbystarted:
                     with open(currentdir + '/multiplayer/server/maxor1.txt') as f:
                         ernd = f.read()
+                        if gc.rnd == 1:
+                            ernd = 1
                         erounds = font3.render("ernd: " + str(ernd), (0, 5), RED)
                         if int(ernd) >= 50 and gc.rnd < 50:
                             gc.lostmp = True
@@ -615,6 +635,8 @@ def main():
                 if gc.lobbystarted:
                     with open(currentdir + '/multiplayer/server/maxor2.txt') as f:
                         ernd = f.read()
+                        if gc.rnd == 1:
+                            ernd = 1
                         erounds = font3.render("ernd: " + str(ernd), (0, 5), RED)
                         if int(ernd) >= 50 and gc.rnd < 50:
                             gc.lostmp = True
@@ -1025,7 +1047,6 @@ def main():
         if startclicked:
             if gc.dialogue == True:
                 d.draw()    
-            pygame.draw.rect(win,(0,200,0), grassRect)
 
         mouserect.x ,mouserect.y = pygame.mouse.get_pos()
         pygame.draw.rect(win, (0,0,0),mouserect)
