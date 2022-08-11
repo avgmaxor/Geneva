@@ -1,3 +1,4 @@
+from cgitb import reset
 import pygame, os, requests, math
 from pygame import K_BACKSPACE , font
 from random import randint
@@ -383,9 +384,9 @@ def getAbility():
 
 def resetServer():
     with open(currentdir + '/multiplayer/server/maxor2.txt', 'w') as f:
-        f.write('1')
+        f.write(str(gc.rnd))
     with open(currentdir + '/multiplayer/server/maxor1.txt', 'w') as f:
-        f.write('1')   
+        f.write(str(gc.rnd))
 
 def main():
 
@@ -1000,11 +1001,11 @@ def main():
                     os.startfile(currentdir + '/multiplayer/client1.exe')
                     opened = True
                 if gc.lobbystarted:
+                    resetServer()
                     with open(currentdir + '/multiplayer/server/maxor1.txt') as f:
                         ernd = f.read()
                         gc.ernd = ernd
-                        if gc.rnd == 1:
-                            ernd = 1
+        
 
                         erounds = font3.render("ernd: " + str(ernd), (0, 5), RED)
 
@@ -1012,8 +1013,8 @@ def main():
                             gc.lostmp = True
                             gc.wonmp = False
 
-                        if int(ernd) < 50 and gc.rnd >= 50:
-                            lostmp = False
+                        if not gc.lostmp and gc.rnd >= 50:
+                            gc.lostmp = False
                             gc.wonmp = True
 
             if gc.client == 2:
@@ -1021,18 +1022,16 @@ def main():
                     os.startfile(currentdir + '/multiplayer/client2.exe')
                     opened = True
                 if gc.lobbystarted:
+                    resetServer()
                     with open(currentdir + '/multiplayer/server/maxor2.txt') as f:
                         ernd = f.read()
                         gc.ernd = ernd
-                    
-                        if gc.rnd == 1:
-                            ernd = 1
-
+                
                         erounds = font3.render("ernd: " + str(ernd), (0, 5), RED)
                         if int(ernd) >= 50 and gc.rnd < 50:
                             gc.lostmp = True
                             gc.wonmp = False
-                        if int(ernd) < 50 and gc.rnd >= 50:
+                        if not gc.lostmp  and gc.rnd >= 50:
                             gc.lostmp = False
                             gc.wonmp = True
 
