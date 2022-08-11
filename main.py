@@ -566,7 +566,7 @@ def main():
                 win.blit(inl,(400,300))       
                 
 
-                with open(currentdir + '/multiplayer/server/maxor2.txt', 'w+') as f:
+                with open(currentdir + '/multiplayer/server/maxor2.txt') as f:
                     ernd = f.read()
                     inl21 = font3.render(ernd,(0,5), BLACK)
 
@@ -653,10 +653,6 @@ def main():
         for event in pygame.event.get():
 
             if event.type == pygame.QUIT:
-                with open(currentdir + '/multiplayer/server/maxor2.txt', 'w') as f:
-                    f.write('1')
-                with open(currentdir + '/multiplayer/server/maxor1.txt', 'w') as f:
-                    f.write('1')
 
                 run = False
 
@@ -815,18 +811,6 @@ def main():
             win.blit(weaponstats2, (920, 190))
             win.blit(weaponstats3, (920, 240))
 
-
-
-
-        if not paused and startclicked and not highscoreprompt:
-            win.blit(hp, (hptxtx, 10))
-            win.blit(spd, (650, 10))
-            win.blit(dmg, (800, 10))
-            if not shop or not won:
-                win.blit(cc, (950, 10))
-            win.blit(rounds,(390,10))
-            if not singleplayer and gc.lobbystarted:
-                win.blit(erounds,(390,50))
 
 
         if p.hp <= 0:
@@ -1000,6 +984,16 @@ def main():
                         if int(ernd) < 50 and gc.rnd >= 50:
                             gc.lostmp = False
                             gc.wonmp = True
+
+        if not paused and startclicked and not highscoreprompt:
+            win.blit(hp, (hptxtx, 10))
+            win.blit(spd, (650, 10))
+            win.blit(dmg, (800, 10))
+            if not shop or not won:
+                win.blit(cc, (950, 10))
+            win.blit(rounds,(390,10))
+            if not singleplayer and gc.lobbystarted:
+                win.blit(erounds,(390,50))                        
 
         # DRAW PLAYER
         if not gc.lost and startclicked:         
