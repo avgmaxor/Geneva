@@ -414,7 +414,7 @@ def main():
         if gc.client == 1 or gc.client == 2:
             singleplayer = False
 
-        if not startclicked and not creditsactive and not settings and not resolutionclicked and not mpprompt and not controlspage and singleplayer:
+        if not startclicked and not creditsactive and not settings and not resolutionclicked and not mpprompt and not controlspage and not gc.inlobby:
             start.draw(win)
             discord.draw(win)
             creditss.draw(win)           
@@ -570,14 +570,10 @@ def main():
                     ernd = f.read()
                     inl21 = font3.render(ernd,(0,5), BLACK)
 
-                    win.blit(inl21,(200,30))
-
-
                     if ernd == 'startlobby':
-                        f.write('1')
-                        startclicked = True
-                        gc.lobbystarted = True
                         gc.inlobby = False
+                        startclicked = True
+                        gc.lobbystarted = True            
                         p2.x = 1050
 
             if gc.client == 1:
@@ -611,39 +607,7 @@ def main():
 
 
 
-        if not singleplayer:
-            if gc.client == 1:
-                if opened == False:
-                    os.startfile(currentdir + '/multiplayer/client1.exe')
-                    opened = True
-                if gc.lobbystarted:
-                    with open(currentdir + '/multiplayer/server/maxor1.txt') as f:
-                        ernd = f.read()
-                        if gc.rnd == 1:
-                            ernd = 1
-                        erounds = font3.render("ernd: " + str(ernd), (0, 5), RED)
-                        if int(ernd) >= 50 and gc.rnd < 50:
-                            gc.lostmp = True
-                            gc.wonmp = False
-                        if int(ernd) < 50 and gc.rnd >= 50:
-                            lostmp = False
-                            gc.wonmp = True
-            if gc.client == 2:
-                if opened == False:
-                    os.startfile(currentdir + '/multiplayer/client2.exe')
-                    opened = True
-                if gc.lobbystarted:
-                    with open(currentdir + '/multiplayer/server/maxor2.txt') as f:
-                        ernd = f.read()
-                        if gc.rnd == 1:
-                            ernd = 1
-                        erounds = font3.render("ernd: " + str(ernd), (0, 5), RED)
-                        if int(ernd) >= 50 and gc.rnd < 50:
-                            gc.lostmp = True
-                            gc.wonmp = False
-                        if int(ernd) < 50 and gc.rnd >= 50:
-                            gc.lostmp = False
-                            gc.wonmp = True
+
                                         
         if highscoreprompt:
             nm = font6.render(namelol, (0, 5), BLACK)
@@ -1003,8 +967,39 @@ def main():
                                     highscoreprompt = True
                                     goths = True
 
-
-                                    
+        if not singleplayer:
+            if gc.client == 1:
+                if opened == False:
+                    os.startfile(currentdir + '/multiplayer/client1.exe')
+                    opened = True
+                if gc.lobbystarted:
+                    with open(currentdir + '/multiplayer/server/maxor1.txt') as f:
+                        ernd = f.read()
+                        if gc.rnd == 1:
+                            ernd = 1
+                        erounds = font3.render("ernd: " + str(ernd), (0, 5), RED)
+                        if int(ernd) >= 50 and gc.rnd < 50:
+                            gc.lostmp = True
+                            gc.wonmp = False
+                        if int(ernd) < 50 and gc.rnd >= 50:
+                            lostmp = False
+                            gc.wonmp = True
+            if gc.client == 2:
+                if opened == False:
+                    os.startfile(currentdir + '/multiplayer/client2.exe')
+                    opened = True
+                if gc.lobbystarted:
+                    with open(currentdir + '/multiplayer/server/maxor2.txt') as f:
+                        ernd = f.read()
+                        if gc.rnd == 1:
+                            ernd = 1
+                        erounds = font3.render("ernd: " + str(ernd), (0, 5), RED)
+                        if int(ernd) >= 50 and gc.rnd < 50:
+                            gc.lostmp = True
+                            gc.wonmp = False
+                        if int(ernd) < 50 and gc.rnd >= 50:
+                            gc.lostmp = False
+                            gc.wonmp = True
 
         # DRAW PLAYER
         if not gc.lost and startclicked:         
