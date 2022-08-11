@@ -961,6 +961,7 @@ def main():
                         ernd = f.read()
                         if gc.rnd == 1:
                             ernd = 1
+                            f.write('1')
                         erounds = font3.render("ernd: " + str(ernd), (0, 5), RED)
                         if int(ernd) >= 50 and gc.rnd < 50:
                             gc.lostmp = True
@@ -977,6 +978,8 @@ def main():
                         ernd = f.read()
                         if gc.rnd == 1:
                             ernd = 1
+                            f.write('1')
+
                         erounds = font3.render("ernd: " + str(ernd), (0, 5), RED)
                         if int(ernd) >= 50 and gc.rnd < 50:
                             gc.lostmp = True

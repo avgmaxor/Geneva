@@ -8,7 +8,7 @@ currentdir = str(Path().absolute())
 class MyClient(discord.Client):
     async def on_ready(self):
         print('Logged on as host: ',self.user)
-        sending233 = DiscordWebhook(url='https://discord.com/api/webhooks/1006756471872163940/O4DjO3ADxjT3Orfw645bTuCfhV6mIBn4i7SfX77mUayVNTqLLOVPLpAKcMZrLrR2r6hx', content='Client 2 has connected')
+        sending233 = DiscordWebhook(url='https://discord.com/api/webhooks/1006756471872163940/O4DjO3ADxjT3Orfw645bTuCfhV6mIBn4i7SfX77mUayVNTqLLOVPLpAKcMZrLrR2r6hx', content='Client 1 has connected')
         sent233 = sending233.execute()     
 
     async def on_message(self, message):
