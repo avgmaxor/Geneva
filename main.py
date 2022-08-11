@@ -62,6 +62,7 @@ class GameController():
         self.lostmp = False  
         self.lobbystarted = False
         self.inlobby = False
+        self.ernd = 0
 
 
 
@@ -172,7 +173,7 @@ yeezusimg = {
     'yeezusswing' :  pygame.image.load(os.path.join('./Assets/yeezus/', 'yeezusSwing.png')).convert_alpha(),
     'yeezus6' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/yeezus/', 'yeezus2.png')), True, False).convert_alpha(),
     'deezz' : pygame.image.load(os.path.join('./Assets/', 'ground.png')).convert_alpha(),
-    'deez' : pygame.transform.scale(pygame.image.load(os.path.join('./Assets/', 'ground.png')),(1320,300)).convert_alpha(),
+    'deez' : pygame.transform.scale(pygame.image.load(os.path.join('./Assets/', 'ground.png')),(1320,140)).convert_alpha(),
     'cloudx' : pygame.image.load(os.path.join('./Assets/', 'cloud.png')).convert_alpha(),
     'cloud' : pygame.transform.scale(pygame.image.load(os.path.join('./Assets/', 'cloud.png')),(300,200)).convert_alpha(),
 
@@ -195,7 +196,8 @@ button_imgs = {
     'multi2': pygame.image.load(os.path.join('./Assets/buttons/', 'client2.png')).convert_alpha(),
     'DC': pygame.image.load(os.path.join('./Assets/buttons/', 'DC.png')).convert_alpha(),
     'Controls': pygame.image.load(os.path.join('./Assets/buttons/', 'Controls.png')).convert_alpha(),
-
+    'Casual': pygame.image.load(os.path.join('./Assets/buttons/', 'Casual.png')).convert_alpha(),
+    'Ranked': pygame.image.load(os.path.join('./Assets/buttons/', 'Ranked.png')).convert_alpha(),
 }
 
 gsiz = (1320, 300)
@@ -204,8 +206,8 @@ gsiz = (1320, 300)
 logo = pygame.image.load(os.path.join('./Assets/', 'logo.png'))
 pygame.display.set_icon(logo)
 
-p = Player(players['PlayerRED'], 120, 460, 5, 1, 4.5, -1, 100, 10, 5, 10, 0)
-p2 = EnemyPlayer(players['PlayerBLUE'], 1020, 460, 5, 1, 100, 2, -1, 1)
+p = Player(players['PlayerRED'], 120, 455, 5, 1, 4.5, -1, 100, 10, 5, 10, 0)
+p2 = EnemyPlayer(players['PlayerBLUE'], 1020, 455, 5, 1, 100, 2, -1, 1)
 p3 = Player(players['PlayerRED'], 120, 1060, 5, 1, 4.5, -1, 100, 10, 5, 10, 0)
 
 # - SHOP -
@@ -215,7 +217,7 @@ erect = pygame.Rect(p2.x, p2.y, p2.img.get_width(), p2.img.get_height())
 prect = pygame.Rect(p.x, p.y, p.img.get_width(), p.img.get_height())
 
 mouserect = pygame.Rect((300, 300),(20,20))
-grassRect = pygame.Rect((0,550),(1320,300))
+grassRect = pygame.Rect((0,510),(1320,300))
 mouserect = pygame.Rect((300, 300),(20,20))
 statsrect = pygame.Rect((900, 100),(330,220))
 
@@ -278,9 +280,10 @@ mp1 = Button(500,50,button_imgs['multi1'],3)
 mp2 = Button(500,150,button_imgs['multi2'],3)
 DC = Button(500,250,button_imgs['DC'],3)
 DC2 = Button(600,250,button_imgs['DC'],3)
+Casual = Button(500,150,button_imgs['Casual'],3)
+Ranked = Button(500,450,button_imgs['Ranked'],3)
 
 controls = Button(500,550,button_imgs['Controls'],3)
-
 
 moving_sprites = pygame.sprite.Group()
 
@@ -383,6 +386,7 @@ def main():
     run = True
     clock = pygame.time.Clock()
     won = False
+    jump = False
     login = False
     shop = False
     username = ''
@@ -410,6 +414,11 @@ def main():
     opened = False
     controlspage = False
     cloudx = 0
+    Y_GRAVITY = 0.7
+    JUMP_HEIGHT = 12
+    Y_VELOCITY = JUMP_HEIGHT
+
+
     while run:
         if gc.client == 1 or gc.client == 2:
             singleplayer = False
@@ -442,7 +451,7 @@ def main():
                 startclicked = True
 
         if startclicked:
-            win.blit(yeezusimg['deez'],(0,350))
+            win.blit(yeezusimg['deez'],(0,425))
             win.blit(yeezusimg['cloud'],(cloudx,30))
             cloudx += 0.1
             pygame.draw.rect(win, (0,0,0),grassRect)
@@ -479,6 +488,9 @@ def main():
             mp1.draw(win)           
             mp2.draw(win)          
             DC.draw(win)
+            Ranked.draw(win)
+            if Ranked.clicked:
+                ranked = True
             if DC.clicked:
                 gc.client = 0
                 gc.inlobby = False
@@ -554,6 +566,7 @@ def main():
         weaponstats3 = font3.render("BulletSpeed: " + str(p.speed), (0, 5), BLACK)
         rounds = font3.render("rnd: " + str(gc.rnd), (0, 5), BLACK)
 
+
         if gc.inlobby and not gc.lobbystarted:
             if gc.client == 2:
                 DC2.draw(win)
@@ -603,13 +616,9 @@ def main():
                     p2.x = 1050
 
                 win.blit(inl,(400,300))       
-                        
-
-
-
-
+                
                                         
-        if highscoreprompt:
+        if highscoreprompt or gc.wonmp and ranked:
             nm = font6.render(namelol, (0, 5), BLACK)
             win.blit(nm,(400,300))
 
@@ -617,9 +626,12 @@ def main():
             lmp = font6.render("You Lost this game!", (0, 5), RED)
             win.blit(lmp,(400,300))
         if gc.wonmp:
-            wmp = font6.render("You Won this game!", (0, 5), GREEN)
+            if ranked:
+                wmp = font6.render("You Won this game! Enter your name to be logged in the leaderboard!", (0, 5), GREEN)
+            else:
+                wmp = font6.render("You Won this game!", (0, 5), GREEN)
             win.blit(wmp,(400,300))
-
+            
         if yeezus:
             p2.yeezus = True
             p.yeezus = True
@@ -672,6 +684,15 @@ def main():
                                 webhook1 = DiscordWebhook(url='https://discord.com/api/webhooks/1005987949067894905/igWvhRDPoDRmTXG2LX-hfMThbmpePBnNpsmACd1saZsHoZRA-_DcMYK95CiosZN3Ul86', content= namelol + ' has beaten the highscore!!')
                                 m = webhook1.execute()
                                 highscoreprompt = False
+                    if gc.wonmp and gc.ernd >= 2 and ranked:
+                        if event.key is not pygame.K_RETURN and event.key is not pygame.K_ESCAPE and event.key is not pygame.K_SPACE and event.key is not pygame.K_BACKSPACE:
+                            namelol += event.unicode
+                        if event.key == K_BACKSPACE:
+                            namelol = ''
+                        if event.key == pygame.K_RETURN:
+                            if gc.wonmp:
+                                    sending24 = DiscordWebhook(url='https://discord.com/api/webhooks/1007335442917621760/VsmtTUpYO0GS27_iJosLRAuw0Fqyrs_MhC0S9vQ_IyvIizIPBVG_ieJLsHzTNSgbppTy', content=namelol + ' has won a ranked game!')
+                                    sent24 = sending24.execute()      
                     else:
                         if(login and paused):
                             if passtime and event.key is not pygame.K_RETURN and event.key is not pygame.K_ESCAPE and event.key is not pygame.K_SPACE and event.key is not pygame.K_BACKSPACE:
@@ -689,8 +710,8 @@ def main():
                             if gc.dialogue:
                                 gc.dialogue = False
                             else:
-                                if(p.y == 460):
-                                    p.y -= 50
+                                if(not jump):
+                                    jump = True
                                 if login:
                                     passtime = True
 
@@ -762,7 +783,7 @@ def main():
                                     gc.points -= s.five
                                     s.five += 10 
                                     p.cc += 5
-                            if(event.key == pygame.K_6 and p.abilitycount <= 9):
+                            if(event.key == pygame.K_6 and p.abilitycount <= 2):
                                 if(gc.points >= s.six):
                                     gc.points -= s.six
                                     gc.dialogue = True
@@ -837,11 +858,23 @@ def main():
         if not paused or not singleplayer and gc.lobbystarted and not paused:
             p2.move(p.x, p2.x)
 
+        # JUMPING
+        if jump:
+            p.y -= Y_VELOCITY
+            Y_VELOCITY -= Y_GRAVITY
+            if Y_VELOCITY < -JUMP_HEIGHT:
+                jump = False
+                Y_VELOCITY = JUMP_HEIGHT
+            
+        
+        if not jump:
+            if p.y < 455:
+                p.y += 2 
 
-        # JUMP
-        if(p.y < 460):
-            p.y += 1.25
 
+
+
+        
         # WIN TEXT
 
         if(won and not shop and not paused):
@@ -959,6 +992,7 @@ def main():
                 if gc.lobbystarted:
                     with open(currentdir + '/multiplayer/server/maxor1.txt') as f:
                         ernd = f.read()
+                        gc.ernd = ernd
                         if gc.rnd == 1:
                             ernd = 1
                             f.write('1')
@@ -966,9 +1000,11 @@ def main():
                         if int(ernd) >= 50 and gc.rnd < 50:
                             gc.lostmp = True
                             gc.wonmp = False
+                            
                         if int(ernd) < 50 and gc.rnd >= 50:
                             lostmp = False
                             gc.wonmp = True
+
             if gc.client == 2:
                 if opened == False:
                     os.startfile(currentdir + '/multiplayer/client2.exe')
@@ -976,6 +1012,8 @@ def main():
                 if gc.lobbystarted:
                     with open(currentdir + '/multiplayer/server/maxor2.txt') as f:
                         ernd = f.read()
+                        gc.ernd = ernd
+                    
                         if gc.rnd == 1:
                             ernd = 1
                             f.write('1')

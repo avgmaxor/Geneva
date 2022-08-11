@@ -1,1 +1,1 @@
-lobby started
+Client 2 has connected
