@@ -1,4 +1,3 @@
-from winreg import REG_DWORD
 import pygame, os, requests, math
 from pygame import K_BACKSPACE , font
 from random import randint
@@ -270,6 +269,8 @@ mp = Button(500,450,button_imgs['multi'],3)
 mp1 = Button(500,50,button_imgs['multi1'],3)
 mp2 = Button(500,150,button_imgs['multi2'],3)
 DC = Button(500,250,button_imgs['DC'],3)
+DC2 = Button(600,250,button_imgs['DC'],3)
+
 controls = Button(500,550,button_imgs['Controls'],3)
 
 
@@ -467,7 +468,8 @@ def main():
             if DC.clicked:
                 gc.client = 0
                 gc.inlobby = False
-                mpprompt = False                
+                mpprompt = False         
+
             if mp1.clicked:
                 gc.inlobby = True
                 gc.client = 1
@@ -538,56 +540,88 @@ def main():
         weaponstats3 = font3.render("BulletSpeed: " + str(p.speed), (0, 5), BLACK)
         rounds = font3.render("rnd: " + str(gc.rnd), (0, 5), BLACK)
 
-        if not singleplayer and not gc.lobbystarted:
+        if gc.inlobby and not gc.lobbystarted:
             if gc.client == 2:
+                DC2.draw(win)
+                if DC.clicked:
+                    startclicked = False
+                    singleplayer = True
+                    gc.inlobby = False
+
                 inl = font3.render("in lobby...", (0, 5), BLACK)
                 win.blit(inl,(400,300))       
-                with open(currentdir + './multiplayer/server/maxor2.txt') as f:
+                
+
+                with open(currentdir + '/multiplayer/server/maxor2.txt') as f:
                     ernd = f.read()
+                    inl21 = font3.render(ernd,(0,5), BLACK)
+
+                    win.blit(inl21,(200,30))
+
+
                     if ernd == 'startlobby':
                         startclicked = True
                         gc.lobbystarted = True
                         gc.inlobby = False
+                        p2.x = 1050
+
             if gc.client == 1:
+                DC2.draw(win)
+                if DC.clicked:
+                    startclicked = False
+                    singleplayer = True
+                    gc.inlobby = False
+                    mpprompt = False
+
+                with open(currentdir + '/multiplayer/server/maxor1.txt') as f:
+                    ernd = f.read()
+                    inl21 = font3.render(ernd,(0,5), BLACK)
+
+                    win.blit(inl21,(200,30))
                 inl = font3.render("in lobby...", (0, 5), BLACK)
                 start.draw(win)
                 if start.clicked:
                     sending23 = DiscordWebhook(url='https://discord.com/api/webhooks/1006756471872163940/O4DjO3ADxjT3Orfw645bTuCfhV6mIBn4i7SfX77mUayVNTqLLOVPLpAKcMZrLrR2r6hx', content='startlobby')
                     sent23 = sending23.execute()        
                     gc.inlobby = False
-                    gc.lobbystarted = True                  
+                    startclicked = True
+                    gc.lobbystarted = True            
+                    p2.x = 1050
+
                 win.blit(inl,(400,300))       
                         
 
 
 
-        if not singleplayer and gc.lobbystarted:
+        if not singleplayer:
             if gc.client == 1:
                 if opened == False:
                     os.startfile(currentdir + '/multiplayer/client1.exe')
                     opened = True
-                with open(currentdir + './multiplayer/server/maxor.txt') as f:
-                    ernd = f.read()
-                    erounds = font3.render("ernd: " + str(ernd), (0, 5), RED)
-                    if int(ernd) >= 50 and gc.rnd < 50:
-                        gc.lostmp = True
-                        gc.wonmp = False
-                    if int(ernd) < 50 and gc.rnd >= 50:
-                        lostmp = False
-                        gc.wonmp = True
+                if gc.lobbystarted:
+                    with open(currentdir + '/multiplayer/server/maxor1.txt') as f:
+                        ernd = f.read()
+                        erounds = font3.render("ernd: " + str(ernd), (0, 5), RED)
+                        if int(ernd) >= 50 and gc.rnd < 50:
+                            gc.lostmp = True
+                            gc.wonmp = False
+                        if int(ernd) < 50 and gc.rnd >= 50:
+                            lostmp = False
+                            gc.wonmp = True
             if gc.client == 2:
                 if opened == False:
                     os.startfile(currentdir + '/multiplayer/client2.exe')
                     opened = True
-                with open(currentdir + './multiplayer/server/maxor2.txt') as f:
-                    ernd = f.read()
-                    erounds = font3.render("ernd: " + str(ernd), (0, 5), RED)
-                    if int(ernd) >= 50 and gc.rnd < 50:
-                        gc.lostmp = True
-                        gc.wonmp = False
-                    if int(ernd) < 50 and gc.rnd >= 50:
-                        gc.lostmp = False
-                        gc.wonmp = True
+                if gc.lobbystarted:
+                    with open(currentdir + '/multiplayer/server/maxor2.txt') as f:
+                        ernd = f.read()
+                        erounds = font3.render("ernd: " + str(ernd), (0, 5), RED)
+                        if int(ernd) >= 50 and gc.rnd < 50:
+                            gc.lostmp = True
+                            gc.wonmp = False
+                        if int(ernd) < 50 and gc.rnd >= 50:
+                            gc.lostmp = False
+                            gc.wonmp = True
                                         
         if highscoreprompt:
             nm = font6.render(namelol, (0, 5), BLACK)
@@ -633,7 +667,13 @@ def main():
         for event in pygame.event.get():
 
             if event.type == pygame.QUIT:
+                with open(currentdir + '/multiplayer/server/maxor2.txt', 'w') as f:
+                    f.write('1')
+                with open(currentdir + '/multiplayer/server/maxor1.txt', 'w') as f:
+                    f.write('1')
+
                 run = False
+
             if event.type == pygame.MOUSEBUTTONDOWN and startclicked:
                     if len(bullets) < p.bulletcnt and not paused and p.hp > 0:  # This will make sure we cannot exceed 5 bullets on the screen at once
                             bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60), 6, (gc.BULLCOLOR), p.facing))
