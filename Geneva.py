@@ -1,6 +1,8 @@
-import pygame, os, requests, math, webbrowser
+from cgitb import reset
+import pygame, os, requests, math
 from pygame import K_BACKSPACE , font
 from random import randint
+import webbrowser
 from discord_webhook import DiscordWebhook
 import socket
 from os.path import exists
@@ -43,6 +45,7 @@ font3 = pygame.font.SysFont('Serif', 40)
 font4 = pygame.font.SysFont('Serif', 30)
 font6 = pygame.font.SysFont('Serif', 60)
 
+
 version = '0.14'
 versioncheck = '14'
 
@@ -62,6 +65,7 @@ class GameController():
         self.lobbystarted = False
         self.inlobby = False
         self.ernd = 0
+        self.consolestage = 0
 
 
 
@@ -74,7 +78,7 @@ win = pygame.display.set_mode(size)
 pygame.mouse.set_visible(False)
 
 class Shop():
-    def __init__(self, one, two, three, four, yeezus, five, hpadd, six):
+    def __init__(self, one, two, three, four, yeezus, five, hpadd, six, weppadd, ccadd, speedadd, dmgadd):
         self.one = one
         self.two = two
         self.three = three
@@ -83,6 +87,10 @@ class Shop():
         self.five = five
         self.hpadd = hpadd
         self.six = six
+        self.wepadd = weppadd
+        self.ccadd = ccadd
+        self.speedadd = speedadd
+        self.dmgadd = dmgadd
 
 class EnemyPlayer(pygame.sprite.Sprite):
     def __init__(self, img, x, y, v, m, hp, speed, facing, dmg):
@@ -138,6 +146,7 @@ class Player():
         self.lightspecial = False
         self.abilitycount = abilitycount
         self.lightused = False
+        self.uncap = False
 
 
     def changeImg(self, newimg):
@@ -150,7 +159,66 @@ class Player():
         else:
             self.facing = self.faceval1
 
+
+class projectile(object):
+    def __init__(self,x,y,radius,color, facing):
+        self.x = x
+        self.y = y
+        self.radius = radius
+        self.color = color
+        self.facing = facing
+        self.vel = 10 * p.facing
+        self.BULLCOLOR = BLACK
+
+    def draw(self,win):
+        pygame.draw.circle(win, self.color, (self.x,self.y), self.radius)
+
+class Button():
+	def __init__(self, x, y, image, scale):
+		width = image.get_width()
+		height = image.get_height()
+		self.image = pygame.transform.scale(image, (int(width * scale), int(height * scale)))
+		self.rect = self.image.get_rect()
+		self.rect.topleft = (x, y)
+		self.clicked = False
+
+	def draw(self, surface):
+		action = False
+		#get mouse position
+		pos = pygame.mouse.get_pos()
+
+		#check mouseover and clicked conditions
+		if self.rect.collidepoint(pos):
+			if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
+				self.clicked = True
+				action = True
+
+		if pygame.mouse.get_pressed()[0] == 0:
+			self.clicked = False
+
+		#draw button on screen
+		surface.blit(self.image, (self.rect.x, self.rect.y))
+
+		return action
+
+class dialogue():
+    def __init__(self,text,text1):
+        self.text = text
+        self.text1 = text1
+
+    def draw(self):
+        txt = font3.render(self.text,(0,5), BLACK)
+        txt1 = font4.render(self.text1,(0,5), BLACK)
+        win.blit(txt,(500,200))
+        win.blit(txt1,(500,260))
+    def changeText(self, t1, t2):
+        self.text = t1
+        self.text1 = t2
+
+# SET GAME NAME
 pygame.display.set_caption("Geneva")
+
+# IMAGES
 players = {
     'PlayerRED' :  pygame.image.load(os.path.join('./Assets/character/', 'player.png')).convert_alpha(),
     'PlayerRED2' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/character/', 'player.png')), True, False).convert_alpha(),
@@ -212,7 +280,7 @@ p2 = EnemyPlayer(players['PlayerBLUE'], 1020, 455, 5, 1, 100, 2, -1, 1)
 p3 = Player(players['PlayerRED'], 120, 1060, 5, 1, 4.5, -1, 100, 10, 5, 10, 0)
 
 # - SHOP -
-s = Shop(1,2,3,10,30,20,20,50)
+s = Shop(1,2,3,10,30,20,10,50,14,5,10.5,245)
 
 erect = pygame.Rect(p2.x, p2.y, p2.img.get_width(), p2.img.get_height())
 prect = pygame.Rect(p.x, p.y, p.img.get_width(), p.img.get_height())
@@ -221,49 +289,7 @@ mouserect = pygame.Rect((300, 300),(20,20))
 grassRect = pygame.Rect((0,510),(1320,300))
 mouserect = pygame.Rect((300, 300),(20,20))
 statsrect = pygame.Rect((900, 100),(330,220))
-
-
-class projectile(object):
-    def __init__(self,x,y,radius,color, facing):
-        self.x = x
-        self.y = y
-        self.radius = radius
-        self.color = color
-        self.facing = facing
-        self.vel = 10 * p.facing
-        self.BULLCOLOR = BLACK
-
-    def draw(self,win):
-        pygame.draw.circle(win, self.color, (self.x,self.y), self.radius)
-
-class Button():
-	def __init__(self, x, y, image, scale):
-		width = image.get_width()
-		height = image.get_height()
-		self.image = pygame.transform.scale(image, (int(width * scale), int(height * scale)))
-		self.rect = self.image.get_rect()
-		self.rect.topleft = (x, y)
-		self.clicked = False
-
-	def draw(self, surface):
-		action = False
-		#get mouse position
-		pos = pygame.mouse.get_pos()
-
-		#check mouseover and clicked conditions
-		if self.rect.collidepoint(pos):
-			if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
-				self.clicked = True
-				action = True
-
-		if pygame.mouse.get_pressed()[0] == 0:
-			self.clicked = False
-
-		#draw button on screen
-		surface.blit(self.image, (self.rect.x, self.rect.y))
-
-		return action
-
+consoleRect = pygame.Rect((700, 50),(230,230))
 
 bullets = []
 settings_button = Button(500,250,button_imgs['settings_button'],3)
@@ -288,21 +314,11 @@ controls = Button(500,550,button_imgs['Controls'],3)
 
 moving_sprites = pygame.sprite.Group()
 
-class dialogue():
-    def __init__(self,text,text1):
-        self.text = text
-        self.text1 = text1
-
-    def draw(self):
-        txt = font3.render(self.text,(0,5), BLACK)
-        txt1 = font4.render(self.text1,(0,5), BLACK)
-        win.blit(txt,(500,200))
-        win.blit(txt1,(500,260))
-    def changeText(self, t1, t2):
-        self.text = t1
-        self.text1 = t2
-
 d = dialogue('', '')
+
+vers = requests.get("https://maxor.xyz/geneva/version.txt")
+versi = vers.text
+
 
 def restartgame():
     p.hp = 100
@@ -322,9 +338,6 @@ def restartgame():
     s.five = 20
     s.yeezus = 30
     gc.lost = False
-
-vers = requests.get("https://maxor.xyz/geneva/version.txt")
-versi = vers.text
 
 def update():
     update = requests.get("https://maxor.xyz/geneva/status.txt")
@@ -380,6 +393,14 @@ def getAbility():
             p.abilitycount += 1
         else:
             getAbility()
+    if ability == 3:
+        if(p.uncap == False):
+            p.uncap = True
+            gc.dialogue = True
+            d.changeText('You unlocked the ability uncap!', 'You may add +1 upgrade slots to a shop item!')
+            p.abilitycount += 124
+        else:
+            getAbility()
 
 
 def resetServer():
@@ -412,7 +433,6 @@ def main():
     value = 0
     creditsactive = False
     resolutionclicked = False
-    unlockedability = False
     darkvalue = 0
     highscoreprompt = False
     namelol = ''
@@ -425,9 +445,16 @@ def main():
     Y_GRAVITY = 0.7
     JUMP_HEIGHT = 12
     Y_VELOCITY = JUMP_HEIGHT
+    console = False
+    consoletxt = ''
 
 
     while run:
+        if console:
+            pygame.draw.rect(win, (70,70,70),consoleRect)
+            ctxt = font4.render(consoletxt, (0,5), BLACK)
+            win.blit(ctxt,(710,70))
+
         if gc.client == 1 or gc.client == 2:
             singleplayer = False
 
@@ -457,10 +484,12 @@ def main():
 
             if start.clicked:
                 startclicked = True
+                p2.x = 1050
 
         if startclicked:
             win.blit(yeezusimg['deez'],(0,425))
-            win.blit(yeezusimg['cloud'],(cloudx,30))
+            if not console:
+                win.blit(yeezusimg['cloud'],(cloudx,30))
             cloudx += 0.1
             pygame.draw.rect(win, (0,0,0),grassRect)
 
@@ -681,15 +710,15 @@ def main():
 
 
             if event.type == pygame.MOUSEBUTTONDOWN and startclicked:
-                    if mouserect.x > p.x:
-                        p.facing = 1
-                        p.changeImg(players['PlayerRED2'])
-                    else:
-                        p.facing = -1
-                        p.changeImg(players['PlayerRED'])     
-                                           
                     if len(bullets) < p.bulletcnt and not paused and p.hp > 0:  # This will make sure we cannot exceed 5 bullets on the screen at once
-                            bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60), 6, (gc.BULLCOLOR), p.facing))
+                        if mouserect.x > p.x:
+                            p.facing = 1
+                            p.changeImg(players['PlayerRED2'])
+                        else:
+                            p.facing = -1
+                            p.changeImg(players['PlayerRED'])
+
+                        bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60), 6, (gc.BULLCOLOR), p.facing))
 
             else:
                 if event.type == pygame.KEYDOWN:
@@ -712,6 +741,36 @@ def main():
                             if gc.wonmp:
                                     sending24 = DiscordWebhook(url='https://discord.com/api/webhooks/1007335442917621760/VsmtTUpYO0GS27_iJosLRAuw0Fqyrs_MhC0S9vQ_IyvIizIPBVG_ieJLsHzTNSgbppTy', content=namelol + ' has won a ranked game!')
                                     sent24 = sending24.execute()      
+                    if console:
+                        if(event.key == pygame.K_c and loggedin):
+                            console = False
+                                
+                        if event.key is not pygame.K_RETURN and event.key is not pygame.K_ESCAPE and event.key is not pygame.K_SPACE and event.key is not pygame.K_BACKSPACE:
+                            consoletxt += event.unicode
+                        if event.key == K_BACKSPACE:
+                            consoletxt = ''                
+                        if event.key ==  pygame.K_RETURN:
+                            if consoletxt == 'php' and gc.consolestage == 0:
+                                consoletxt = ''
+                                gc.consolestage = 1
+                            if consoletxt == 'rnd' and gc.consolestage == 0:
+                                consoletxt = ''
+                                gc.consolestage = 2      
+                            if consoletxt == 'points' and gc.consolestage == 0:
+                                consoletxt = ''
+                                gc.consolestage = 3                                                             
+                            if gc.consolestage == 1 and consoletxt != '':
+                                p.hp = int(consoletxt)
+                                gc.consolestage = 0
+                                consoletxt = ''
+                            if gc.consolestage == 2 and consoletxt != '':
+                                gc.rnd = int(consoletxt)
+                                gc.consolestage = 0     
+                                consoletxt = ''
+                            if gc.consolestage == 3 and consoletxt != '':
+                                gc.points = int(consoletxt)
+                                gc.consolestage = 0        
+                                consoletxt = ''
                     else:
                         if(login and paused):
                             if passtime and event.key is not pygame.K_RETURN and event.key is not pygame.K_ESCAPE and event.key is not pygame.K_SPACE and event.key is not pygame.K_BACKSPACE:
@@ -772,32 +831,46 @@ def main():
 
                         if(event.key == pygame.K_u and paused):
                             update()
-
+                        if(event.key == pygame.K_c and loggedin):
+                            console = True
+                                
                         if(shop):
                             if(event.key == pygame.K_1):
                                 if(gc.points >= s.one):
                                     gc.points -= s.one
                                     s.one += 1
                                     p.hp += s.hpadd
-                            if(event.key == pygame.K_2 and p.speed <= 10.5):
-                                if(gc.points >= s.two):
-                                    gc.points -= s.two
+                            if(event.key == pygame.K_2):
+                                if(p.uncap):
+                                    s.speedadd += 1
+                                    p.uncap = False                                      
+                                if(gc.points >= s.two and p.speed <= s.speedadd):
+                                    gc.points -= s.two 
                                     s.two += 1
                                     p.speed += 0.5
-                            if(event.key == pygame.K_3 and p.dmg <= 245):
-                                if(gc.points >= s.three):
+                            if(event.key == pygame.K_3):
+                                if(p.uncap):
+                                    s.dmgadd += 5
+                                    p.uncap = False                                
+                                if(gc.points >= s.three  and p.dmg <= s.dmgadd):
                                     gc.points -= s.three
                                     s.three += 1
                                     p.dmg += 5
-                            if(event.key == pygame.K_4 and p.bulletcnt <= 14):
-                                if(gc.points >= s.four):
+                            if(event.key == pygame.K_4):
+                                if(p.uncap):
+                                    s.wepadd += 1
+                                    p.uncap = False
+                                if(gc.points >= s.four and p.bulletcnt <= s.wepadd):
                                     gc.points -= s.four
                                     s.four += 15 
                                     p.bulletcnt += 1
                                     p.faceval2 -= 0.25
                                     p.faceval1 += 0.25
 
-                            if(event.key == pygame.K_5 and p.cc <= 75):
+                            if(event.key == pygame.K_5 and p.cc <= s.ccadd):
+                                if(p.uncap):
+                                    s.ccadd += 5
+                                    p.uncap = False                                
                                 if(gc.points >= s.five):
                                     gc.points -= s.five
                                     s.five += 10 
@@ -817,7 +890,7 @@ def main():
                                     yeezus = True
         
         if loggedin and startclicked:
-            pygame.display.set_caption("Geneva Royale Beta 0.11")
+            pygame.display.set_caption("Geneva Royale Admin Edition")
             if hpcheck:
                 p.hp = 3000
                 hptxtx -= 30
@@ -896,7 +969,7 @@ def main():
         
         # WIN TEXT
 
-        if(won and not shop and not paused):
+        if(won and not shop and not paused and not console):
             win.blit(wintxt, (180, 20))
 
         # KEY HANDLING 2
@@ -997,7 +1070,7 @@ def main():
                                         
                                 p2.hp += 100 
                                 p2.hp += (gc.rnd * 20)
-                                p2.dmg += 1
+                                p2.dmg += 0.2
                                 gc.points += (1 + (gc.rnd * 0.1))
                                 if int(highscore) < gc.rnd and not goths :
                                     highscoreprompt = True
@@ -1080,6 +1153,8 @@ def main():
                 if(p2.facing > 0):
                     win.blit(players['PlayerBLUEswing2'], (p2.x, p2.y - 40))
 
+            p.hp -= p2.dmg
+            round(p.hp, 1)
 
           if(value > 60 and value <= 70 ):
             if yeezus:
