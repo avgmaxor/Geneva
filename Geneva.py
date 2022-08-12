@@ -1,8 +1,6 @@
-from cgitb import reset
-import pygame, os, requests, math
+import pygame, os, requests, math, webbrowser
 from pygame import K_BACKSPACE , font
 from random import randint
-import webbrowser
 from discord_webhook import DiscordWebhook
 import socket
 from os.path import exists
@@ -76,7 +74,7 @@ win = pygame.display.set_mode(size)
 pygame.mouse.set_visible(False)
 
 class Shop():
-    def __init__(self, one, two, three, four, yeezus, five, hpadd, six, weppadd, ccadd, speedadd, dmgadd):
+    def __init__(self, one, two, three, four, yeezus, five, hpadd, six):
         self.one = one
         self.two = two
         self.three = three
@@ -85,10 +83,6 @@ class Shop():
         self.five = five
         self.hpadd = hpadd
         self.six = six
-        self.wepadd = weppadd
-        self.ccadd = ccadd
-        self.speedadd = speedadd
-        self.dmgadd = dmgadd
 
 class EnemyPlayer(pygame.sprite.Sprite):
     def __init__(self, img, x, y, v, m, hp, speed, facing, dmg):
@@ -144,7 +138,6 @@ class Player():
         self.lightspecial = False
         self.abilitycount = abilitycount
         self.lightused = False
-        self.uncap = False
 
 
     def changeImg(self, newimg):
@@ -219,7 +212,7 @@ p2 = EnemyPlayer(players['PlayerBLUE'], 1020, 455, 5, 1, 100, 2, -1, 1)
 p3 = Player(players['PlayerRED'], 120, 1060, 5, 1, 4.5, -1, 100, 10, 5, 10, 0)
 
 # - SHOP -
-s = Shop(1,2,3,10,30,20,10,50,14,5,10.5,245)
+s = Shop(1,2,3,10,30,20,20,50)
 
 erect = pygame.Rect(p2.x, p2.y, p2.img.get_width(), p2.img.get_height())
 prect = pygame.Rect(p.x, p.y, p.img.get_width(), p.img.get_height())
@@ -387,14 +380,6 @@ def getAbility():
             p.abilitycount += 1
         else:
             getAbility()
-    if ability == 3:
-        if(p.uncap == False):
-            p.uncap = True
-            gc.dialogue = True
-            d.changeText('You unlocked the ability uncap!', 'You may add +1 upgrade slots to a shop item!')
-            p.abilitycount += 124
-        else:
-            getAbility()
 
 
 def resetServer():
@@ -427,6 +412,7 @@ def main():
     value = 0
     creditsactive = False
     resolutionclicked = False
+    unlockedability = False
     darkvalue = 0
     highscoreprompt = False
     namelol = ''
@@ -695,15 +681,15 @@ def main():
 
 
             if event.type == pygame.MOUSEBUTTONDOWN and startclicked:
+                    if mouserect.x > p.x:
+                        p.facing = 1
+                        p.changeImg(players['PlayerRED2'])
+                    else:
+                        p.facing = -1
+                        p.changeImg(players['PlayerRED'])     
+                                           
                     if len(bullets) < p.bulletcnt and not paused and p.hp > 0:  # This will make sure we cannot exceed 5 bullets on the screen at once
-                        if mouserect.x > p.x:
-                            p.facing = 1
-                            p.changeImg(players['PlayerRED2'])
-                        else:
-                            p.facing = -1
-                            p.changeImg(players['PlayerRED'])
-
-                        bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60), 6, (gc.BULLCOLOR), p.facing))
+                            bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60), 6, (gc.BULLCOLOR), p.facing))
 
             else:
                 if event.type == pygame.KEYDOWN:
@@ -793,37 +779,25 @@ def main():
                                     gc.points -= s.one
                                     s.one += 1
                                     p.hp += s.hpadd
-                            if(event.key == pygame.K_2):
-                                if(p.uncap):
-                                    s.speedadd += 1
-                                    p.uncap = False                                      
-                                if(gc.points >= s.two and p.speed <= s.speedadd):
-                                    gc.points -= s.two 
+                            if(event.key == pygame.K_2 and p.speed <= 10.5):
+                                if(gc.points >= s.two):
+                                    gc.points -= s.two
                                     s.two += 1
                                     p.speed += 0.5
-                            if(event.key == pygame.K_3):
-                                if(p.uncap):
-                                    s.dmgadd += 5
-                                    p.uncap = False                                
-                                if(gc.points >= s.three  and p.dmg <= s.dmgadd):
+                            if(event.key == pygame.K_3 and p.dmg <= 245):
+                                if(gc.points >= s.three):
                                     gc.points -= s.three
                                     s.three += 1
                                     p.dmg += 5
-                            if(event.key == pygame.K_4):
-                                if(p.uncap):
-                                    s.wepadd += 1
-                                    p.uncap = False
-                                if(gc.points >= s.four and p.bulletcnt <= s.wepadd):
+                            if(event.key == pygame.K_4 and p.bulletcnt <= 14):
+                                if(gc.points >= s.four):
                                     gc.points -= s.four
                                     s.four += 15 
                                     p.bulletcnt += 1
                                     p.faceval2 -= 0.25
                                     p.faceval1 += 0.25
 
-                            if(event.key == pygame.K_5 and p.cc <= s.ccadd):
-                                if(p.uncap):
-                                    s.ccadd += 5
-                                    p.uncap = False                                
+                            if(event.key == pygame.K_5 and p.cc <= 75):
                                 if(gc.points >= s.five):
                                     gc.points -= s.five
                                     s.five += 10 
@@ -1023,7 +997,7 @@ def main():
                                         
                                 p2.hp += 100 
                                 p2.hp += (gc.rnd * 20)
-                                p2.dmg += 0.2
+                                p2.dmg += 1
                                 gc.points += (1 + (gc.rnd * 0.1))
                                 if int(highscore) < gc.rnd and not goths :
                                     highscoreprompt = True
@@ -1106,8 +1080,6 @@ def main():
                 if(p2.facing > 0):
                     win.blit(players['PlayerBLUEswing2'], (p2.x, p2.y - 40))
 
-            p.hp -= p2.dmg
-            round(p.hp, 1)
 
           if(value > 60 and value <= 70 ):
             if yeezus:
