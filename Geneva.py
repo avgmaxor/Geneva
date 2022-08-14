@@ -66,9 +66,9 @@ class GameController():
         self.inlobby = False
         self.ernd = 0
         self.consolestage = 0
-
-
-
+        self.won = False
+        self.login = False
+        self.shop = False
 
 gc = GameController(1,0,0)
 
@@ -147,6 +147,10 @@ class Player():
         self.abilitycount = abilitycount
         self.lightused = False
         self.uncap = False
+        self.jump = False
+        self.hasinvinc = False
+        self.invinc = False
+
 
 
     def changeImg(self, newimg):
@@ -286,8 +290,7 @@ erect = pygame.Rect(p2.x, p2.y, p2.img.get_width(), p2.img.get_height())
 prect = pygame.Rect(p.x, p.y, p.img.get_width(), p.img.get_height())
 
 mouserect = pygame.Rect((300, 300),(20,20))
-grassRect = pygame.Rect((0,510),(1320,300))
-mouserect = pygame.Rect((300, 300),(20,20))
+grassRect = pygame.Rect((0,520),(1320,300))
 statsrect = pygame.Rect((900, 100),(330,220))
 consoleRect = pygame.Rect((700, 50),(230,230))
 
@@ -376,7 +379,7 @@ def resetRes():
     grassRect.height = 0
 
 def getAbility():
-    ability = randint(1,2)
+    ability = randint(1,4)
     if ability == 1:
         if(p.lightspecial == False):
             p.lightspecial = True
@@ -398,10 +401,17 @@ def getAbility():
             p.uncap = True
             gc.dialogue = True
             d.changeText('You unlocked the ability uncap!', 'You may add +1 upgrade slots to a shop item!')
-            p.abilitycount += 124
+            p.abilitycount += 1
         else:
             getAbility()
-
+    if ability == 4:
+        if(p.hasinvinc == False):
+            p.hasinvinc  = True
+            gc.dialogue = True
+            d.changeText('You unlocked invincibility!', 'Press I once to gain invincibility for 1 round!')
+            p.abilitycount += 1
+        else:
+            getAbility()
 
 def resetServer():
 
@@ -414,10 +424,6 @@ def main():
 
     run = True
     clock = pygame.time.Clock()
-    won = False
-    jump = False
-    login = False
-    shop = False
     username = ''
     password = ''
     passtime = False
@@ -696,8 +702,8 @@ def main():
                 else:
                     settings = False
             if(login_button.clicked):
-                if not login:
-                    login = True
+                if not gc.login:
+                    gc.login = True
 
 
         for event in pygame.event.get():
@@ -749,7 +755,7 @@ def main():
                             consoletxt += event.unicode
                         if event.key == K_BACKSPACE:
                             consoletxt = ''                
-                        if event.key ==  pygame.K_RETURN:
+                        if event.key ==  pygame.K_RETURN and singleplayer:
                             if consoletxt == 'php' and gc.consolestage == 0:
                                 consoletxt = ''
                                 gc.consolestage = 1
@@ -771,8 +777,9 @@ def main():
                                 gc.points = int(consoletxt)
                                 gc.consolestage = 0        
                                 consoletxt = ''
+
                     else:
-                        if(login and paused):
+                        if(gc.login and paused):
                             if passtime and event.key is not pygame.K_RETURN and event.key is not pygame.K_ESCAPE and event.key is not pygame.K_SPACE and event.key is not pygame.K_BACKSPACE:
                                 password += event.unicode
                             elif not passtime and event.key is not pygame.K_RETURN and event.key is not pygame.K_ESCAPE and event.key is not pygame.K_SPACE and event.key is not pygame.K_BACKSPACE:
@@ -783,17 +790,19 @@ def main():
                                 else:
                                     password = ''
                     
-
                         if event.key == pygame.K_SPACE:
                             if gc.dialogue:
                                 gc.dialogue = False
                             else:
-                                if(not jump):
-                                    jump = True
-                                if login:
+                                if(not p.jump):
+                                    p.jump = True
+                                if gc.login:
                                     passtime = True
 
-
+                        if event.key == pygame.K_i:
+                            if p.hasinvinc:
+                                p.invinc = True
+                                    
                         if event.key == pygame.K_RETURN:
                             if passtime and not loggedin:
                                 logins = requests.get("https://maxor.xyz/geneva/logins.json")
@@ -810,17 +819,17 @@ def main():
                                     webhook4 = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content=name + ' had logged into the admin account: ' + username)
                                     responsaae = webhook4.execute()
                         if event.key == pygame.K_n:
-                            if(won):
-                                won = False
+                            if(gc.won):
+                                gc.won = False
                                 if p.x <= 500:
                                     p2.x = 1020
                                 else:
                                     p2.x = 10
-                        if event.key == pygame.K_TAB and won:
-                            if(shop):
-                                shop = False
+                        if event.key == pygame.K_TAB and gc.won:
+                            if(gc.shop):
+                                gc.shop = False
                             else:
-                                shop = True
+                                gc.shop = True
 
 
                         if event.key == pygame.K_ESCAPE:
@@ -831,10 +840,10 @@ def main():
 
                         if(event.key == pygame.K_u and paused):
                             update()
-                        if(event.key == pygame.K_c and loggedin):
+                        if(event.key == pygame.K_c and loggedin and singleplayer):
                             console = True
                                 
-                        if(shop):
+                        if(gc.shop):
                             if(event.key == pygame.K_1):
                                 if(gc.points >= s.one):
                                     gc.points -= s.one
@@ -875,12 +884,13 @@ def main():
                                     gc.points -= s.five
                                     s.five += 10 
                                     p.cc += 5
-                            if(event.key == pygame.K_6 and p.abilitycount <= 2):
+                            if(event.key == pygame.K_6 and p.abilitycount <= 3):
                                 if(gc.points >= s.six):
                                     gc.points -= s.six
                                     gc.dialogue = True
                                     s.six *= 2
                                     getAbility()
+
                             if(event.key == pygame.K_y):
                                 if(gc.points >= s.yeezus):
                                     gc.points -= s.yeezus
@@ -903,14 +913,14 @@ def main():
             hs = font3.render('You have beaten the hs, what would you like your name to appear as?', True, (BLACK))
             win.blit(hs, (20,20))
 
-        if login and paused:
+        if gc.login and paused:
             use = font3.render(username, True, (BLACK))
             win.blit(use, (20,20))
         if passtime and paused:
             pas = font3.render(password, True, (BLACK))
             win.blit(pas, (20,60))
 
-        if shop and won and not paused and startclicked:
+        if gc.shop and gc.won and not paused and startclicked:
             win.blit(shoptxt, (20, 10))
             win.blit(shoptxt2, (20, 150))
             win.blit(shoptxt3, (20, 190))
@@ -924,8 +934,6 @@ def main():
             win.blit(weaponstats2, (920, 190))
             win.blit(weaponstats3, (920, 240))
 
-
-
         if p.hp <= 0:
             lost = font.render("Ratio U LOST", (20,20), BLACK)
             win.blit(lost, (150, 20))
@@ -938,10 +946,10 @@ def main():
             if p.lightspecial == True:
                 if p.lightused == False:
                     p.hp = 100
-                    won = True
+                    gc.won = True
                     p.lightused = True
                 else:
-                    lost = True
+                    gc.lost = True
             elif goths:
                 webhook3 = DiscordWebhook(url='https://discord.com/api/webhooks/1005987949067894905/igWvhRDPoDRmTXG2LX-hfMThbmpePBnNpsmACd1saZsHoZRA-_DcMYK95CiosZN3Ul86', content=namelol + 'had died in their hs run with a final score of' + str(gc.rnd))
                 ad = webhook3.execute()      
@@ -951,25 +959,20 @@ def main():
             p2.move(p.x, p2.x)
 
         # JUMPING
-        if jump:
+        if  p.jump:
             p.y -= Y_VELOCITY
             Y_VELOCITY -= Y_GRAVITY
             if Y_VELOCITY < -JUMP_HEIGHT:
-                jump = False
+                p.jump = False
                 Y_VELOCITY = JUMP_HEIGHT
             
-        
-        if not jump:
+        if not  p.jump:
             if p.y < 455:
                 p.y += 2 
 
-
-
-
-        
         # WIN TEXT
 
-        if(won and not shop and not paused and not console):
+        if(gc.won and not gc.shop and not paused and not console):
             win.blit(wintxt, (180, 20))
 
         # KEY HANDLING 2
@@ -1010,7 +1013,11 @@ def main():
         p2.hitbox = (p2.x + 17, p2.y + 11, 29, 52) # NEW
         if (erect.colliderect(prect)):
             p2.attack = True
-            value += 1
+            if gc.rnd < 40:
+                value += 1
+            else:
+                value += 2
+                
             if(value >= 70):
                 value = 0
         else:
@@ -1027,7 +1034,7 @@ def main():
                 if(bullet in bullets):
                     bullets.pop(bullets.index(bullet))  # This will remove the bullet if it is off 
 
-            if not gc.lost and not won and not paused:
+            if not gc.lost and not gc.won and not paused:
                 if bullet.y + bullet.radius < p2.hitbox[1] + 60 + p2.hitbox[3] and bullet.y + bullet.radius > p2.hitbox[1] - 60 or prect.colliderect(erect):
                     if bullet.x + bullet.radius > p2.hitbox[0] + 13 and bullet.x - bullet.radius < p2.hitbox[0] + p2.hitbox[2] - 13 or prect.colliderect(erect):
                         if(randint(1, 100) <= p.cc):
@@ -1047,13 +1054,13 @@ def main():
 
                             p2.hp -= p.dmg
 
-                        if not won:
+                        if not gc.won:
                             if bullet in bullets:
                                 bullets.pop(bullets.index(bullet))
                         # SCALE ENEMY
-                        if not won:
+                        if not gc.won:
                             if(p2.hp <= 0):
-                                won = True
+                                gc.won = True
                                 if(p.speed >= p2.speed):
                                     p2.speed += 0.25
                                 elif p.speed <= p2.speed and p.speed <= 9.5:
@@ -1067,7 +1074,11 @@ def main():
                                     if gc.client == 1:
                                         sending2 = DiscordWebhook(url='https://discord.com/api/webhooks/1006756471872163940/O4DjO3ADxjT3Orfw645bTuCfhV6mIBn4i7SfX77mUayVNTqLLOVPLpAKcMZrLrR2r6hx', content=str(gc.rnd))
                                         sent2 = sending2.execute()      
-                                        
+                                if p.invinc:
+                                    p.hasinvinc = False
+                                    p.invinc = False        
+
+
                                 p2.hp += 100 
                                 p2.hp += (gc.rnd * 20)
                                 p2.dmg += 0.2
@@ -1123,7 +1134,7 @@ def main():
             win.blit(hp, (hptxtx, 10))
             win.blit(spd, (650, 10))
             win.blit(dmg, (800, 10))
-            if not shop or not won:
+            if not gc.shop or not gc.won:
                 win.blit(cc, (950, 10))
             win.blit(rounds,(390,10))
             if not singleplayer and gc.lobbystarted:
@@ -1132,7 +1143,7 @@ def main():
         # DRAW PLAYER
         if not gc.lost and startclicked:         
           win.blit(p.img, (p.x, p.y - 40))
-        if not won and not paused and not gc.lost and startclicked or not singleplayer and gc.lobbystarted and not won and not paused and not gc.lost and startclicked:
+        if not gc.won and not paused and not gc.lost and startclicked or not singleplayer and gc.lobbystarted and not gc.won and not paused and not gc.lost and startclicked:
           if(value <= 25):
             win.blit(p2.img, (p2.x, p2.y - 40))
           if(value > 25 and value <= 55):
@@ -1153,9 +1164,6 @@ def main():
                 if(p2.facing > 0):
                     win.blit(players['PlayerBLUEswing2'], (p2.x, p2.y - 40))
 
-            p.hp -= p2.dmg
-            round(p.hp, 1)
-
           if(value > 60 and value <= 70 ):
             if yeezus:
                 win.blit(yeezusimg['yeezusswing2'], (p2.x, p2.y - 40))
@@ -1164,8 +1172,9 @@ def main():
                     win.blit(players['PlayerBLUEswing32'], (p2.x, p2.y - 40))
                 if(p2.facing > 0):
                     win.blit(players['PlayerBLUEswing3'], (p2.x, p2.y - 40))                
+            if not p.invinc:
+                p.hp -= p2.dmg
 
-            p.hp -= p2.dmg
             round(p.hp, 1)
         if startclicked:
             if gc.dialogue == True:
@@ -1176,7 +1185,6 @@ def main():
 
         pygame.display.flip()
 
-
         clock.tick(60)
         pygame.display.update()
 
@@ -1186,7 +1194,6 @@ def main():
             win.fill(WHITE)
 
     pygame.quit()
-
 
 if int(versioncheck) < int(float(versi)):
     update()
