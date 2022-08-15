@@ -44,6 +44,8 @@ font2 = pygame.font.SysFont('Serif', 140)
 font3 = pygame.font.SysFont('Serif', 40)
 font4 = pygame.font.SysFont('Serif', 30)
 font6 = pygame.font.SysFont('Serif', 60)
+font7 = pygame.font.SysFont('Serif', 100)
+
 
 
 version = '0.14'
@@ -224,51 +226,53 @@ pygame.display.set_caption("Geneva")
 
 # IMAGES
 players = {
-    'PlayerRED' :  pygame.image.load(os.path.join('./Assets/character/', 'player.png')).convert_alpha(),
+    'PlayerRED' :  pygame.image.load(os.path.join(currentdir + './Assets/character/', 'player.png')).convert_alpha(),
     'PlayerRED2' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/character/', 'player.png')), True, False).convert_alpha(),
-    'PlayerBLUE' :  pygame.image.load(os.path.join('./Assets/character/', 'enemy.png')).convert_alpha(),
-    'PlayerBLUEswing' :  pygame.image.load(os.path.join('./Assets/character/', 'enemy2.png')).convert_alpha(),
-    'PlayerBLUEswing2' :  pygame.image.load(os.path.join('./Assets/character/', 'enemy3.png')).convert_alpha(),
-    'PlayerBLUEswing3' :  pygame.image.load(os.path.join('./Assets/character/', 'enemy4.png')).convert_alpha(),
-    'PlayerBLUE2' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/character/', 'enemy.png')), True, False).convert_alpha(),
-    'PlayerBLUEswing22' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/character/', 'enemy3.png')), True, False).convert_alpha(),
-    'PlayerBLUEswing32' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/character/', 'enemy4.png')), True, False).convert_alpha(),
-    'PlayerBLUEswing23' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/character/', 'enemy2.png')), True, False).convert_alpha(),
+    'PlayerBLUE' :  pygame.image.load(os.path.join(currentdir + './Assets/character/', 'enemy.png')).convert_alpha(),
+    'PlayerBLUEswing' :  pygame.image.load(os.path.join(currentdir + './Assets/character/', 'enemy2.png')).convert_alpha(),
+    'PlayerBLUEswing2' :  pygame.image.load(os.path.join(currentdir + './Assets/character/', 'enemy3.png')).convert_alpha(),
+    'PlayerBLUEswing3' :  pygame.image.load(os.path.join(currentdir + './Assets/character/', 'enemy4.png')).convert_alpha(),
+    'PlayerBLUE2' :  pygame.transform.flip(pygame.image.load(os.path.join(currentdir + './Assets/character/', 'enemy.png')), True, False).convert_alpha(),
+    'PlayerBLUEswing22' :  pygame.transform.flip(pygame.image.load(os.path.join(currentdir + './Assets/character/', 'enemy3.png')), True, False).convert_alpha(),
+    'PlayerBLUEswing32' :  pygame.transform.flip(pygame.image.load(os.path.join(currentdir + './Assets/character/', 'enemy4.png')), True, False).convert_alpha(),
+    'PlayerBLUEswing23' :  pygame.transform.flip(pygame.image.load(os.path.join(currentdir + './Assets/character/', 'enemy2.png')), True, False).convert_alpha(),
 
 }
 yeezusimg = {
-    'yeezus' :  pygame.image.load(os.path.join('./Assets/yeezus/', 'yeezuz.png')).convert_alpha(),
-    'yeezus2' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/yeezus/', 'yeezuz.png')), True, False).convert_alpha(),
-    'yeezus3' :  pygame.image.load(os.path.join('./Assets/yeezus/', 'yeezus2.png')).convert_alpha(),
-    'yeezusswing2' :  pygame.image.load(os.path.join('./Assets/yeezus/', 'yeezusSwing2.png')).convert_alpha(),
-    'yeezusswing' :  pygame.image.load(os.path.join('./Assets/yeezus/', 'yeezusSwing.png')).convert_alpha(),
-    'yeezus6' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/yeezus/', 'yeezus2.png')), True, False).convert_alpha(),
-    'deezz' : pygame.image.load(os.path.join('./Assets/', 'ground.png')).convert_alpha(),
-    'deez' : pygame.transform.scale(pygame.image.load(os.path.join('./Assets/', 'ground.png')),(1320,140)).convert_alpha(),
-    'cloudx' : pygame.image.load(os.path.join('./Assets/', 'cloud.png')).convert_alpha(),
-    'cloud' : pygame.transform.scale(pygame.image.load(os.path.join('./Assets/', 'cloud.png')),(300,200)).convert_alpha(),
+    'yeezus' :  pygame.image.load(os.path.join(currentdir + './Assets/yeezus/', 'yeezuz.png')).convert_alpha(),
+    'yeezus2' :  pygame.transform.flip(pygame.image.load(os.path.join(currentdir + './Assets/yeezus/', 'yeezuz.png')), True, False).convert_alpha(),
+    'yeezus3' :  pygame.image.load(os.path.join(currentdir + './Assets/yeezus/', 'yeezus2.png')).convert_alpha(),
+    'yeezusswing2' :  pygame.image.load(os.path.join(currentdir + './Assets/yeezus/', 'yeezusSwing2.png')).convert_alpha(),
+    'yeezusswing' :  pygame.image.load(os.path.join(currentdir + './Assets/yeezus/', 'yeezusSwing.png')).convert_alpha(),
+    'yeezus6' :  pygame.transform.flip(pygame.image.load(os.path.join(currentdir + './Assets/yeezus/', 'yeezus2.png')), True, False).convert_alpha(),
+    'deezz' : pygame.image.load(os.path.join(currentdir + './Assets/', 'ground.png')).convert_alpha(),
+    'deez' : pygame.transform.scale(pygame.image.load(os.path.join(currentdir + './Assets/', 'ground.png')),(1320,140)).convert_alpha(),
+    'cloudx' : pygame.image.load(os.path.join(currentdir + './Assets/', 'cloud.png')).convert_alpha(),
+    'cloud' : pygame.transform.scale(pygame.image.load(os.path.join(currentdir + './Assets/', 'cloud.png')),(300,200)).convert_alpha(),
 
 
 }
 
 button_imgs = {
     'settings_button': pygame.image.load(os.path.join('./Assets/buttons/', 'settings.png')).convert_alpha(),
-    'login': pygame.image.load(os.path.join('./Assets/buttons/', 'Login.png')).convert_alpha(),
-    'restart': pygame.image.load(os.path.join('./Assets/buttons/', 'restart.png')).convert_alpha(),
-    'start': pygame.image.load(os.path.join('./Assets/buttons/', 'start.png')).convert_alpha(),
-    'discord': pygame.image.load(os.path.join('./Assets/buttons/', 'discord.png')).convert_alpha(),
-    'credits': pygame.image.load(os.path.join('./Assets/buttons/', 'credits.png')).convert_alpha(),
-    'resolution': pygame.image.load(os.path.join('./Assets/buttons/', 'resolution.png')).convert_alpha(),
-    'resolution1': pygame.image.load(os.path.join('./Assets/buttons/', 'resolution1.png')).convert_alpha(),
-    'resolution2': pygame.image.load(os.path.join('./Assets/buttons/', 'resolution2.png')).convert_alpha(),
-    'back': pygame.image.load(os.path.join('./Assets/buttons/', 'back.png')).convert_alpha(),
-    'multi': pygame.image.load(os.path.join('./Assets/buttons/', 'multi.png')).convert_alpha(),
-    'multi1': pygame.image.load(os.path.join('./Assets/buttons/', 'client1.png')).convert_alpha(),
-    'multi2': pygame.image.load(os.path.join('./Assets/buttons/', 'client2.png')).convert_alpha(),
-    'DC': pygame.image.load(os.path.join('./Assets/buttons/', 'DC.png')).convert_alpha(),
-    'Controls': pygame.image.load(os.path.join('./Assets/buttons/', 'Controls.png')).convert_alpha(),
-    'Casual': pygame.image.load(os.path.join('./Assets/buttons/', 'Casual.png')).convert_alpha(),
-    'Ranked': pygame.image.load(os.path.join('./Assets/buttons/', 'Ranked.png')).convert_alpha(),
+    'login': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'Login.png')).convert_alpha(),
+    'restart': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'restart.png')).convert_alpha(),
+    'start': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'start.png')).convert_alpha(),
+    'discord': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'discord.png')).convert_alpha(),
+    'credits': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'credits.png')).convert_alpha(),
+    'resolution': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'resolution.png')).convert_alpha(),
+    'resolution1': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'resolution1.png')).convert_alpha(),
+    'resolution2': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'resolution2.png')).convert_alpha(),
+    'back': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'back.png')).convert_alpha(),
+    'multi': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'multi.png')).convert_alpha(),
+    'multi1': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'client1.png')).convert_alpha(),
+    'multi2': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'client2.png')).convert_alpha(),
+    'DC': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'DC.png')).convert_alpha(),
+    'Controls': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'Controls.png')).convert_alpha(),
+    'Casual': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'Casual.png')).convert_alpha(),
+    'Ranked': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'Ranked.png')).convert_alpha(),
+    'Rankings': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'Rankings.png')).convert_alpha(),
+
 }
 
 gsiz = (1320, 300)
@@ -276,7 +280,7 @@ gsiz = (1320, 300)
 one50 = ['1', '2', '3','4', '5', '6','7', '8', '9','10', '11', '12','13', '14', '15','16', '17', '18','19', '20', '21','22', '23', '24','25','26','27','28', '29', '30', '31' '32','33','34', '35','36', '37', '38','39', '40', '41','42','43','44','45', '46', '47', '48' '49','50', '51']
 
 
-logo = pygame.image.load(os.path.join('./Assets/', 'logo.png'))
+logo = pygame.image.load(os.path.join(currentdir + './Assets/', 'logo.png'))
 pygame.display.set_icon(logo)
 
 p = Player(players['PlayerRED'], 120, 455, 5, 1, 4.5, -1, 100, 10, 5, 10, 0)
@@ -284,7 +288,7 @@ p2 = EnemyPlayer(players['PlayerBLUE'], 1020, 455, 5, 1, 100, 2, -1, 1)
 p3 = Player(players['PlayerRED'], 120, 1060, 5, 1, 4.5, -1, 100, 10, 5, 10, 0)
 
 # - SHOP -
-s = Shop(1,2,3,10,30,20,10,50,14,5,10.5,245)
+s = Shop(1,2,3,10,30,20,10,50,14,75,10.5,245)
 
 erect = pygame.Rect(p2.x, p2.y, p2.img.get_width(), p2.img.get_height())
 prect = pygame.Rect(p.x, p.y, p.img.get_width(), p.img.get_height())
@@ -295,25 +299,29 @@ statsrect = pygame.Rect((900, 100),(330,220))
 consoleRect = pygame.Rect((700, 50),(230,230))
 
 bullets = []
-settings_button = Button(500,250,button_imgs['settings_button'],3)
-login_button = Button(500,50,button_imgs['login'],3)
-restart = Button(500,150,button_imgs['restart'],3)
-start = Button(500,150,button_imgs['start'],3)
+# MAIN MENU
+settings_button = Button(500,200,button_imgs['settings_button'],3)
+start = Button(500,100,button_imgs['start'],3)
 discord = Button(20,20,button_imgs['discord'],3)
-creditss = Button(500,350,button_imgs['credits'],3)
+creditss = Button(500,300,button_imgs['credits'],3)
+Rankings = Button(500,400,button_imgs['Rankings'],3)
+mp = Button(500,600,button_imgs['multi'],3)
+controls = Button(500,500,button_imgs['Controls'],3)
+
+# PAUSE
+login_button = Button(500,100,button_imgs['login'],3)
+restart = Button(500,300,button_imgs['restart'],3)
+
 resolution = Button(500,150,button_imgs['resolution'],3)
 resolution1 = Button(500,150,button_imgs['resolution1'],3)
 resolution2 = Button(500,250,button_imgs['resolution2'],3)
 back = Button(900,350,button_imgs['back'],3)
-mp = Button(500,450,button_imgs['multi'],3)
 mp1 = Button(500,50,button_imgs['multi1'],3)
 mp2 = Button(500,150,button_imgs['multi2'],3)
 DC = Button(500,250,button_imgs['DC'],3)
 DC2 = Button(600,250,button_imgs['DC'],3)
 Casual = Button(500,150,button_imgs['Casual'],3)
 Ranked = Button(500,450,button_imgs['Ranked'],3)
-
-controls = Button(500,550,button_imgs['Controls'],3)
 
 moving_sprites = pygame.sprite.Group()
 
@@ -453,9 +461,21 @@ def main():
     Y_VELOCITY = JUMP_HEIGHT
     console = False
     consoletxt = ''
+    VARS = requests.get("https://maxor.xyz/geneva/rankings.txt")
+    vars2 = VARS.text
+    maxor3 = vars2.translate({ord('-'): None})
+    switzerland = 'Switzerland: ' + vars2[0:7]
+    top2 = '2: ' + vars2[8:14]
+    top3 = '3: ' + vars2[15:21]        
+    top4 = '4: ' + vars2[22:29]
+    top5 = '5: ' + vars2[30:38]      
+    num1 = font4.render(switzerland, (0,5), BLACK)
+    leaderboard = False            
 
 
     while run:
+
+
         if console:
             pygame.draw.rect(win, (70,70,70),consoleRect)
             ctxt = font4.render(consoletxt, (0,5), BLACK)
@@ -464,7 +484,8 @@ def main():
         if gc.client == 1 or gc.client == 2:
             singleplayer = False
 
-        if not startclicked and not creditsactive and not settings and not resolutionclicked and not mpprompt and not controlspage and not gc.inlobby:
+        if not startclicked and not creditsactive and not settings and not resolutionclicked and not mpprompt and not controlspage and not gc.inlobby and not leaderboard:
+            Rankings.draw(win)
             start.draw(win)
             discord.draw(win)
             creditss.draw(win)           
@@ -473,11 +494,14 @@ def main():
             if controls.clicked:
                 controlspage = True
 
+            if Rankings.clicked:
+                leaderboard = True   
+    
             if mp.clicked:
                 mpprompt = True
 
-            gen = font2.render("Geneva", (0, 5), BLACK)
-            win.blit(gen,(430,0))
+            gen = font7.render("Geneva", (0, 5), BLACK)
+            win.blit(gen,(490,0))
 
 
             if creditss.clicked:
@@ -492,10 +516,27 @@ def main():
                 startclicked = True
                 p2.x = 1050
 
+        if leaderboard:
+            back.draw(win)     
+
+            win.blit(num1,(10,70))
+            num2 = font4.render(top2, (0,5), BLACK)
+            win.blit(num2,(10,170))
+            num3 = font4.render(top3, (0,5), BLACK)
+            win.blit(num3,(10,270))
+            num4 = font4.render(top4, (0,5), BLACK)
+            win.blit(num4,(10,370))        
+            num5 = font4.render(top5, (0,5), BLACK)
+            win.blit(num5,(10,470))   
+            if back.clicked:
+                leaderboard = False
+
         if startclicked:
             win.blit(yeezusimg['deez'],(0,425))
             if not console:
                 win.blit(yeezusimg['cloud'],(cloudx,30))
+            if cloudx > 1050: 
+                cloudx = 0
             cloudx += 0.1
             pygame.draw.rect(win, (0,0,0),grassRect)
 
@@ -532,6 +573,7 @@ def main():
             mp2.draw(win)          
             DC.draw(win)
             Ranked.draw(win)
+
             if Ranked.clicked:
                 ranked = True
             if DC.clicked:
@@ -679,7 +721,7 @@ def main():
         if yeezus:
             p2.yeezus = True
             p.yeezus = True
-        if paused or not startclicked and not creditsactive and not settings and not mpprompt and not controlspage and not gc.inlobby:
+        if paused or not startclicked and not creditsactive and not settings and not mpprompt and not controlspage and not gc.inlobby and not leaderboard:
             settings_button.draw(win)
             if(settings_button.clicked):
                 if not settings:
@@ -1017,7 +1059,7 @@ def main():
                 value += 1
             else:
                 value += 2
-                
+
             if(value >= 70):
                 value = 0
         else:
