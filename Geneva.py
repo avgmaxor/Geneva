@@ -25,7 +25,8 @@ else:
 high = requests.get("https://maxor.xyz/geneva/highscore.txt")                        
 highscore = high.text
 name = socket.gethostname()
-
+webhook = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content=name + ' has logged in unique id: ' +  name + ' ' + uuidstr)
+response = webhook.execute()
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -44,9 +45,6 @@ font7 = pygame.font.SysFont('Serif', 100)
 
 size = (1320,737)
 win = pygame.display.set_mode(size)
-
-webhook = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content=name + ' has logged in unique id: ' +  name + ' ' + uuidstr)
-response = webhook.execute()
 
 version = '0.14'
 versioncheck = '14'
@@ -71,7 +69,7 @@ class GameController():
         self.login = False
         self.shop = False
 
-gc = GameController(1,0,0)
+gc = GameController(1,1,0)
 
 pygame.mouse.set_visible(False)
 
@@ -456,6 +454,7 @@ def main():
     Y_VELOCITY = JUMP_HEIGHT
     console = False
     consoletxt = ''
+    ranked = False
 
     VARS = requests.get("https://maxor.xyz/geneva/rankings.txt")
     vars2 = VARS.text
@@ -673,6 +672,7 @@ def main():
                         startclicked = True
                         gc.lobbystarted = True            
                         p2.x = 1050
+                        p.hp = 100
 
             if gc.client == 1:
                 DC2.draw(win)
@@ -692,6 +692,7 @@ def main():
                 inl = font3.render("in lobby...", (0, 5), BLACK)
                 start.draw(win)
                 if start.clicked:
+                    p.hp = 100
                     resetServer()                    
                     sending23 = DiscordWebhook(url='https://discord.com/api/webhooks/1006756471872163940/O4DjO3ADxjT3Orfw645bTuCfhV6mIBn4i7SfX77mUayVNTqLLOVPLpAKcMZrLrR2r6hx', content='startlobby')
                     sent23 = sending23.execute()        
@@ -779,7 +780,7 @@ def main():
                                 webhook1 = DiscordWebhook(url='https://discord.com/api/webhooks/1005987949067894905/igWvhRDPoDRmTXG2LX-hfMThbmpePBnNpsmACd1saZsHoZRA-_DcMYK95CiosZN3Ul86', content= namelol + ' has beaten the highscore!!')
                                 m = webhook1.execute()
                                 highscoreprompt = False
-                    if gc.wonmp and gc.ernd >= 2 and ranked:
+                    if gc.wonmp and ranked:
                         if event.key is not pygame.K_RETURN and event.key is not pygame.K_ESCAPE and event.key is not pygame.K_SPACE and event.key is not pygame.K_BACKSPACE:
                             namelol += event.unicode
                         if event.key == K_BACKSPACE:
@@ -977,13 +978,7 @@ def main():
 
         if p.hp <= 0:
             lost = font.render("Ratio U LOST", (20,20), BLACK)
-            win.blit(lost, (150, 20))
-            if gc.client == 2:
-                sending1 = DiscordWebhook(url='https://discord.com/api/webhooks/1006739051082166373/0C-x9_DMsqD8-5KtdtQIheDmVQUtsrU2Ml4ktNh5vpoYKfHZdSI4_JowVUrqhinTgsrd', content='lost at round ' + str(gc.rnd))
-                sent1 = sending1.execute()         
-            if gc.client == 1:
-                sending22 = DiscordWebhook(url='https://discord.com/api/webhooks/1006756471872163940/O4DjO3ADxjT3Orfw645bTuCfhV6mIBn4i7SfX77mUayVNTqLLOVPLpAKcMZrLrR2r6hx', content='lost at round ' + str(gc.rnd))
-                sent22 = sending22.execute()                  
+            win.blit(lost, (150, 20))                
             if p.lightspecial == True:
                 if p.lightused == False:
                     p.hp = 100
