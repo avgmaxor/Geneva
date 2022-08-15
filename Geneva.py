@@ -535,6 +535,9 @@ def main():
                 cloudx = 0
             cloudx += 0.1
             pygame.draw.rect(win, (0,0,0),grassRect)
+            if d.dialogue == True:
+                d.draw()    
+
 
 
         if controlspage:
@@ -829,8 +832,8 @@ def main():
                                     password = ''
                     
                         if event.key == pygame.K_SPACE:
-                            if gc.dialogue:
-                                gc.dialogue = False
+                            if d.dialogue:
+                                d.dialogue = False
                             else:
                                 if(not p.jump):
                                     p.jump = True
@@ -925,7 +928,7 @@ def main():
                             if(event.key == pygame.K_6 and p.abilitycount <= 3):
                                 if(gc.points >= s.six):
                                     gc.points -= s.six
-                                    gc.dialogue = True
+                                    d.dialogue = True
                                     s.six *= 2
                                     getAbility()
 
@@ -1214,9 +1217,6 @@ def main():
                 p.hp -= p2.dmg
 
             round(p.hp, 1)
-        if startclicked:
-            if gc.dialogue == True:
-                d.draw()    
 
         mouserect.x ,mouserect.y = pygame.mouse.get_pos()
         pygame.draw.rect(win, (0,0,0),mouserect)
