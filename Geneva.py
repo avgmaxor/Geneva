@@ -1,4 +1,3 @@
-from cgitb import reset
 import pygame, os, requests, math
 from pygame import K_BACKSPACE , font
 from random import randint
@@ -6,9 +5,7 @@ import webbrowser
 from discord_webhook import DiscordWebhook
 import socket
 from os.path import exists
-import socket
 from pathlib import Path
-
 
 file_exists = exists('./assets/uuid.txt')
 
@@ -28,8 +25,7 @@ else:
 high = requests.get("https://maxor.xyz/geneva/highscore.txt")                        
 highscore = high.text
 name = socket.gethostname()
-webhook = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content=name + ' has logged in unique id: ' +  name + ' ' + uuidstr)
-response = webhook.execute()
+
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -46,7 +42,11 @@ font4 = pygame.font.SysFont('Serif', 30)
 font6 = pygame.font.SysFont('Serif', 60)
 font7 = pygame.font.SysFont('Serif', 100)
 
+size = (1320,737)
+win = pygame.display.set_mode(size)
 
+webhook = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content=name + ' has logged in unique id: ' +  name + ' ' + uuidstr)
+response = webhook.execute()
 
 version = '0.14'
 versioncheck = '14'
@@ -59,7 +59,6 @@ class GameController():
         self.points = points
         self.size = 1320, 724
         self.BULLCOLOR = BLACK
-        self.dialogue = False
         self.lost = False
         self.client = client
         self.wonmp = False
@@ -73,9 +72,6 @@ class GameController():
         self.shop = False
 
 gc = GameController(1,0,0)
-
-size = (1320,737)
-win = pygame.display.set_mode(size)
 
 pygame.mouse.set_visible(False)
 
@@ -153,8 +149,6 @@ class Player():
         self.hasinvinc = False
         self.invinc = False
 
-
-
     def changeImg(self, newimg):
         self.img = newimg 
 
@@ -211,6 +205,7 @@ class dialogue():
     def __init__(self,text,text1):
         self.text = text
         self.text1 = text1
+        self.dialogue = False
 
     def draw(self):
         txt = font3.render(self.text,(0,5), BLACK)
@@ -391,7 +386,7 @@ def getAbility():
     if ability == 1:
         if(p.lightspecial == False):
             p.lightspecial = True
-            gc.dialogue = True
+            d.dialogue = True
             d.changeText('You unlocked ability light!', 'when you die you will get a free revive!')
             p.abilitycount += 1
         else:
@@ -399,7 +394,7 @@ def getAbility():
     if ability == 2:
         if(p.darkspecial == False):
             p.darkspecial = True
-            gc.dialogue = True
+            d.dialogue = True
             d.changeText('You unlocked ability dark!', 'every 20 hits this will kill the enemy for you!')
             p.abilitycount += 1
         else:
@@ -407,7 +402,7 @@ def getAbility():
     if ability == 3:
         if(p.uncap == False):
             p.uncap = True
-            gc.dialogue = True
+            d.dialogue = True
             d.changeText('You unlocked the ability uncap!', 'You may add +1 upgrade slots to a shop item!')
             p.abilitycount += 1
         else:
@@ -415,7 +410,7 @@ def getAbility():
     if ability == 4:
         if(p.hasinvinc == False):
             p.hasinvinc  = True
-            gc.dialogue = True
+            d.dialogue = True
             d.changeText('You unlocked invincibility!', 'Press I once to gain invincibility for 1 round!')
             p.abilitycount += 1
         else:
@@ -461,6 +456,7 @@ def main():
     Y_VELOCITY = JUMP_HEIGHT
     console = False
     consoletxt = ''
+
     VARS = requests.get("https://maxor.xyz/geneva/rankings.txt")
     vars2 = VARS.text
     maxor3 = vars2.translate({ord('-'): None})
