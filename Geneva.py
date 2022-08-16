@@ -284,13 +284,15 @@ pygame.display.set_icon(logo)
 
 p = Player(players['PlayerRED'], 120, 455, 5, 1, 4.5, -1, 100, 10, 5, 10, 0)
 p2 = EnemyPlayer(players['PlayerBLUE'], 1020, 455, 5, 1, 100, 2, -1, 1)
-p3 = Player(players['PlayerRED'], 120, 1060, 5, 1, 4.5, -1, 100, 10, 5, 10, 0)
+p3 = EnemyPlayer(players['PlayerBLUE'], 0, 455, 5, 1, 0, 2, -1, 1)
 
 # - SHOP -
 s = Shop(1,2,3,10,30,20,10,50,14,75,10.5,245)
 
 erect = pygame.Rect(p2.x, p2.y, p2.img.get_width(), p2.img.get_height())
 prect = pygame.Rect(p.x, p.y, p.img.get_width(), p.img.get_height())
+erect2 = pygame.Rect(p3.x, p3.y, p3.img.get_width(), p3.img.get_height())
+
 
 mouserect = pygame.Rect((300, 300),(20,20))
 grassRect = pygame.Rect((0,520),(1320,300))
@@ -331,7 +333,8 @@ vers = requests.get("https://maxor.xyz/geneva/version.txt")
 versi = vers.text
 
 
-def restartgame():
+
+def restartGame():
     p.hp = 100
     p2.hp = 100
     gc.rnd = 1
@@ -466,10 +469,10 @@ def main():
     console = False
     consoletxt = ''
     ranked = False
+    value2 = 0
 
     VARS = requests.get("https://maxor.xyz/geneva/rankings.txt")
     vars2 = VARS.text
-    maxor3 = vars2.translate({ord('-'): None})
     switzerland = 'Switzerland: ' + vars2[0:7]
     top2 = '2: ' + vars2[8:14]
     top3 = '3: ' + vars2[15:21]        
@@ -480,6 +483,7 @@ def main():
 
 
     while run:
+        round(p.hp)
 
         if console:
             pygame.draw.rect(win, (70,70,70),consoleRect)
@@ -731,6 +735,7 @@ def main():
             lmp = font6.render("You Lost this game!", (0, 5), RED)
             win.blit(lmp,(400,300))
         if gc.wonmp:
+            DC.draw(win)
             if ranked:
                 wmp = font6.render("You Won this game! Enter your name to be logged in the leaderboard!", (0, 5), GREEN)
             if gc.speedrun:
@@ -738,7 +743,11 @@ def main():
             else:
                 wmp = font6.render("You Won this game!", (0, 5), GREEN)
             win.blit(wmp,(400,300))
-            
+            if DC.clicked:
+                startclicked = False
+                singleplayer = True
+                restartGame()
+
         if yeezus:
             p2.yeezus = True
             p.yeezus = True
@@ -756,7 +765,7 @@ def main():
                 restart.draw(win)
 
             if(restart.clicked):
-                restartgame()
+                restartGame()
 
 
             if(settings_button.clicked):
@@ -827,7 +836,12 @@ def main():
                                 gc.consolestage = 2      
                             if consoletxt == 'points' and gc.consolestage == 0:
                                 consoletxt = ''
-                                gc.consolestage = 3                                                             
+                                gc.consolestage = 3    
+                            if consoletxt == 'killenemy' and gc.consolestage == 0:
+                                p2.hp = 0
+                                p3.hp = 0                 
+                                consoletxt = ''
+
                             if gc.consolestage == 1 and consoletxt != '':
                                 p.hp = int(consoletxt)
                                 gc.consolestage = 0
@@ -840,6 +854,7 @@ def main():
                                 gc.points = int(consoletxt)
                                 gc.consolestage = 0        
                                 consoletxt = ''
+                     
 
                     else:
                         if event.key == pygame.K_a:
@@ -847,12 +862,16 @@ def main():
                                 p.dashstate += 1
                             elif p.hasdash and p.dashstate >= 1:
                                 p.x -= 50
+                                if p.x < 0:
+                                    p.x = 0                               
                                 p.dashstate = 0
                         if event.key == pygame.K_d:
                             if p.hasdash and p.dashstate < 1:
                                     p.dashstate += 1
                             elif p.hasdash and p.dashstate >= 1:
                                     p.x += 50
+                                    if p.x > 1240:
+                                        p.x = 1240
                                     p.dashstate = 0                                
 
                         if(gc.login and paused):
@@ -897,10 +916,14 @@ def main():
                         if event.key == pygame.K_n:
                             if(gc.won):
                                 gc.won = False
-                                if p.x <= 500:
-                                    p2.x = 1020
+                                if gc.rnd < 40:
+                                    if p.x <= 500:
+                                        p2.x = 1020
+                                    else:
+                                        p2.x = 10
                                 else:
-                                    p2.x = 10
+                                    p2.x = 1020
+
                         if event.key == pygame.K_TAB and gc.won:
                             if(gc.shop):
                                 gc.shop = False
@@ -1027,6 +1050,8 @@ def main():
         # MOVE PLAYER 2
         if not paused or not singleplayer and gc.lobbystarted and not paused:
             p2.move(p.x, p2.x)
+            if gc.rnd >= 40 and not gc.won:
+                p3.move(p.x, p3.x)
 
         # JUMPING
         if  p.jump:
@@ -1077,16 +1102,40 @@ def main():
          erect.x = (p2.x + 80)
         if(p.x > p2.x):
          erect.x = (p2.x - 80)
+        if(p.x < p3.x):
+         erect2.x = (p3.x + 80)
+        if(p.x > p3.x):
+         erect2.x = (p3.x - 80)
+
+        erect2.y = p3.y
         erect.y = p2.y
         
         # HITBOXES
         p2.hitbox = (p2.x + 17, p2.y + 11, 29, 52) # NEW
+        p3.hitbox = (p3.x + 17, p3.y + 11, 29, 52) # NEW
+        if (erect2.colliderect(prect)):
+            p2.attack = True
+            if gc.rnd < 40:
+                value2 += 1
+            if gc.rnd >= 40 and gc.rnd < 100:
+                value2 += 2
+            else:
+                value2 += 2.5
+
+            if(value2 >= 70):
+                value2 = 0
+        else:
+            p2.attack = False
+            value2 = 0
+
         if (erect.colliderect(prect)):
             p2.attack = True
             if gc.rnd < 40:
                 value += 1
-            else:
+            if gc.rnd >= 40 and gc.rnd < 100:
                 value += 2
+            else:
+                value += 2.5
 
             if(value >= 70):
                 value = 0
@@ -1105,6 +1154,26 @@ def main():
                     bullets.pop(bullets.index(bullet))  # This will remove the bullet if it is off 
 
             if not gc.lost and not gc.won and not paused:
+                if gc.rnd >= 40:
+                    if bullet.y + bullet.radius < p3.hitbox[1] + 60 + p3.hitbox[3] and bullet.y + bullet.radius > p3.hitbox[1] - 60 or prect.colliderect(erect2):
+                                        if bullet.x + bullet.radius > p3.hitbox[0] + 13 and bullet.x - bullet.radius < p3.hitbox[0] + p2.hitbox[2] - 13 or prect.colliderect(erect2):
+                                            if(randint(1, 100) <= p.cc):
+                                                p3.hp -= (p.dmg * 2)
+                                                crit = True
+                                                if p.darkspecial == True:
+                                                    darkvalue += 1
+                                                    if darkvalue == 20:
+                                                        p3.hp = 0
+                                                        darkvalue = 0
+                                            else:
+                                                if p.darkspecial == True:
+                                                    darkvalue += 1
+                                                    if darkvalue == 20:
+                                                        p3.hp = 0
+                                                        darkvalue = 0
+
+                                                p3.hp -= p.dmg            
+                                                        
                 if bullet.y + bullet.radius < p2.hitbox[1] + 60 + p2.hitbox[3] and bullet.y + bullet.radius > p2.hitbox[1] - 60 or prect.colliderect(erect):
                     if bullet.x + bullet.radius > p2.hitbox[0] + 13 and bullet.x - bullet.radius < p2.hitbox[0] + p2.hitbox[2] - 13 or prect.colliderect(erect):
                         if(randint(1, 100) <= p.cc):
@@ -1129,7 +1198,7 @@ def main():
                                 bullets.pop(bullets.index(bullet))
                         # SCALE ENEMY
                         if not gc.won:
-                            if(p2.hp <= 0):
+                            if(p2.hp <= 0 and p3.hp <= 0):
                                 gc.won = True
                                 if(p.speed >= p2.speed):
                                     p2.speed += 0.25
@@ -1152,14 +1221,30 @@ def main():
                                     p.hasinvinc = False
                                     p.invinc = False        
 
+                                if gc.rnd < 140:
+                                    p2.hp += 100 
+                                    if gc.rnd >= 40:
+                                        p3.hp += 100
+                                        p3.hp += (gc.rnd * 20)
 
-                                p2.hp += 100 
-                                p2.hp += (gc.rnd * 20)
+                                    p2.hp += (gc.rnd * 20)
+                                else:
+                                    p2.hp + 250
+                                    if gc.rnd > 40:
+                                        p3.hp += 250
+                                        p3.hp += (gc.rnd * 25) 
+                                    p2.hp += (gc.rnd * 25)
+
+                                if gc.rnd >= 40:
+                                    p3.dmg += 0.1
+
                                 p2.dmg += 0.2
                                 gc.points += (1 + (gc.rnd * 0.1))
-                                if int(highscore) < gc.rnd and not goths :
+                                
+                                if int(highscore) < gc.rnd and not goths and not loggedin:
                                     highscoreprompt = True
                                     goths = True
+
 
         if not singleplayer:
             if gc.client == 1:
@@ -1179,7 +1264,7 @@ def main():
                                 gc.lostmp = True
                                 gc.wonmp = False
 
-                            if not gc.lostmp and gc.rnd >= 50:
+                            if int(ernd) < 50 and gc.rnd >= 50:
                                 gc.lostmp = False
                                 gc.wonmp = True
 
@@ -1217,6 +1302,7 @@ def main():
         # DRAW PLAYER
         if not gc.lost and startclicked:         
           win.blit(p.img, (p.x, p.y - 40))
+
         if not gc.won and not paused and not gc.lost and startclicked or not singleplayer and gc.lobbystarted and not gc.won and not paused and not gc.lost and startclicked:
           if(value <= 25):
             win.blit(p2.img, (p2.x, p2.y - 40))
@@ -1250,6 +1336,41 @@ def main():
                 p.hp -= p2.dmg
 
             round(p.hp, 1)
+
+        # SECOND ENEMY
+        if not gc.won and not paused and not gc.lost and startclicked or not singleplayer and gc.lobbystarted and not gc.won and not paused and not gc.lost and startclicked and gc.rnd >= 40:
+          if(value2 <= 25 and p3.hp > 0):
+            win.blit(p3.img, (p3.x, p3.y - 40))
+          if(value2 > 25 and value2 <= 55):
+            if yeezus:
+                win.blit(yeezusimg['yeezusswing'], (p3.x, p3.y - 40))
+            else:
+                if(p3.facing > 0):
+                 win.blit(players['PlayerBLUEswing'], (p3.x, p3.y  - 40))
+                if(p3.facing < 0):
+                 win.blit(players['PlayerBLUEswing23'], (p3.x, p3.y  - 40))
+
+          if(value2 > 55 and value2 <= 60 ):
+            if yeezus:
+                win.blit(yeezusimg['yeezusswing2'], (p3.x, p3.y - 40))
+            else:
+                if(p2.facing < 0):                
+                    win.blit(players['PlayerBLUEswing22'], (p3.x, p3.y - 40))
+                if(p2.facing > 0):
+                    win.blit(players['PlayerBLUEswing2'], (p3.x, p3.y - 40))
+
+          if(value2 > 60 and value2 <= 70 ):
+            if yeezus:
+                win.blit(yeezusimg['yeezusswing2'], (p3.x, p3.y - 40))
+            else:
+                if(p2.facing < 0):
+                    win.blit(players['PlayerBLUEswing32'], (p3.x, p3.y - 40))
+                if(p2.facing > 0):
+                    win.blit(players['PlayerBLUEswing3'], (p3.x, p3.y - 40))                
+            if not p.invinc:
+                p.hp -= p3.dmg
+
+
 
         mouserect.x ,mouserect.y = pygame.mouse.get_pos()
         pygame.draw.rect(win, (0,0,0),mouserect)
