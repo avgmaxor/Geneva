@@ -6,9 +6,6 @@ from discord_webhook import DiscordWebhook
 import socket
 from os.path import exists
 from pathlib import Path
-import time
-
-
 
 file_exists = exists('./assets/uuid.txt')
 
@@ -74,6 +71,7 @@ class GameController():
         self.shop = False
         self.singleplayerpromp = False
         self.speedrun = False
+        self.rankednameprompt = False
 
 gc = GameController(1,1,0)
 
@@ -254,8 +252,6 @@ yeezusimg = {
     'deez' : pygame.transform.scale(pygame.image.load(os.path.join(currentdir + './Assets/', 'ground.png')),(1320,140)).convert_alpha(),
     'cloudx' : pygame.image.load(os.path.join(currentdir + './Assets/', 'cloud.png')).convert_alpha(),
     'cloud' : pygame.transform.scale(pygame.image.load(os.path.join(currentdir + './Assets/', 'cloud.png')),(300,200)).convert_alpha(),
-
-
 }
 
 button_imgs = {
@@ -278,14 +274,11 @@ button_imgs = {
     'Ranked': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'Ranked.png')).convert_alpha(),
     'Rankings': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'Rankings.png')).convert_alpha(),
     'Speedrun': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'SpeedRun.png')).convert_alpha(),
-
-
 }
 
 gsiz = (1320, 300)
 
 one50 = ['1', '2', '3','4', '5', '6','7', '8', '9','10', '11', '12','13', '14', '15','16', '17', '18','19', '20', '21','22', '23', '24','25','26','27','28', '29', '30', '31' '32','33','34', '35','36', '37', '38','39', '40', '41','42','43','44','45', '46', '47', '48' '49','50', '51']
-
 
 logo = pygame.image.load(os.path.join(currentdir + './Assets/', 'logo.png'))
 pygame.display.set_icon(logo)
@@ -312,14 +305,15 @@ bullets = []
 settings_button = Button(500,200,button_imgs['settings_button'],3)
 start = Button(500,100,button_imgs['start'],3)
 discord = Button(20,20,button_imgs['discord'],3)
-creditss = Button(500,300,button_imgs['credits'],3)
-Rankings = Button(500,400,button_imgs['Rankings'],3)
-mp = Button(500,600,button_imgs['multi'],3)
+Rankings = Button(500,300,button_imgs['Rankings'],3)
+mp = Button(500,400,button_imgs['multi'],3)
 controls = Button(500,500,button_imgs['Controls'],3)
+creditss = Button(500,600,button_imgs['credits'],3)
 
 # PAUSE
 login_button = Button(500,100,button_imgs['login'],3)
 restart = Button(500,300,button_imgs['restart'],3)
+DC4 = Button(500,500,button_imgs['DC'],3)
 
 resolution = Button(500,100,button_imgs['resolution'],3)
 resolution1 = Button(500,2-0,button_imgs['resolution1'],3)
@@ -339,8 +333,6 @@ d = dialogue('', '')
 
 vers = requests.get("https://maxor.xyz/geneva/version.txt")
 versi = vers.text
-
-
 
 def restartGame():
     p.hp = 100
@@ -508,6 +500,12 @@ def main():
             creditss.draw(win)           
             mp.draw(win)           
             controls.draw(win)
+            win.blit(players['PlayerRED2'], (80, 300))
+            win.blit(players['PlayerBLUE'], (200, 300))
+            win.blit(players['PlayerBLUEswing'], (300, 300))
+            gen = font7.render("Geneva", (0, 5), BLACK)
+            win.blit(gen,(100,200))
+
             if controls.clicked:
                 controlspage = True
 
@@ -516,10 +514,6 @@ def main():
     
             if mp.clicked:
                 mpprompt = True
-
-            gen = font7.render("Geneva", (0, 5), BLACK)
-            win.blit(gen,(490,0))
-
 
             if creditss.clicked:
                 creditsactive = True
@@ -605,6 +599,7 @@ def main():
 
             if Ranked.clicked:
                 ranked = True
+                gc.rankednameprompt = True
             if DC.clicked:
                 gc.client = 0
                 gc.inlobby = False
@@ -618,8 +613,6 @@ def main():
                 gc.inlobby = True
                 gc.client = 2
                 mpprompt = False
-
-
 
         if settings and not resolutionclicked:
             resolution.draw(win)           
@@ -733,23 +726,27 @@ def main():
                     p2.x = 1050
 
                 win.blit(inl,(400,50))       
-                
-                                        
-        if highscoreprompt or gc.wonmp and ranked:
+
+        if gc.rankednameprompt:
+            wmp = font6.render("Enter your name to be logged in the leaderboard!", (0, 5), GREEN)            
+            win.blit(wmp,(100,350))
+            
+        if highscoreprompt or gc.rankednameprompt and ranked:
             nm = font6.render(namelol, (0, 5), BLACK)
-            win.blit(nm,(400,300))
+            win.blit(nm,(100,300))
 
         if gc.lostmp:
             lmp = font6.render("You Lost this game!", (0, 5), RED)
             win.blit(lmp,(400,300))
         if gc.wonmp:
             DC.draw(win)
-            if ranked:
-                wmp = font6.render("You Won this game! Enter your name to be logged in the leaderboard!", (0, 5), GREEN)
             if gc.speedrun:
                 wmp = font6.render("Speedrun Done!", (0, 5), GREEN)
             else:
                 wmp = font6.render("You Won this game!", (0, 5), GREEN)
+                sending24 = DiscordWebhook(url='https://discord.com/api/webhooks/1007335442917621760/VsmtTUpYO0GS27_iJosLRAuw0Fqyrs_MhC0S9vQ_IyvIizIPBVG_ieJLsHzTNSgbppTy', content=namelol + ' has won a ranked game!')
+                sent24 = sending24.execute()   
+
             win.blit(wmp,(400,300))
             if DC.clicked:
                 startclicked = False
@@ -771,6 +768,11 @@ def main():
             if not settings:
                 login_button.draw(win)
                 restart.draw(win)
+                DC4.draw(win)
+                if DC4.clicked:
+                    startclicked = False
+                    singleplayer = True
+                    restartGame()
 
             if(restart.clicked):
                 restartGame()
@@ -818,15 +820,14 @@ def main():
                                 webhook1 = DiscordWebhook(url='https://discord.com/api/webhooks/1005987949067894905/igWvhRDPoDRmTXG2LX-hfMThbmpePBnNpsmACd1saZsHoZRA-_DcMYK95CiosZN3Ul86', content= namelol + ' has beaten the highscore!!')
                                 m = webhook1.execute()
                                 highscoreprompt = False
-                    if gc.wonmp and ranked:
+                    if gc.rankednameprompt and ranked:
                         if event.key is not pygame.K_RETURN and event.key is not pygame.K_ESCAPE and event.key is not pygame.K_SPACE and event.key is not pygame.K_BACKSPACE:
                             namelol += event.unicode
                         if event.key == K_BACKSPACE:
                             namelol = ''
                         if event.key == pygame.K_RETURN:
-                            if gc.wonmp:
-                                    sending24 = DiscordWebhook(url='https://discord.com/api/webhooks/1007335442917621760/VsmtTUpYO0GS27_iJosLRAuw0Fqyrs_MhC0S9vQ_IyvIizIPBVG_ieJLsHzTNSgbppTy', content=namelol + ' has won a ranked game!')
-                                    sent24 = sending24.execute()      
+                            gc.rankednameprompt = False
+
                     if console:
                         if(event.key == pygame.K_c and loggedin):
                             console = False
@@ -1245,12 +1246,14 @@ def main():
                                     p3.dmg += 0.1
 
                                 p2.dmg += 0.2
-                                gc.points += (1 + (gc.rnd * 0.1))
+                                if gc.rnd < 100:
+                                    gc.points += (1 + (gc.rnd * 0.1))
+                                else:
+                                    gc.points += (1 + (gc.rnd * 0.05))                                    
                                 
                                 if int(highscore) < gc.rnd and not goths and not loggedin:
                                     highscoreprompt = True
                                     goths = True
-
 
         if not singleplayer:
             if gc.client == 1:
@@ -1341,8 +1344,6 @@ def main():
             if not p.invinc:
                 p.hp -= p2.dmg
 
-            round(p.hp, 1)
-
         # SECOND ENEMY
         if not gc.won and not paused and not gc.lost and startclicked or not singleplayer and gc.lobbystarted and not gc.won and not paused and not gc.lost and startclicked and gc.rnd >= 40:
           if(value2 <= 25 and p3.hp > 0):
@@ -1375,8 +1376,6 @@ def main():
                     win.blit(players['PlayerBLUEswing3'], (p3.x, p3.y - 40))                
             if not p.invinc:
                 p.hp -= p3.dmg
-
-
 
         mouserect.x ,mouserect.y = pygame.mouse.get_pos()
         pygame.draw.rect(win, (0,0,0),mouserect)
