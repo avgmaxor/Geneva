@@ -6,6 +6,9 @@ from discord_webhook import DiscordWebhook
 import socket
 from os.path import exists
 from pathlib import Path
+import time
+
+
 
 file_exists = exists('./assets/uuid.txt')
 
@@ -39,9 +42,10 @@ pygame.init()
 font = pygame.font.SysFont('Serif', 170)
 font2 = pygame.font.SysFont('Serif', 140)
 font3 = pygame.font.SysFont('Serif', 40)
-font4 = pygame.font.SysFont('Serif', 30)
 font6 = pygame.font.SysFont('Serif', 60)
+font4 = pygame.font.SysFont('Serif', 30)
 font7 = pygame.font.SysFont('Serif', 100)
+font8 = pygame.font.SysFont('Serif', 10)
 
 size = (1320,737)
 win = pygame.display.set_mode(size)
@@ -212,8 +216,12 @@ class dialogue():
     def draw(self):
         txt = font3.render(self.text,(0,5), BLACK)
         txt1 = font4.render(self.text1,(0,5), BLACK)
+        txt2 = font8.render("Press Space",(0,5), BLACK)
+
         win.blit(txt,(500,200))
         win.blit(txt1,(500,260))
+        win.blit(txt2,(550,300))
+
     def changeText(self, t1, t2):
         self.text = t1
         self.text1 = t2
@@ -313,9 +321,9 @@ controls = Button(500,500,button_imgs['Controls'],3)
 login_button = Button(500,100,button_imgs['login'],3)
 restart = Button(500,300,button_imgs['restart'],3)
 
-resolution = Button(500,150,button_imgs['resolution'],3)
-resolution1 = Button(500,150,button_imgs['resolution1'],3)
-resolution2 = Button(500,250,button_imgs['resolution2'],3)
+resolution = Button(500,100,button_imgs['resolution'],3)
+resolution1 = Button(500,2-0,button_imgs['resolution1'],3)
+resolution2 = Button(500,300,button_imgs['resolution2'],3)
 back = Button(900,350,button_imgs['back'],3)
 mp1 = Button(500,50,button_imgs['multi1'],3)
 mp2 = Button(500,150,button_imgs['multi2'],3)
@@ -1117,10 +1125,8 @@ def main():
             p2.attack = True
             if gc.rnd < 40:
                 value2 += 1
-            if gc.rnd >= 40 and gc.rnd < 100:
-                value2 += 2
             else:
-                value2 += 2.5
+                value2 += 2
 
             if(value2 >= 70):
                 value2 = 0
