@@ -46,8 +46,8 @@ font7 = pygame.font.SysFont('Serif', 100)
 size = (1320,737)
 win = pygame.display.set_mode(size)
 
-version = '0.14'
-versioncheck = '14'
+version = '0.15'
+versioncheck = '15'
 
 wintxt = font.render("NEW ROUND", (0, 5), BLACK)
 
@@ -68,6 +68,8 @@ class GameController():
         self.won = False
         self.login = False
         self.shop = False
+        self.singleplayerpromp = False
+        self.speedrun = False
 
 gc = GameController(1,1,0)
 
@@ -146,6 +148,8 @@ class Player():
         self.jump = False
         self.hasinvinc = False
         self.invinc = False
+        self.hasdash = False
+        self.dashstate = 0
 
     def changeImg(self, newimg):
         self.img = newimg 
@@ -265,6 +269,8 @@ button_imgs = {
     'Casual': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'Casual.png')).convert_alpha(),
     'Ranked': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'Ranked.png')).convert_alpha(),
     'Rankings': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'Rankings.png')).convert_alpha(),
+    'Speedrun': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'SpeedRun.png')).convert_alpha(),
+
 
 }
 
@@ -315,6 +321,7 @@ DC = Button(500,250,button_imgs['DC'],3)
 DC2 = Button(600,250,button_imgs['DC'],3)
 Casual = Button(500,150,button_imgs['Casual'],3)
 Ranked = Button(500,450,button_imgs['Ranked'],3)
+SpeedRun = Button(500,250,button_imgs['Speedrun'],3)
 
 moving_sprites = pygame.sprite.Group()
 
@@ -376,7 +383,7 @@ def resetRes():
     grassRect.height = 0
 
 def getAbility():
-    ability = randint(1,4)
+    ability = randint(1,5)
     if ability == 1:
         if(p.lightspecial == False):
             p.lightspecial = True
@@ -409,6 +416,14 @@ def getAbility():
             p.abilitycount += 1
         else:
             getAbility()
+    if ability == 5:
+        if(p.hasdash == False):
+            p.hasdash  = True
+            d.dialogue = True
+            d.changeText('You unlocked dash!', 'Double Tap A or D to dash!')
+            p.abilitycount += 1
+        else:
+            getAbility()            
 
 def resetServer():
 
@@ -466,7 +481,6 @@ def main():
 
     while run:
 
-
         if console:
             pygame.draw.rect(win, (70,70,70),consoleRect)
             ctxt = font4.render(consoletxt, (0,5), BLACK)
@@ -475,7 +489,7 @@ def main():
         if gc.client == 1 or gc.client == 2:
             singleplayer = False
 
-        if not startclicked and not creditsactive and not settings and not resolutionclicked and not mpprompt and not controlspage and not gc.inlobby and not leaderboard:
+        if not startclicked and not creditsactive and not settings and not resolutionclicked and not mpprompt and not controlspage and not gc.inlobby and not leaderboard and not gc.singleplayerpromp:
             Rankings.draw(win)
             start.draw(win)
             discord.draw(win)
@@ -504,7 +518,7 @@ def main():
                 webbrowser.open(str(disco))  # Go to example.com
 
             if start.clicked:
-                startclicked = True
+                gc.singleplayerpromp = True
                 p2.x = 1050
 
         if leaderboard:
@@ -533,7 +547,16 @@ def main():
             if d.dialogue == True:
                 d.draw()    
 
-
+        if gc.singleplayerpromp:
+            SpeedRun.draw(win)
+            Casual.draw(win)
+            if SpeedRun.clicked:
+                startclicked = True
+                gc.singleplayerpromp = False
+                gc.speedrun = True
+            if Casual.clicked:
+                startclicked = True
+                gc.singleplayerpromp = False
 
         if controlspage:
           
@@ -649,12 +672,12 @@ def main():
         if gc.inlobby and not gc.lobbystarted:
             if gc.client == 2:
                 DC2.draw(win)
-                if DC.clicked:
+                if DC2.clicked:
                     startclicked = False
                     singleplayer = True
                     gc.inlobby = False
 
-                inl = font3.render("in lobby...", (0, 5), BLACK)
+                inl = font3.render("in lobby... waiting for host to start", (0, 5), BLACK)
                 win.blit(inl,(400,300))       
                 
 
@@ -672,7 +695,7 @@ def main():
 
             if gc.client == 1:
                 DC2.draw(win)
-                if DC.clicked:
+                if DC2.clicked:
                     startclicked = False
                     singleplayer = True
                     gc.inlobby = False
@@ -685,7 +708,7 @@ def main():
                     win.blit(inl21,(200,30))
   
 
-                inl = font3.render("in lobby...", (0, 5), BLACK)
+                inl = font3.render("You are hosting the game!", (0, 5), BLACK)
                 start.draw(win)
                 if start.clicked:
                     p.hp = 100
@@ -697,7 +720,7 @@ def main():
                     gc.lobbystarted = True            
                     p2.x = 1050
 
-                win.blit(inl,(400,300))       
+                win.blit(inl,(400,50))       
                 
                                         
         if highscoreprompt or gc.wonmp and ranked:
@@ -710,6 +733,8 @@ def main():
         if gc.wonmp:
             if ranked:
                 wmp = font6.render("You Won this game! Enter your name to be logged in the leaderboard!", (0, 5), GREEN)
+            if gc.speedrun:
+                wmp = font6.render("Speedrun Done!", (0, 5), GREEN)
             else:
                 wmp = font6.render("You Won this game!", (0, 5), GREEN)
             win.blit(wmp,(400,300))
@@ -717,7 +742,7 @@ def main():
         if yeezus:
             p2.yeezus = True
             p.yeezus = True
-        if paused or not startclicked and not creditsactive and not settings and not mpprompt and not controlspage and not gc.inlobby and not leaderboard:
+        if paused or not startclicked and not creditsactive and not settings and not mpprompt and not controlspage and not gc.inlobby and not leaderboard and not gc.singleplayerpromp:
             settings_button.draw(win)
             if(settings_button.clicked):
                 if not settings:
@@ -817,6 +842,19 @@ def main():
                                 consoletxt = ''
 
                     else:
+                        if event.key == pygame.K_a:
+                            if p.hasdash and p.dashstate < 1:
+                                p.dashstate += 1
+                            elif p.hasdash and p.dashstate >= 1:
+                                p.x -= 50
+                                p.dashstate = 0
+                        if event.key == pygame.K_d:
+                            if p.hasdash and p.dashstate < 1:
+                                    p.dashstate += 1
+                            elif p.hasdash and p.dashstate >= 1:
+                                    p.x += 50
+                                    p.dashstate = 0                                
+
                         if(gc.login and paused):
                             if passtime and event.key is not pygame.K_RETURN and event.key is not pygame.K_ESCAPE and event.key is not pygame.K_SPACE and event.key is not pygame.K_BACKSPACE:
                                 password += event.unicode
@@ -1099,6 +1137,10 @@ def main():
                                     p2.speed += 0.1
 
                                 gc.rnd += 1
+                                if gc.speedrun:
+                                    if gc.rnd >= 50:
+                                        gc.wonmp = True
+
                                 if not singleplayer:
                                     if gc.client == 2:
                                         sending = DiscordWebhook(url='https://discord.com/api/webhooks/1006739051082166373/0C-x9_DMsqD8-5KtdtQIheDmVQUtsrU2Ml4ktNh5vpoYKfHZdSI4_JowVUrqhinTgsrd', content=str(gc.rnd))
