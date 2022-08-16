@@ -344,35 +344,31 @@ def restartgame():
     gc.lost = False
 
 def update():
-    update = requests.get("https://maxor.xyz/geneva/status.txt")
-    updatetxt = update.text
     pygame.display.set_caption("updating.... " + version)
+    widthreq = requests.get("https://maxor.xyz/geneva/width.txt")
+    width = widthreq.text
+    heightreq = requests.get("https://maxor.xyz/geneva/height.txt")
+    height = heightreq.text
+    gc.size = (int(width), int(height))
+    win = pygame.display.set_mode(gc.size)
+    if(int(versioncheck) < int(versi)):
+        pygame.display.set_caption("Geneva OUTDATED beta " + version)
+    else:
+        pygame.display.set_caption("Geneva")
+    VARS = requests.get("https://maxor.xyz/geneva/vars.txt")
+    vars2 = VARS.text
+    maxor2 = vars2[0:5]
+    maxor5 = vars2[6:8]
+    maxor6 = vars2[9:11]
+    s.hpadd = int(maxor5)
+    s.yeezus = maxor6
 
-    if updatetxt == 'update':
-        widthreq = requests.get("https://maxor.xyz/geneva/width.txt")
-        width = widthreq.text
-        heightreq = requests.get("https://maxor.xyz/geneva/height.txt")
-        height = heightreq.text
-        gc.size = (int(width), int(height))
-        win = pygame.display.set_mode(gc.size)
-        if(int(versioncheck) < int(versi)):
-            pygame.display.set_caption("Geneva OUTDATED beta " + version)
-        else:
-            pygame.display.set_caption("Geneva")
-        VARS = requests.get("https://maxor.xyz/geneva/vars.txt")
-        vars2 = VARS.text
-        maxor2 = vars2[0:5]
-        maxor5 = vars2[6:8]
-        maxor6 = vars2[9:11]
-        s.hpadd = int(maxor5)
-        s.yeezus = maxor6
-
-        if maxor2 == 'BLACK':
-            gc.BULLCOLOR = BLACK
-        else:
-            maxor3 = maxor2.translate({ord('-'): None})
-            gc.BULLCOLOR = maxor3
-        main()
+    if maxor2 == 'BLACK':
+        gc.BULLCOLOR = BLACK
+    else:
+        maxor3 = maxor2.translate({ord('-'): None})
+        gc.BULLCOLOR = maxor3
+    main()
 
 
 def resetRes():
