@@ -1,9 +1,7 @@
-import pygame, os, requests, math
+import pygame, os, requests, math, webbrowser, socket
 from pygame import K_BACKSPACE , font
 from random import randint
-import webbrowser
 from discord_webhook import DiscordWebhook
-import socket
 from os.path import exists
 from pathlib import Path
 
@@ -71,11 +69,24 @@ class GameController():
         self.shop = False
         self.singleplayerpromp = False
         self.speedrun = False
-        self.rankednameprompt = False
-
+        self.rankednameprompt = False    
+        self.startclicked = False
 gc = GameController(1,1,0)
 
 pygame.mouse.set_visible(False)
+class VariableStorage():
+    def __init__(self):
+        self.value = 0
+        self.creditsactive = False
+        self.resolutionclicked = False
+        self.darkvalue = 0
+        self.highscoreprompt = False
+        self.namelol = ''
+        self.goths = False
+        self.singleplayer = True
+        self.mpprompt = False
+        self.opened = False
+        self.controlspage = False    
 
 class Shop():
     def __init__(self, one, two, three, four, yeezus, five, hpadd, six, weppadd, ccadd, speedadd, dmgadd):
@@ -327,6 +338,8 @@ Casual = Button(500,150,button_imgs['Casual'],3)
 Ranked = Button(500,450,button_imgs['Ranked'],3)
 SpeedRun = Button(500,250,button_imgs['Speedrun'],3)
 
+v = VariableStorage()
+
 moving_sprites = pygame.sprite.Group()
 
 d = dialogue('', '')
@@ -450,18 +463,6 @@ def main():
     hpcheck = True
     critvalue = 0
     crit = False
-    startclicked = False
-    value = 0
-    creditsactive = False
-    resolutionclicked = False
-    darkvalue = 0
-    highscoreprompt = False
-    namelol = ''
-    goths = False
-    singleplayer = True
-    mpprompt = False
-    opened = False
-    controlspage = False
     cloudx = 0
     Y_GRAVITY = 0.7
     JUMP_HEIGHT = 12
@@ -481,7 +482,7 @@ def main():
     num1 = font4.render(switzerland, (0,5), BLACK)
     leaderboard = False            
 
-
+    # main
     while run:
         round(p.hp)
 
@@ -491,9 +492,9 @@ def main():
             win.blit(ctxt,(710,70))
 
         if gc.client == 1 or gc.client == 2:
-            singleplayer = False
+            v.singleplayer = False
 
-        if not startclicked and not creditsactive and not settings and not resolutionclicked and not mpprompt and not controlspage and not gc.inlobby and not leaderboard and not gc.singleplayerpromp:
+        if not gc.startclicked and not v.creditsactive and not settings and not v.resolutionclicked and not v.mpprompt and not v.controlspage and not gc.inlobby and not leaderboard and not gc.singleplayerpromp:
             Rankings.draw(win)
             start.draw(win)
             discord.draw(win)
@@ -507,16 +508,16 @@ def main():
             win.blit(gen,(100,200))
 
             if controls.clicked:
-                controlspage = True
+                v.controlspage = True
 
             if Rankings.clicked:
                 leaderboard = True   
     
             if mp.clicked:
-                mpprompt = True
+                v.mpprompt = True
 
             if creditss.clicked:
-                creditsactive = True
+                v.creditsactive = True
 
             if discord.clicked:
                 disc = requests.get("https://maxor.xyz/geneva/discord.txt")                        
@@ -542,7 +543,8 @@ def main():
             if back.clicked:
                 leaderboard = False
 
-        if startclicked:
+        # GROUND AND CLOUD
+        if gc.startclicked:
             win.blit(yeezusimg['deez'],(0,425))
             if not console:
                 win.blit(yeezusimg['cloud'],(cloudx,30))
@@ -557,14 +559,15 @@ def main():
             SpeedRun.draw(win)
             Casual.draw(win)
             if SpeedRun.clicked:
-                startclicked = True
+                gc.startclicked = True
                 gc.singleplayerpromp = False
                 gc.speedrun = True
             if Casual.clicked:
-                startclicked = True
+                gc.startclicked = True
                 gc.singleplayerpromp = False
 
-        if controlspage:
+        # CREDITS
+        if v.controlspage:
           
             control1 = font3.render("TAB - shop", (0, 5), BLACK)
             control2 = font3.render("N - start new round", (0, 5), BLACK)
@@ -574,10 +577,10 @@ def main():
             win.blit(control3, (200, 250))
             back.draw(win)
             if back.clicked:
-                controlspage = False
+                v.controlspage = False
                 
-
-        if creditsactive:
+        # CREDITS
+        if v.creditsactive:
           
             duncan = font3.render("AvgJew - Lead Dev", (0, 5), BLACK)
             william = font3.render("William - Co Dev", (0, 5), BLACK)
@@ -589,9 +592,9 @@ def main():
             win.blit(archer, (200, 350))
             back.draw(win)
             if back.clicked:
-                creditsactive = False
+                v.creditsactive = False
                 
-        if mpprompt:
+        if v.mpprompt:
             mp1.draw(win)           
             mp2.draw(win)          
             DC.draw(win)
@@ -603,23 +606,23 @@ def main():
             if DC.clicked:
                 gc.client = 0
                 gc.inlobby = False
-                mpprompt = False         
+                v.mpprompt = False         
 
             if mp1.clicked:
                 gc.inlobby = True
                 gc.client = 1
-                mpprompt = False
+                v.mpprompt = False
             if mp2.clicked:
                 gc.inlobby = True
                 gc.client = 2
-                mpprompt = False
+                v.mpprompt = False
 
-        if settings and not resolutionclicked:
+        if settings and not v.resolutionclicked:
             resolution.draw(win)           
             if resolution.clicked:
-                resolutionclicked = True
+                v.resolutionclicked = True
         
-        if resolutionclicked:
+        if v.resolutionclicked:
             resolution1.draw(win)           
             resolution2.draw(win)           
 
@@ -628,7 +631,7 @@ def main():
                 resetRes()
                 grassRect.width += 1320
                 grassRect.height += 737
-                resolutionclicked = False
+                v.resolutionclicked = False
                 settings = False
                 pygame.display.set_mode(size)
             if resolution2.clicked:
@@ -637,7 +640,7 @@ def main():
                 grassRect.width += 1460
                 grassRect.height += 900
                 settings = False
-                resolutionclicked = False
+                v.resolutionclicked = False
                 pygame.display.set_mode(size)               
 
 
@@ -678,8 +681,8 @@ def main():
             if gc.client == 2:
                 DC2.draw(win)
                 if DC2.clicked:
-                    startclicked = False
-                    singleplayer = True
+                    gc.startclicked = False
+                    v.singleplayer = True
                     gc.inlobby = False
 
                 inl = font3.render("in lobby... waiting for host to start", (0, 5), BLACK)
@@ -693,7 +696,7 @@ def main():
                     if ernd == 'startlobby':
                         resetServer()                        
                         gc.inlobby = False
-                        startclicked = True
+                        gc.startclicked = True
                         gc.lobbystarted = True            
                         p2.x = 1050
                         p.hp = 100
@@ -701,10 +704,10 @@ def main():
             if gc.client == 1:
                 DC2.draw(win)
                 if DC2.clicked:
-                    startclicked = False
-                    singleplayer = True
+                    gc.startclicked = False
+                    v.singleplayer = True
                     gc.inlobby = False
-                    mpprompt = False
+                    v.mpprompt = False
 
                 with open(currentdir + '/multiplayer/server/maxor1.txt') as f:
                     ernd = f.read()
@@ -721,7 +724,7 @@ def main():
                     sending23 = DiscordWebhook(url='https://discord.com/api/webhooks/1006756471872163940/O4DjO3ADxjT3Orfw645bTuCfhV6mIBn4i7SfX77mUayVNTqLLOVPLpAKcMZrLrR2r6hx', content='startlobby')
                     sent23 = sending23.execute()        
                     gc.inlobby = False
-                    startclicked = True
+                    gc.startclicked = True
                     gc.lobbystarted = True            
                     p2.x = 1050
 
@@ -731,8 +734,8 @@ def main():
             wmp = font6.render("Enter your name to be logged in the leaderboard!", (0, 5), GREEN)            
             win.blit(wmp,(100,350))
             
-        if highscoreprompt or gc.rankednameprompt and ranked:
-            nm = font6.render(namelol, (0, 5), BLACK)
+        if v.highscoreprompt or gc.rankednameprompt and ranked:
+            nm = font6.render(v.namelol, (0, 5), BLACK)
             win.blit(nm,(100,300))
 
         if gc.lostmp:
@@ -744,19 +747,19 @@ def main():
                 wmp = font6.render("Speedrun Done!", (0, 5), GREEN)
             else:
                 wmp = font6.render("You Won this game!", (0, 5), GREEN)
-                sending24 = DiscordWebhook(url='https://discord.com/api/webhooks/1007335442917621760/VsmtTUpYO0GS27_iJosLRAuw0Fqyrs_MhC0S9vQ_IyvIizIPBVG_ieJLsHzTNSgbppTy', content=namelol + ' has won a ranked game!')
+                sending24 = DiscordWebhook(url='https://discord.com/api/webhooks/1007335442917621760/VsmtTUpYO0GS27_iJosLRAuw0Fqyrs_MhC0S9vQ_IyvIizIPBVG_ieJLsHzTNSgbppTy', content=v.namelol + ' has won a ranked game!')
                 sent24 = sending24.execute()   
 
             win.blit(wmp,(400,300))
             if DC.clicked:
-                startclicked = False
-                singleplayer = True
+                gc.startclicked = False
+                v.singleplayer = True
                 restartGame()
 
         if yeezus:
             p2.yeezus = True
             p.yeezus = True
-        if paused or not startclicked and not creditsactive and not settings and not mpprompt and not controlspage and not gc.inlobby and not leaderboard and not gc.singleplayerpromp:
+        if paused or not gc.startclicked and not v.creditsactive and not settings and not v.mpprompt and not v.controlspage and not gc.inlobby and not leaderboard and not gc.singleplayerpromp:
             settings_button.draw(win)
             if(settings_button.clicked):
                 if not settings:
@@ -764,14 +767,14 @@ def main():
                 else:
                     settings = False
 
-        if paused and startclicked:
+        if paused and gc.startclicked:
             if not settings:
                 login_button.draw(win)
                 restart.draw(win)
                 DC4.draw(win)
                 if DC4.clicked:
-                    startclicked = False
-                    singleplayer = True
+                    gc.startclicked = False
+                    v.singleplayer = True
                     restartGame()
 
             if(restart.clicked):
@@ -797,7 +800,7 @@ def main():
                 run = False
 
 
-            if event.type == pygame.MOUSEBUTTONDOWN and startclicked:
+            if event.type == pygame.MOUSEBUTTONDOWN and gc.startclicked:
                     if len(bullets) < p.bulletcnt and not paused and p.hp > 0:  # This will make sure we cannot exceed 5 bullets on the screen at once
                         if mouserect.x > p.x:
                             p.facing = 1
@@ -810,21 +813,21 @@ def main():
 
             else:
                 if event.type == pygame.KEYDOWN:
-                    if highscoreprompt:
+                    if v.highscoreprompt:
                         if event.key is not pygame.K_RETURN and event.key is not pygame.K_ESCAPE and event.key is not pygame.K_SPACE and event.key is not pygame.K_BACKSPACE:
-                            namelol += event.unicode
+                            v.namelol += event.unicode
                         if event.key == K_BACKSPACE:
-                            namelol = ''
+                            v.namelol = ''
                         if event.key == pygame.K_RETURN:
-                            if highscoreprompt:
-                                webhook1 = DiscordWebhook(url='https://discord.com/api/webhooks/1005987949067894905/igWvhRDPoDRmTXG2LX-hfMThbmpePBnNpsmACd1saZsHoZRA-_DcMYK95CiosZN3Ul86', content= namelol + ' has beaten the highscore!!')
+                            if v.highscoreprompt:
+                                webhook1 = DiscordWebhook(url='https://discord.com/api/webhooks/1005987949067894905/igWvhRDPoDRmTXG2LX-hfMThbmpePBnNpsmACd1saZsHoZRA-_DcMYK95CiosZN3Ul86', content= v.namelol + ' has beaten the highscore!!')
                                 m = webhook1.execute()
-                                highscoreprompt = False
+                                v.highscoreprompt = False
                     if gc.rankednameprompt and ranked:
                         if event.key is not pygame.K_RETURN and event.key is not pygame.K_ESCAPE and event.key is not pygame.K_SPACE and event.key is not pygame.K_BACKSPACE:
-                            namelol += event.unicode
+                            v.namelol += event.unicode
                         if event.key == K_BACKSPACE:
-                            namelol = ''
+                            v.namelol = ''
                         if event.key == pygame.K_RETURN:
                             gc.rankednameprompt = False
 
@@ -836,7 +839,7 @@ def main():
                             consoletxt += event.unicode
                         if event.key == K_BACKSPACE:
                             consoletxt = ''                
-                        if event.key ==  pygame.K_RETURN and singleplayer:
+                        if event.key ==  pygame.K_RETURN and v.singleplayer:
                             if consoletxt == 'php' and gc.consolestage == 0:
                                 consoletxt = ''
                                 gc.consolestage = 1
@@ -948,7 +951,7 @@ def main():
 
                         if(event.key == pygame.K_u and paused):
                             update()
-                        if(event.key == pygame.K_c and loggedin and singleplayer):
+                        if(event.key == pygame.K_c and loggedin and v.singleplayer):
                             console = True
                                 
                         if(gc.shop):
@@ -1007,7 +1010,7 @@ def main():
                                     p.speed += 1
                                     yeezus = True
         
-        if loggedin and startclicked:
+        if loggedin and gc.startclicked:
             pygame.display.set_caption("Geneva Royale Admin Edition")
             if hpcheck:
                 p.hp = 3000
@@ -1017,7 +1020,7 @@ def main():
 
         p.checkFacing()
 
-        if highscoreprompt:
+        if v.highscoreprompt:
             hs = font3.render('You have beaten the hs, what would you like your name to appear as?', True, (BLACK))
             win.blit(hs, (20,20))
 
@@ -1028,7 +1031,7 @@ def main():
             pas = font3.render(password, True, (BLACK))
             win.blit(pas, (20,60))
 
-        if gc.shop and gc.won and not paused and startclicked:
+        if gc.shop and gc.won and not paused and gc.startclicked:
             win.blit(shoptxt, (20, 10))
             win.blit(shoptxt2, (20, 150))
             win.blit(shoptxt3, (20, 190))
@@ -1052,12 +1055,12 @@ def main():
                     p.lightused = True
                 else:
                     gc.lost = True
-            elif goths:
-                webhook3 = DiscordWebhook(url='https://discord.com/api/webhooks/1005987949067894905/igWvhRDPoDRmTXG2LX-hfMThbmpePBnNpsmACd1saZsHoZRA-_DcMYK95CiosZN3Ul86', content=namelol + 'had died in their hs run with a final score of' + str(gc.rnd))
+            elif v.goths:
+                webhook3 = DiscordWebhook(url='https://discord.com/api/webhooks/1005987949067894905/igWvhRDPoDRmTXG2LX-hfMThbmpePBnNpsmACd1saZsHoZRA-_DcMYK95CiosZN3Ul86', content=v.namelol + 'had died in their hs run with a final score of' + str(gc.rnd))
                 ad = webhook3.execute()      
                            
         # MOVE PLAYER 2
-        if not paused or not singleplayer and gc.lobbystarted and not paused:
+        if not paused or not v.singleplayer and gc.lobbystarted and not paused:
             p2.move(p.x, p2.x)
             if gc.rnd >= 40 and not gc.won:
                 p3.move(p.x, p3.x)
@@ -1138,17 +1141,17 @@ def main():
         if (erect.colliderect(prect)):
             p2.attack = True
             if gc.rnd < 40:
-                value += 1
+                v.value += 1
             if gc.rnd >= 40 and gc.rnd < 100:
-                value += 2
+                v.value += 2
             else:
-                value += 2.5
+                v.value += 2.5
 
-            if(value >= 70):
-                value = 0
+            if(v.value >= 70):
+                v.value = 0
         else:
             p2.attack = False
-            value = 0
+            v.value = 0
 
         for bullet in bullets:
 
@@ -1168,16 +1171,16 @@ def main():
                                                 p3.hp -= (p.dmg * 2)
                                                 crit = True
                                                 if p.darkspecial == True:
-                                                    darkvalue += 1
-                                                    if darkvalue == 20:
+                                                    v.darkvalue += 1
+                                                    if v.darkvalue == 20:
                                                         p3.hp = 0
-                                                        darkvalue = 0
+                                                        v.darkvalue = 0
                                             else:
                                                 if p.darkspecial == True:
-                                                    darkvalue += 1
-                                                    if darkvalue == 20:
+                                                    v.darkvalue += 1
+                                                    if v.darkvalue == 20:
                                                         p3.hp = 0
-                                                        darkvalue = 0
+                                                        v.darkvalue = 0
 
                                                 p3.hp -= p.dmg            
                                                         
@@ -1187,16 +1190,16 @@ def main():
                             p2.hp -= (p.dmg * 2)
                             crit = True
                             if p.darkspecial == True:
-                                darkvalue += 1
-                                if darkvalue == 20:
+                                v.darkvalue += 1
+                                if v.darkvalue == 20:
                                     p2.hp = 0
-                                    darkvalue = 0
+                                    v.darkvalue = 0
                         else:
                             if p.darkspecial == True:
-                                darkvalue += 1
-                                if darkvalue == 20:
+                                v.darkvalue += 1
+                                if v.darkvalue == 20:
                                     p2.hp = 0
-                                    darkvalue = 0
+                                    v.darkvalue = 0
 
                             p2.hp -= p.dmg
 
@@ -1217,7 +1220,7 @@ def main():
                                     if gc.rnd >= 50:
                                         gc.wonmp = True
 
-                                if not singleplayer:
+                                if not v.singleplayer:
                                     if gc.client == 2:
                                         sending = DiscordWebhook(url='https://discord.com/api/webhooks/1006739051082166373/0C-x9_DMsqD8-5KtdtQIheDmVQUtsrU2Ml4ktNh5vpoYKfHZdSI4_JowVUrqhinTgsrd', content=str(gc.rnd))
                                         sent = sending.execute()         
@@ -1251,15 +1254,15 @@ def main():
                                 else:
                                     gc.points += (1 + (gc.rnd * 0.05))                                    
                                 
-                                if int(highscore) < gc.rnd and not goths and not loggedin:
-                                    highscoreprompt = True
-                                    goths = True
+                                if int(highscore) < gc.rnd and not v.goths and not loggedin:
+                                    v.highscoreprompt = True
+                                    v.goths = True
 
-        if not singleplayer:
+        if not v.singleplayer:
             if gc.client == 1:
-                if opened == False:
+                if v.opened == False:
                     os.startfile(currentdir + '/multiplayer/client1.exe')
-                    opened = True
+                    v.opened = True
                 if gc.lobbystarted:
                     with open(currentdir + '/multiplayer/server/maxor1.txt') as f:
                         ernd = f.read()
@@ -1278,9 +1281,9 @@ def main():
                                 gc.wonmp = True
 
             if gc.client == 2:
-                if opened == False:
+                if v.opened == False:
                     os.startfile(currentdir + '/multiplayer/client2.exe')
-                    opened = True
+                    v.opened = True
                 if gc.lobbystarted:
                     with open(currentdir + '/multiplayer/server/maxor2.txt') as f:
                         ernd = f.read()
@@ -1298,24 +1301,24 @@ def main():
                                 gc.lostmp = False
                                 gc.wonmp = True
 
-        if not paused and startclicked and not highscoreprompt:
+        if not paused and gc.startclicked and not v.highscoreprompt:
             win.blit(hp, (hptxtx, 10))
             win.blit(spd, (650, 10))
             win.blit(dmg, (800, 10))
             if not gc.shop or not gc.won:
                 win.blit(cc, (950, 10))
             win.blit(rounds,(390,10))
-            if not singleplayer and gc.lobbystarted:
+            if not v.singleplayer and gc.lobbystarted:
                 win.blit(erounds,(390,50))                        
 
         # DRAW PLAYER
-        if not gc.lost and startclicked:         
+        if not gc.lost and gc.startclicked:         
           win.blit(p.img, (p.x, p.y - 40))
 
-        if not gc.won and not paused and not gc.lost and startclicked or not singleplayer and gc.lobbystarted and not gc.won and not paused and not gc.lost and startclicked:
-          if(value <= 25):
+        if not gc.won and not paused and not gc.lost and gc.startclicked or not v.singleplayer and gc.lobbystarted and not gc.won and not paused and not gc.lost and gc.startclicked:
+          if(v.value <= 25):
             win.blit(p2.img, (p2.x, p2.y - 40))
-          if(value > 25 and value <= 55):
+          if(v.value > 25 and v.value <= 55):
             if yeezus:
                 win.blit(yeezusimg['yeezusswing'], (p2.x, p2.y - 40))
             else:
@@ -1324,7 +1327,7 @@ def main():
                 if(p2.facing < 0):
                  win.blit(players['PlayerBLUEswing23'], (p2.x, p2.y  - 40))
 
-          if(value > 55 and value <= 60 ):
+          if(v.value > 55 and v.value <= 60 ):
             if yeezus:
                 win.blit(yeezusimg['yeezusswing2'], (p2.x, p2.y - 40))
             else:
@@ -1333,7 +1336,7 @@ def main():
                 if(p2.facing > 0):
                     win.blit(players['PlayerBLUEswing2'], (p2.x, p2.y - 40))
 
-          if(value > 60 and value <= 70 ):
+          if(v.value > 60 and v.value <= 70 ):
             if yeezus:
                 win.blit(yeezusimg['yeezusswing2'], (p2.x, p2.y - 40))
             else:
@@ -1345,7 +1348,7 @@ def main():
                 p.hp -= p2.dmg
 
         # SECOND ENEMY
-        if not gc.won and not paused and not gc.lost and startclicked or not singleplayer and gc.lobbystarted and not gc.won and not paused and not gc.lost and startclicked and gc.rnd >= 40:
+        if not gc.won and not paused and not gc.lost and gc.startclicked or not v.singleplayer and gc.lobbystarted and not gc.won and not paused and not gc.lost and gc.startclicked and gc.rnd >= 40:
           if(value2 <= 25 and p3.hp > 0):
             win.blit(p3.img, (p3.x, p3.y - 40))
           if(value2 > 25 and value2 <= 55):
@@ -1385,7 +1388,7 @@ def main():
         clock.tick(60)
         pygame.display.update()
 
-        if startclicked:
+        if gc.startclicked:
             win.fill(LBLUE)
         else:
             win.fill(WHITE)
