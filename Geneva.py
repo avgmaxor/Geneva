@@ -71,6 +71,9 @@ class GameController():
         self.speedrun = False
         self.rankednameprompt = False    
         self.startclicked = False
+        self.sentrankedwin = False
+        self.restarted = False
+
 gc = GameController(1,1,0)
 
 pygame.mouse.set_visible(False)
@@ -266,7 +269,7 @@ yeezusimg = {
 }
 
 button_imgs = {
-    'settings_button': pygame.image.load(os.path.join('./Assets/buttons/', 'settings.png')).convert_alpha(),
+    'settings_button': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'settings.png')).convert_alpha(),
     'login': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'Login.png')).convert_alpha(),
     'restart': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'restart.png')).convert_alpha(),
     'start': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'start.png')).convert_alpha(),
@@ -333,7 +336,7 @@ back = Button(900,350,button_imgs['back'],3)
 mp1 = Button(500,50,button_imgs['multi1'],3)
 mp2 = Button(500,150,button_imgs['multi2'],3)
 DC = Button(500,250,button_imgs['DC'],3)
-DC2 = Button(600,250,button_imgs['DC'],3)
+DC2 = Button(500,250,button_imgs['DC'],3)
 Casual = Button(500,150,button_imgs['Casual'],3)
 Ranked = Button(500,450,button_imgs['Ranked'],3)
 SpeedRun = Button(500,250,button_imgs['Speedrun'],3)
@@ -507,7 +510,7 @@ def main():
             gen = font7.render("Geneva", (0, 5), BLACK)
             win.blit(gen,(100,200))
 
-            if controls.clicked:
+            if controls.clicked and not gc.restarted:
                 v.controlspage = True
 
             if Rankings.clicked:
@@ -516,7 +519,7 @@ def main():
             if mp.clicked:
                 v.mpprompt = True
 
-            if creditss.clicked:
+            if creditss.clicked :
                 v.creditsactive = True
 
             if discord.clicked:
@@ -527,7 +530,11 @@ def main():
             if start.clicked:
                 gc.singleplayerpromp = True
                 p2.x = 1050
+                gc.restarted = False
 
+        if gc.restarted:
+            paused = False
+            
         if leaderboard:
             back.draw(win)     
 
@@ -747,8 +754,10 @@ def main():
                 wmp = font6.render("Speedrun Done!", (0, 5), GREEN)
             else:
                 wmp = font6.render("You Won this game!", (0, 5), GREEN)
-                sending24 = DiscordWebhook(url='https://discord.com/api/webhooks/1007335442917621760/VsmtTUpYO0GS27_iJosLRAuw0Fqyrs_MhC0S9vQ_IyvIizIPBVG_ieJLsHzTNSgbppTy', content=v.namelol + ' has won a ranked game!')
-                sent24 = sending24.execute()   
+                if ranked and not gc.sentrankedwin:
+                    sending24 = DiscordWebhook(url='https://discord.com/api/webhooks/1007335442917621760/VsmtTUpYO0GS27_iJosLRAuw0Fqyrs_MhC0S9vQ_IyvIizIPBVG_ieJLsHzTNSgbppTy', content=v.namelol + ' has won a ranked game!')
+                    sent24 = sending24.execute()   
+                    gc.sentrankedwin = True
 
             win.blit(wmp,(400,300))
             if DC.clicked:
@@ -775,7 +784,9 @@ def main():
                 if DC4.clicked:
                     gc.startclicked = False
                     v.singleplayer = True
+                    gc.restarted = True
                     restartGame()
+
 
             if(restart.clicked):
                 restartGame()
@@ -934,6 +945,7 @@ def main():
                                     else:
                                         p2.x = 10
                                 else:
+                                    p3.x = 0
                                     p2.x = 1020
 
                         if event.key == pygame.K_TAB and gc.won:
@@ -1351,7 +1363,7 @@ def main():
         if not gc.won and not paused and not gc.lost and gc.startclicked or not v.singleplayer and gc.lobbystarted and not gc.won and not paused and not gc.lost and gc.startclicked and gc.rnd >= 40:
           if(value2 <= 25 and p3.hp > 0):
             win.blit(p3.img, (p3.x, p3.y - 40))
-          if(value2 > 25 and value2 <= 55):
+          if(value2 > 25 and value2 <= 55 and p3.hp > 0):
             if yeezus:
                 win.blit(yeezusimg['yeezusswing'], (p3.x, p3.y - 40))
             else:
@@ -1360,7 +1372,7 @@ def main():
                 if(p3.facing < 0):
                  win.blit(players['PlayerBLUEswing23'], (p3.x, p3.y  - 40))
 
-          if(value2 > 55 and value2 <= 60 ):
+          if(value2 > 55 and value2 <= 60 and p3.hp > 0):
             if yeezus:
                 win.blit(yeezusimg['yeezusswing2'], (p3.x, p3.y - 40))
             else:
@@ -1369,7 +1381,7 @@ def main():
                 if(p2.facing > 0):
                     win.blit(players['PlayerBLUEswing2'], (p3.x, p3.y - 40))
 
-          if(value2 > 60 and value2 <= 70 ):
+          if(value2 > 60 and value2 <= 70 and p3.hp > 0):
             if yeezus:
                 win.blit(yeezusimg['yeezusswing2'], (p3.x, p3.y - 40))
             else:
