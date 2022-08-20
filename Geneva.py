@@ -172,6 +172,8 @@ class Player():
         self.invinc = False
         self.hasdash = False
         self.dashstate = 0
+        self.dashstate2 = 0
+
 
     def changeImg(self, newimg):
         self.img = newimg 
@@ -882,6 +884,8 @@ def main():
                                 p2.hp = 0
                                 p3.hp = 0                 
                                 consoletxt = ''
+                            if consoletxt == 'godmode' and gc.consolestage == 0:
+                                p.invinc = True
 
                             if gc.consolestage == 1 and consoletxt != '':
                                 p.hp = int(consoletxt)
@@ -896,7 +900,6 @@ def main():
                                 gc.consolestage = 0        
                                 consoletxt = ''
                      
-
                     else:
                         if event.key == pygame.K_a:
                             if p.hasdash and p.dashstate < 1:
@@ -907,13 +910,13 @@ def main():
                                     p.x = 0                               
                                 p.dashstate = 0
                         if event.key == pygame.K_d:
-                            if p.hasdash and p.dashstate < 1:
+                            if p.hasdash and p.dashstate2 < 1:
                                     p.dashstate += 1
-                            elif p.hasdash and p.dashstate >= 1:
+                            elif p.hasdash and p.dashstate2 >= 1:
                                     p.x += 50
                                     if p.x > 1240:
                                         p.x = 1240
-                                    p.dashstate = 0                                
+                                    p.dashstate2 = 0                                
 
                         if(gc.login and paused):
                             if passtime and event.key is not pygame.K_RETURN and event.key is not pygame.K_ESCAPE and event.key is not pygame.K_SPACE and event.key is not pygame.K_BACKSPACE:
