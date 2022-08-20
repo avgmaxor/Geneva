@@ -73,6 +73,7 @@ class GameController():
         self.startclicked = False
         self.sentrankedwin = False
         self.restarted = False
+        self.ppr = 0
 
 gc = GameController(1,1,0)
 
@@ -92,7 +93,7 @@ class VariableStorage():
         self.controlspage = False    
 
 class Shop():
-    def __init__(self, one, two, three, four, yeezus, five, hpadd, six, weppadd, ccadd, speedadd, dmgadd):
+    def __init__(self, one, two, three, four, yeezus, five, hpadd, six, weppadd, ccadd, speedadd, dmgadd, seven):
         self.one = one
         self.two = two
         self.three = three
@@ -105,6 +106,8 @@ class Shop():
         self.ccadd = ccadd
         self.speedadd = speedadd
         self.dmgadd = dmgadd
+        self.seven = seven
+
 
 class EnemyPlayer(pygame.sprite.Sprite):
     def __init__(self, img, x, y, v, m, hp, speed, facing, dmg):
@@ -299,10 +302,10 @@ pygame.display.set_icon(logo)
 
 p = Player(players['PlayerRED'], 120, 455, 5, 1, 4.5, -1, 100, 10, 5, 10, 0)
 p2 = EnemyPlayer(players['PlayerBLUE'], 1020, 455, 5, 1, 100, 2, -1, 1)
-p3 = EnemyPlayer(players['PlayerBLUE'], 0, 455, 5, 1, 0, 2, -1, 1)
+p3 = EnemyPlayer(players['PlayerBLUE'], 0, 455, 5, 1, 0, 3, -1, 1)
 
 # - SHOP -
-s = Shop(1,2,3,10,30,20,10,50,14,75,10.5,245)
+s = Shop(1,2,3,10,30,20,10,50,14,75,10.5,245,70)
 
 erect = pygame.Rect(p2.x, p2.y, p2.img.get_width(), p2.img.get_height())
 prect = pygame.Rect(p.x, p.y, p.img.get_width(), p.img.get_height())
@@ -336,10 +339,11 @@ back = Button(900,350,button_imgs['back'],3)
 mp1 = Button(500,50,button_imgs['multi1'],3)
 mp2 = Button(500,150,button_imgs['multi2'],3)
 DC = Button(500,250,button_imgs['DC'],3)
-DC2 = Button(500,250,button_imgs['DC'],3)
-Casual = Button(500,150,button_imgs['Casual'],3)
+DC2 = Button(500,350,button_imgs['DC'],3)
+Casual = Button(500,200,button_imgs['Casual'],3)
 Ranked = Button(500,450,button_imgs['Ranked'],3)
-SpeedRun = Button(500,250,button_imgs['Speedrun'],3)
+SpeedRun = Button(500,300,button_imgs['Speedrun'],3)
+start2 = Button(500,200,button_imgs['start'],3)
 
 v = VariableStorage()
 
@@ -676,6 +680,8 @@ def main():
         shoptxt5 = font3.render("WEAPON: KEY: 4 PRC:" + str(s.four), (0, 5), BLACK)
         shoptxt6 = font3.render("CC: KEY: 5 PRC:" + str(s.five), (0, 5), BLACK)
         shoptxt7 = font3.render("Ability: KEY: 6 PRC:" + str(s.six), (0, 5), BLACK)
+        shoptxt8 = font3.render("Points: KEY: 7 PRC:" + str(s.seven), (0, 5), BLACK)
+
 
 
         weaponstats = font6.render("Weapon Stats", (0, 5), BLACK)
@@ -724,7 +730,7 @@ def main():
   
 
                 inl = font3.render("You are hosting the game!", (0, 5), BLACK)
-                start.draw(win)
+                start2.draw(win)
                 if start.clicked:
                     p.hp = 100
                     resetServer()                    
@@ -1013,6 +1019,11 @@ def main():
                                     d.dialogue = True
                                     s.six *= 2
                                     getAbility()
+                            if(event.key == pygame.K_7 and gc.ppr < 4):
+                                if(gc.points >= s.seven):
+                                    gc.points -= s.seven
+                                    s.seven *= 2
+                                    gc.ppr += 1                                
 
                             if(event.key == pygame.K_y):
                                 if(gc.points >= s.yeezus):
@@ -1051,11 +1062,14 @@ def main():
             win.blit(shoptxt5, (20, 270))
             win.blit(points, (985, 10))
             win.blit(shoptxt6, (20, 310))
-            win.blit(shoptxt7, (20, 350))           
+            win.blit(shoptxt7, (20, 350))         
+            win.blit(shoptxt8, (20, 390))         
+
             pygame.draw.rect(win, (120,120,120),statsrect)
             win.blit(weaponstats, (900, 100))
             win.blit(weaponstats2, (920, 190))
             win.blit(weaponstats3, (920, 240))
+            
 
         if p.hp <= 0:
             lost = font.render("Ratio U LOST", (20,20), BLACK)
@@ -1139,7 +1153,7 @@ def main():
         p3.hitbox = (p3.x + 17, p3.y + 11, 29, 52) # NEW
         if (erect2.colliderect(prect)):
             p2.attack = True
-            if gc.rnd < 40:
+            if gc.rnd < 49:
                 value2 += 1
             else:
                 value2 += 2
@@ -1152,9 +1166,9 @@ def main():
 
         if (erect.colliderect(prect)):
             p2.attack = True
-            if gc.rnd < 40:
+            if gc.rnd < 49:
                 v.value += 1
-            if gc.rnd >= 40 and gc.rnd < 100:
+            if gc.rnd >= 49 and gc.rnd < 100:
                 v.value += 2
             else:
                 v.value += 2.5
@@ -1223,9 +1237,9 @@ def main():
                             if(p2.hp <= 0 and p3.hp <= 0):
                                 gc.won = True
                                 if(p.speed >= p2.speed):
-                                    p2.speed += 0.25
+                                    p2.speed += 0.15
                                 elif p.speed <= p2.speed and p.speed <= 9.5:
-                                    p2.speed += 0.1
+                                    p2.speed += 0.05
 
                                 gc.rnd += 1
                                 if gc.speedrun:
@@ -1247,24 +1261,24 @@ def main():
                                     p2.hp += 100 
                                     if gc.rnd >= 40:
                                         p3.hp += 100
-                                        p3.hp += (gc.rnd * 20)
+                                        p3.hp += (gc.rnd * 15)
 
-                                    p2.hp += (gc.rnd * 20)
+                                    p2.hp += (gc.rnd * 15)
                                 else:
                                     p2.hp + 250
                                     if gc.rnd > 40:
                                         p3.hp += 250
-                                        p3.hp += (gc.rnd * 25) 
-                                    p2.hp += (gc.rnd * 25)
+                                        p3.hp += (gc.rnd * 20) 
+                                    p2.hp += (gc.rnd * 20)
 
                                 if gc.rnd >= 40:
                                     p3.dmg += 0.1
 
                                 p2.dmg += 0.2
                                 if gc.rnd < 100:
-                                    gc.points += (1 + (gc.rnd * 0.1))
+                                    gc.points += gc.ppr + (1 + (gc.rnd * 0.1)) 
                                 else:
-                                    gc.points += (1 + (gc.rnd * 0.05))                                    
+                                    gc.points += gc.ppr + (1 + (gc.rnd * 0.05))                               
                                 
                                 if int(highscore) < gc.rnd and not v.goths and not loggedin:
                                     v.highscoreprompt = True
@@ -1400,7 +1414,7 @@ def main():
         clock.tick(60)
         pygame.display.update()
 
-        if gc.startclicked:
+        if gc.startclicked or gc.inlobby:
             win.fill(LBLUE)
         else:
             win.fill(WHITE)
