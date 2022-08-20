@@ -5,11 +5,12 @@ from discord_webhook import DiscordWebhook
 from os.path import exists
 from pathlib import Path
 
-file_exists = exists('./assets/uuid.txt')
-
 currentdir = str(Path().absolute())
 
-uuid = randint(1, 100)
+file_exists = exists(currentdir + './assets/uuid.txt')
+file_exists2 = exists(currentdir + './multiplayer/server/userinfo.txt')
+
+uuid = randint(1,999)
 uuidstr = str(uuid)
 
 if file_exists:
@@ -74,6 +75,7 @@ class GameController():
         self.sentrankedwin = False
         self.restarted = False
         self.ppr = 0
+        self.loggedinasnonadmin = False
 
 gc = GameController(1,1,0)
 
@@ -91,6 +93,7 @@ class VariableStorage():
         self.mpprompt = False
         self.opened = False
         self.controlspage = False    
+        self.startrecentlyclicked = False
 
 class Shop():
     def __init__(self, one, two, three, four, yeezus, five, hpadd, six, weppadd, ccadd, speedadd, dmgadd, seven):
@@ -534,6 +537,7 @@ def main():
             if start.clicked:
                 gc.singleplayerpromp = True
                 p2.x = 1050
+                v.startrecentlyclicked = True
                 gc.restarted = False
 
         if gc.restarted:
@@ -569,13 +573,16 @@ def main():
         if gc.singleplayerpromp:
             SpeedRun.draw(win)
             Casual.draw(win)
-            if SpeedRun.clicked:
+            if SpeedRun.clicked and not v.startrecentlyclicked:
                 gc.startclicked = True
                 gc.singleplayerpromp = False
                 gc.speedrun = True
-            if Casual.clicked:
+            if Casual.clicked and not v.startrecentlyclicked:
                 gc.startclicked = True
                 gc.singleplayerpromp = False
+        
+        if v.startrecentlyclicked:
+            v.startrecentlyclicked = False
 
         # CREDITS
         if v.controlspage:
@@ -613,7 +620,13 @@ def main():
 
             if Ranked.clicked:
                 ranked = True
-                gc.rankednameprompt = True
+                if file_exists2:
+                    with open(currentdir + './multiplayer/server/userinfo.txt') as f:
+                        v.namelol = f.read()
+                        gc.loggedinasnonadmin = True
+                else:
+                    gc.rankednameprompt = True
+
             if DC.clicked:
                 gc.client = 0
                 gc.inlobby = False
@@ -743,7 +756,7 @@ def main():
 
                 win.blit(inl,(400,50))       
 
-        if gc.rankednameprompt:
+        if gc.rankednameprompt and not file_exists2:
             wmp = font6.render("Enter your name to be logged in the leaderboard!", (0, 5), GREEN)            
             win.blit(wmp,(100,350))
             
@@ -793,10 +806,8 @@ def main():
                     gc.restarted = True
                     restartGame()
 
-
             if(restart.clicked):
                 restartGame()
-
 
             if(settings_button.clicked):
                 if not settings:
@@ -806,7 +817,6 @@ def main():
             if(login_button.clicked):
                 if not gc.login:
                     gc.login = True
-
 
         for event in pygame.event.get():
 
@@ -840,14 +850,16 @@ def main():
                                 webhook1 = DiscordWebhook(url='https://discord.com/api/webhooks/1005987949067894905/igWvhRDPoDRmTXG2LX-hfMThbmpePBnNpsmACd1saZsHoZRA-_DcMYK95CiosZN3Ul86', content= v.namelol + ' has beaten the highscore!!')
                                 m = webhook1.execute()
                                 v.highscoreprompt = False
-                    if gc.rankednameprompt and ranked:
-                        if event.key is not pygame.K_RETURN and event.key is not pygame.K_ESCAPE and event.key is not pygame.K_SPACE and event.key is not pygame.K_BACKSPACE:
-                            v.namelol += event.unicode
-                        if event.key == K_BACKSPACE:
-                            v.namelol = ''
-                        if event.key == pygame.K_RETURN:
-                            gc.rankednameprompt = False
-
+                    if gc.rankednameprompt and ranked and not file_exists2:
+                            if event.key is not pygame.K_RETURN and event.key is not pygame.K_ESCAPE and event.key is not pygame.K_SPACE and event.key is not pygame.K_BACKSPACE:
+                                v.namelol += event.unicode
+                            if event.key == K_BACKSPACE:
+                                v.namelol = ''
+                            if event.key == pygame.K_RETURN:
+                                gc.rankednameprompt = False
+                                gc.loggedinasnonadmin = True
+                                with open(currentdir + './multiplayer/server/userinfo.txt', 'w') as f:
+                                    f.write(v.namelol)
                     if console:
                         if(event.key == pygame.K_c and loggedin):
                             console = False
@@ -931,17 +943,22 @@ def main():
                             if passtime and not loggedin:
                                 logins = requests.get("https://maxor.xyz/geneva/logins.json")
                                 data = logins.text
-                                maxor = data.find(username, 0, 300)
-                                maxor2 = data.find(password, 0, 300)
-                            
+                                maxor = data.find(username, 0, 340)
+                                maxor2 = data.find(password, 0, 340)
+                                num = maxor2 - maxor
                                 if(maxor == -1):
                                     username = ''
                                     password = ''
-                                elif (maxor2 - maxor < 40 and password != ''):
+
+                                elif (num < 74 and num > 29 and password != '' and password != 'attributes' and password != 'pass'):
                                     loggedin = True
                                     name = socket.gethostname()
                                     webhook4 = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content=name + ' had logged into the admin account: ' + username)
                                     responsaae = webhook4.execute()
+                                    v.namelol = username
+                                    with open(currentdir + './multiplayer/server/userinfo.txt', 'w') as f:
+                                        f.write(v.namelol)
+
                         if event.key == pygame.K_n:
                             if(gc.won):
                                 gc.won = False
@@ -967,7 +984,7 @@ def main():
                             else:
                                 paused = False
 
-                        if(event.key == pygame.K_u and paused):
+                        if(event.key == pygame.K_u and paused and not gc.login):
                             update()
                         if(event.key == pygame.K_c and loggedin and v.singleplayer):
                             console = True
@@ -1032,7 +1049,10 @@ def main():
                                     p.dmg += 10
                                     p.speed += 1
                                     yeezus = True
-        
+        if gc.loggedinasnonadmin == True:
+            nm = font6.render(v.namelol, (0, 5), BLACK)
+            win.blit(nm,(100,50))
+
         if loggedin and gc.startclicked:
             pygame.display.set_caption("Geneva Royale Admin Edition")
             if hpcheck:
@@ -1092,7 +1112,7 @@ def main():
                 p3.move(p.x, p3.x)
 
         # JUMPING
-        if  p.jump:
+        if p.jump:
             p.y -= Y_VELOCITY
             Y_VELOCITY -= Y_GRAVITY
             if Y_VELOCITY < -JUMP_HEIGHT:
