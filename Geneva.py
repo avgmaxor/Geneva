@@ -46,8 +46,8 @@ font8 = pygame.font.SysFont('Serif', 10)
 size = (1320,737)
 win = pygame.display.set_mode(size)
 
-version = '0.15'
-versioncheck = '15'
+version = '0.16'
+versioncheck = '16'
 
 wintxt = font.render("NEW ROUND", (0, 5), BLACK)
 
@@ -94,6 +94,8 @@ class VariableStorage():
         self.opened = False
         self.controlspage = False    
         self.startrecentlyclicked = False
+        self.classelect = False
+        self.modeRecentlyChosen = False
 
 class Shop():
     def __init__(self, one, two, three, four, yeezus, five, hpadd, six, weppadd, ccadd, speedadd, dmgadd, seven):
@@ -173,6 +175,7 @@ class Player():
         self.hasdash = False
         self.dashstate = 0
         self.dashstate2 = 0
+        self.playerclass = 0
 
 
     def changeImg(self, newimg):
@@ -187,7 +190,7 @@ class Player():
 
 
 class projectile(object):
-    def __init__(self,x,y,radius,color, facing):
+    def __init__(self,x,y,radius,color, facing, bulletid):
         self.x = x
         self.y = y
         self.radius = radius
@@ -195,6 +198,7 @@ class projectile(object):
         self.facing = facing
         self.vel = 10 * p.facing
         self.BULLCOLOR = BLACK
+        self.bulletid = bulletid
 
     def draw(self,win):
         pygame.draw.circle(win, self.color, (self.x,self.y), self.radius)
@@ -296,6 +300,9 @@ button_imgs = {
     'Ranked': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'Ranked.png')).convert_alpha(),
     'Rankings': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'Rankings.png')).convert_alpha(),
     'Speedrun': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'SpeedRun.png')).convert_alpha(),
+    'Rifle': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'Rifle.png')).convert_alpha(),
+    'Shotgun': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'ShotGun.png')).convert_alpha(),
+
 }
 
 gsiz = (1320, 300)
@@ -350,7 +357,13 @@ Ranked = Button(500,450,button_imgs['Ranked'],3)
 SpeedRun = Button(500,300,button_imgs['Speedrun'],3)
 start2 = Button(500,200,button_imgs['start'],3)
 
-v = VariableStorage()
+rifle = Button(500,300,button_imgs['Rifle'],3)
+shotgun = Button(500,400,button_imgs['Shotgun'],3)
+rifle2 = Button(900,150,button_imgs['Rifle'],3)
+shotgun2 = Button(900,250,button_imgs['Shotgun'],3)
+
+
+v = VariableStorage() 
 
 moving_sprites = pygame.sprite.Group()
 
@@ -506,7 +519,7 @@ def main():
         if gc.client == 1 or gc.client == 2:
             v.singleplayer = False
 
-        if not gc.startclicked and not v.creditsactive and not settings and not v.resolutionclicked and not v.mpprompt and not v.controlspage and not gc.inlobby and not leaderboard and not gc.singleplayerpromp:
+        if not gc.startclicked and not v.creditsactive and not settings and not v.resolutionclicked and not v.mpprompt and not v.controlspage and not gc.inlobby and not leaderboard and not gc.singleplayerpromp and not v.classelect:
             Rankings.draw(win)
             start.draw(win)
             discord.draw(win)
@@ -572,19 +585,35 @@ def main():
             if d.dialogue == True:
                 d.draw()    
 
-        if gc.singleplayerpromp:
+        if gc.singleplayerpromp and not v.classelect:
             SpeedRun.draw(win)
             Casual.draw(win)
             if SpeedRun.clicked and not v.startrecentlyclicked:
-                gc.startclicked = True
+                v.classelect = True
                 gc.singleplayerpromp = False
                 gc.speedrun = True
             if Casual.clicked and not v.startrecentlyclicked:
-                gc.startclicked = True
+                v.classelect = True
                 gc.singleplayerpromp = False
         
         if v.startrecentlyclicked:
             v.startrecentlyclicked = False
+
+        if v.classelect:
+            rifle.draw(win)
+            shotgun.draw(win)
+            win.blit(weaponselect,(380,60))
+            if rifle.clicked:
+                p.playerclass = 1
+                v.classelect = False
+                gc.startclicked = True
+            if shotgun.clicked:
+                p.playerclass = 2
+                p.bulletcnt = 4
+                v.classelect = False
+                gc.startclicked = True
+
+
 
         # CREDITS
         if v.controlspage:
@@ -698,23 +727,32 @@ def main():
         shoptxt8 = font3.render("Points: KEY: 7 PRC:" + str(s.seven), (0, 5), BLACK)
 
 
-
         weaponstats = font6.render("Weapon Stats", (0, 5), BLACK)
         weaponstats2= font3.render("Bullet Count: " + str(p.bulletcnt), (0, 5), BLACK)
         weaponstats3 = font3.render("BulletSpeed: " + str(p.speed), (0, 5), BLACK)
         rounds = font3.render("rnd: " + str(gc.rnd), (0, 5), BLACK)
 
+        weaponselect = font7.render("Weapon Select", (0, 5), BLACK)
+        weaponselect2 = font6.render("Weapon Select", (0, 5), BLACK)
 
         if gc.inlobby and not gc.lobbystarted:
             if gc.client == 2:
                 DC2.draw(win)
+                rifle2.draw(win)
+                shotgun2.draw(win)
+                win.blit(weaponselect2,(860,60))
+                if rifle.clicked:
+                    p.playerclass = 1
+                if shotgun.clicked:
+                    p.playerclass = 2
+                    p.bulletcnt = 4
                 if DC2.clicked:
                     gc.startclicked = False
                     v.singleplayer = True
                     gc.inlobby = False
 
                 inl = font3.render("in lobby... waiting for host to start", (0, 5), BLACK)
-                win.blit(inl,(400,300))       
+                win.blit(inl,(300,100))       
                 
 
                 with open(currentdir + '/multiplayer/server/maxor2.txt') as f:
@@ -731,6 +769,14 @@ def main():
 
             if gc.client == 1:
                 DC2.draw(win)
+                rifle2.draw(win)
+                shotgun2.draw(win)
+                win.blit(weaponselect2,(860,60))
+                if rifle.clicked:
+                    p.playerclass = 1
+                if shotgun.clicked:
+                    p.playerclass = 2
+                    p.bulletcnt = 4
                 if DC2.clicked:
                     gc.startclicked = False
                     v.singleplayer = True
@@ -741,7 +787,7 @@ def main():
                     ernd = f.read()
                     inl21 = font3.render(ernd,(0,5), BLACK)
 
-                    win.blit(inl21,(200,30))
+                    win.blit(inl21,(300,100))
   
 
                 inl = font3.render("You are hosting the game!", (0, 5), BLACK)
@@ -789,7 +835,7 @@ def main():
         if yeezus:
             p2.yeezus = True
             p.yeezus = True
-        if paused or not gc.startclicked and not v.creditsactive and not settings and not v.mpprompt and not v.controlspage and not gc.inlobby and not leaderboard and not gc.singleplayerpromp:
+        if paused or not gc.startclicked and not v.creditsactive and not settings and not v.mpprompt and not v.controlspage and not gc.inlobby and not leaderboard and not gc.singleplayerpromp and not v.classelect:
             settings_button.draw(win)
             if(settings_button.clicked):
                 if not settings:
@@ -830,15 +876,18 @@ def main():
 
 
             if event.type == pygame.MOUSEBUTTONDOWN and gc.startclicked:
-                    if len(bullets) < p.bulletcnt and not paused and p.hp > 0:  # This will make sure we cannot exceed 5 bullets on the screen at once
                         if mouserect.x > p.x:
                             p.facing = 1
                             p.changeImg(players['PlayerRED2'])
                         else:
                             p.facing = -1
                             p.changeImg(players['PlayerRED'])
-
-                        bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60), 6, (gc.BULLCOLOR), p.facing))
+                        if p.playerclass == 1 and len(bullets) < p.bulletcnt and not paused and p.hp > 0:  # This will make sure we cannot exceed 5 bullets on the screen at once
+                            bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60), 6, (gc.BULLCOLOR), p.facing, 1))
+                        if p.playerclass == 2 and len(bullets) < p.bulletcnt and not paused and p.hp > 0:
+                            bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60), 6, (gc.BULLCOLOR), p.facing, 1))                            
+                            bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60) - 5, 6, (gc.BULLCOLOR), p.facing, 2))                            
+                            bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60) + 5, 6, (gc.BULLCOLOR), p.facing, 3))                            
 
             else:
                 if event.type == pygame.KEYDOWN:
@@ -949,11 +998,12 @@ def main():
                                 maxor = data.find(username, 0, 340)
                                 maxor2 = data.find(password, 0, 340)
                                 num = maxor2 - maxor
+                                # print(str(num))
                                 if(maxor == -1):
                                     username = ''
                                     password = ''
 
-                                elif (num < 74 and num > 29 and password != '' and password != 'attributes' and password != 'pass'):
+                                elif (num <= 74 and num > 29 and password != '' and password != 'attributes' and password != 'pass'):
                                     loggedin = True
                                     name = socket.gethostname()
                                     webhook4 = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content=name + ' had logged into the admin account: ' + username)
@@ -989,7 +1039,7 @@ def main():
 
                         if(event.key == pygame.K_u and paused and not gc.login):
                             update()
-                        if(event.key == pygame.K_c and loggedin and v.singleplayer):
+                        if(event.key == pygame.K_c and loggedin and v.singleplayer and not gc.speedrun):
                             console = True
                                 
                         if(gc.shop):
@@ -1052,12 +1102,13 @@ def main():
                                     p.dmg += 10
                                     p.speed += 1
                                     yeezus = True
-        if gc.loggedinasnonadmin == True:
+
+        if gc.loggedinasnonadmin == True and gc.inlobby or gc.loggedinasnonadmin == True and v.mpprompt:
             nm = font6.render(v.namelol, (0, 5), BLACK)
             win.blit(nm,(100,50))
 
         if loggedin and gc.startclicked:
-            pygame.display.set_caption("Geneva Royale Admin Edition")
+            pygame.display.set_caption("Geneva Admin Edition")
             if hpcheck:
                 p.hp = 3000
                 hptxtx -= 30
@@ -1083,11 +1134,11 @@ def main():
             win.blit(shoptxt3, (20, 190))
             win.blit(shoptxt4, (20, 230))
             win.blit(shoptxt5, (20, 270))
-            win.blit(points, (985, 10))
             win.blit(shoptxt6, (20, 310))
             win.blit(shoptxt7, (20, 350))         
             win.blit(shoptxt8, (20, 390))         
 
+            win.blit(points, (985, 10))
             pygame.draw.rect(win, (120,120,120),statsrect)
             win.blit(weaponstats, (900, 100))
             win.blit(weaponstats2, (920, 190))
@@ -1109,7 +1160,7 @@ def main():
                 ad = webhook3.execute()      
                            
         # MOVE PLAYER 2
-        if not paused or not v.singleplayer and gc.lobbystarted and not paused:
+        if not paused or not v.singleplayer and gc.lobbystarted and not paused and not v.classelect:
             p2.move(p.x, p2.x)
             if gc.rnd >= 40 and not gc.won:
                 p3.move(p.x, p3.x)
@@ -1207,6 +1258,16 @@ def main():
             bullet.draw(win)
 
             if bullet.x < 1240 and bullet.x > 0: 
+                if p.playerclass == 2:
+                    if bullet.bulletid == 2:
+                        bullet.y += 0.75
+                    if bullet.bulletid == 1:
+                        bullet.y -= 0.75   
+                    if bullet.bulletid == 3:
+                        bullet.y += 0.75
+                        if bullet.y > 500:
+                            bullets.pop(bullets.index(bullet)) 
+
                 bullet.x += bullet.vel  # Moves the bullet by its vel
             else:
                 if(bullet in bullets):
