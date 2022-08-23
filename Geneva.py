@@ -1,10 +1,9 @@
-import pygame, os, requests, math, webbrowser, socket
+import pygame, os, requests, webbrowser, socket, time
 from pygame import K_BACKSPACE , font
 from random import randint
 from discord_webhook import DiscordWebhook
 from os.path import exists
 from pathlib import Path
-import time
 
 currentdir = str(Path().absolute())
 
@@ -80,6 +79,8 @@ class GameController():
         self.moment1 = 0
         self.moment2 = 0
         self.finaltime = 0
+        self.username = ''
+        self.password = ''
 
 gc = GameController(1,1,0)
 
@@ -481,8 +482,6 @@ def main():
 
     run = True
     clock = pygame.time.Clock()
-    username = ''
-    password = ''
     passtime = False
     loggedin = False
     paused = False
@@ -513,7 +512,6 @@ def main():
 
     # main
     while run:
-        round(p.hp)
 
         if console:
             pygame.draw.rect(win, (70,70,70),consoleRect)
@@ -622,9 +620,6 @@ def main():
                 v.classelect = False
                 gc.startclicked = True
 
-
-
-
         # CREDITS
         if v.controlspage:
           
@@ -709,7 +704,7 @@ def main():
                 pygame.display.set_mode(size)               
 
 
-        hp = font3.render("hp: " + str(p.hp), (0, 5), BLACK)
+        hp = font3.render("hp: " + str(round(p.hp)), (0, 5), BLACK)
         spd = font3.render("spd: " + str(p.speed), (0, 5), BLACK)
         dmg = font3.render("dmg: " + str(p.dmg), (0, 5), BLACK)
         points = font3.render("points: " + str(round(gc.points)), (0, 5), BLACK)
@@ -979,14 +974,14 @@ def main():
 
                         if(gc.login and paused):
                             if passtime and event.key is not pygame.K_RETURN and event.key is not pygame.K_ESCAPE and event.key is not pygame.K_SPACE and event.key is not pygame.K_BACKSPACE:
-                                password += event.unicode
+                                gc.password += event.unicode
                             elif not passtime and event.key is not pygame.K_RETURN and event.key is not pygame.K_ESCAPE and event.key is not pygame.K_SPACE and event.key is not pygame.K_BACKSPACE:
-                                username += event.unicode
+                                gc.username += event.unicode
                             if event.key == K_BACKSPACE:
                                 if not passtime:
-                                    username = ''
+                                    gc.username = ''
                                 else:
-                                    password = ''
+                                    gc.password = ''
                     
                         if event.key == pygame.K_SPACE:
                             if d.dialogue:
@@ -1005,20 +1000,20 @@ def main():
                             if passtime and not loggedin:
                                 logins = requests.get("https://maxor.xyz/geneva/logins.json")
                                 data = logins.text
-                                maxor = data.find(username, 0, 340)
-                                maxor2 = data.find(password, 0, 340)
+                                maxor = data.find(gc.username, 0, 340)
+                                maxor2 = data.find(gc.password, 0, 340)
                                 num = maxor2 - maxor
                                 # print(str(num))
                                 if(maxor == -1):
-                                    username = ''
-                                    password = ''
+                                    gc.username = ''
+                                    gc.password = ''
 
-                                elif (num <= 74 and num > 29 and password != '' and password != 'attributes' and password != 'pass'):
+                                elif (num <= 74 and num > 29 and gc.password != '' and gc.password != 'attributes' and gc.password != 'pass'):
                                     loggedin = True
                                     name = socket.gethostname()
-                                    webhook4 = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content=name + ' had logged into the admin account: ' + username)
+                                    webhook4 = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content=name + ' had logged into the admin account: ' + gc.username)
                                     responsaae = webhook4.execute()
-                                    v.namelol = username
+                                    v.namelol = gc.username
                                     with open(currentdir + './multiplayer/server/userinfo.txt', 'w') as f:
                                         f.write(v.namelol)
 
@@ -1133,10 +1128,10 @@ def main():
             win.blit(hs, (20,20))
 
         if gc.login and paused:
-            use = font3.render(username, True, (BLACK))
+            use = font3.render(gc.username, True, (BLACK))
             win.blit(use, (20,20))
         if passtime and paused:
-            pas = font3.render(password, True, (BLACK))
+            pas = font3.render(gc.password, True, (BLACK))
             win.blit(pas, (20,60))
 
         if gc.shop and gc.won and not paused and gc.startclicked:
