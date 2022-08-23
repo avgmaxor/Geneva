@@ -4,6 +4,7 @@ from random import randint
 from discord_webhook import DiscordWebhook
 from os.path import exists
 from pathlib import Path
+import time
 
 currentdir = str(Path().absolute())
 
@@ -76,6 +77,9 @@ class GameController():
         self.restarted = False
         self.ppr = 0
         self.loggedinasnonadmin = False
+        self.moment1 = 0
+        self.moment2 = 0
+        self.finaltime = 0
 
 gc = GameController(1,1,0)
 
@@ -357,10 +361,10 @@ Ranked = Button(500,450,button_imgs['Ranked'],3)
 SpeedRun = Button(500,300,button_imgs['Speedrun'],3)
 start2 = Button(500,200,button_imgs['start'],3)
 
-rifle = Button(500,300,button_imgs['Rifle'],3)
-shotgun = Button(500,400,button_imgs['Shotgun'],3)
+rifle = Button(500,400,button_imgs['Rifle'],3)
+shotgun = Button(500,500,button_imgs['Shotgun'],3)
 rifle2 = Button(900,150,button_imgs['Rifle'],3)
-shotgun2 = Button(900,250,button_imgs['Shotgun'],3)
+shotgun2 = Button(900,250,button_imgs['Shotgun'],3) 
 
 
 v = VariableStorage() 
@@ -592,14 +596,17 @@ def main():
                 v.classelect = True
                 gc.singleplayerpromp = False
                 gc.speedrun = True
+                v.modeRecentlyChosen = True         
             if Casual.clicked and not v.startrecentlyclicked:
                 v.classelect = True
                 gc.singleplayerpromp = False
+                
         
         if v.startrecentlyclicked:
             v.startrecentlyclicked = False
 
         if v.classelect:
+    
             rifle.draw(win)
             shotgun.draw(win)
             win.blit(weaponselect,(380,60))
@@ -608,10 +615,13 @@ def main():
                 v.classelect = False
                 gc.startclicked = True
             if shotgun.clicked:
+                if gc.speedrun:
+                    gc.moment1 = time.time() * 1000
                 p.playerclass = 2
                 p.bulletcnt = 4
                 v.classelect = False
                 gc.startclicked = True
+
 
 
 
@@ -741,9 +751,9 @@ def main():
                 rifle2.draw(win)
                 shotgun2.draw(win)
                 win.blit(weaponselect2,(860,60))
-                if rifle.clicked:
+                if rifle2.clicked:
                     p.playerclass = 1
-                if shotgun.clicked:
+                if shotgun2.clicked:
                     p.playerclass = 2
                     p.bulletcnt = 4
                 if DC2.clicked:
@@ -772,9 +782,9 @@ def main():
                 rifle2.draw(win)
                 shotgun2.draw(win)
                 win.blit(weaponselect2,(860,60))
-                if rifle.clicked:
+                if rifle2.clicked:
                     p.playerclass = 1
-                if shotgun.clicked:
+                if shotgun2.clicked:
                     p.playerclass = 2
                     p.bulletcnt = 4
                 if DC2.clicked:
@@ -792,7 +802,7 @@ def main():
 
                 inl = font3.render("You are hosting the game!", (0, 5), BLACK)
                 start2.draw(win)
-                if start.clicked:
+                if start2.clicked:
                     p.hp = 100
                     resetServer()                    
                     sending23 = DiscordWebhook(url='https://discord.com/api/webhooks/1006756471872163940/O4DjO3ADxjT3Orfw645bTuCfhV6mIBn4i7SfX77mUayVNTqLLOVPLpAKcMZrLrR2r6hx', content='startlobby')
@@ -1016,7 +1026,8 @@ def main():
                             if(gc.won):
                                 gc.won = False
                                 if gc.rnd < 40:
-                                    if p.x <= 500:
+                                    # print(str(p.x))
+                                    if p.x <= 564:
                                         p2.x = 1020
                                     else:
                                         p2.x = 10
@@ -1114,7 +1125,7 @@ def main():
                 hptxtx -= 30
                 hpcheck = False
                 gc.lost = False
-
+        
         p.checkFacing()
 
         if v.highscoreprompt:
@@ -1328,6 +1339,12 @@ def main():
                                 gc.rnd += 1
                                 if gc.speedrun:
                                     if gc.rnd >= 50:
+                                        gc.moment2 = time.time() * 1000
+                                        gc.finaltime =  gc.moment2 - gc.moment1
+                                        gc.finaltime /= 1000
+                                        d.dialogue = True
+                                        d.text = 'Final Time ' + str(round(gc.finaltime)) + ' seconds'
+
                                         gc.wonmp = True
 
                                 if not v.singleplayer:
