@@ -1,6 +1,7 @@
 import discord
 from pathlib import Path
 from discord_webhook import DiscordWebhook
+# PREVENT CRASHES
 currentdir = str(Path().absolute())
 
 class MyClient(discord.Client):

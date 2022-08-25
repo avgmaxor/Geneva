@@ -4,12 +4,14 @@ from random import randint
 from discord_webhook import DiscordWebhook
 from os.path import exists
 from pathlib import Path
+pygame.init()
 
 currentdir = str(Path().absolute())
 
 file_exists = exists(currentdir + './assets/uuid.txt')
 file_exists2 = exists(currentdir + './multiplayer/server/userinfo.txt')
 
+# UUID
 uuid = randint(1,999)
 uuidstr = str(uuid)
 
@@ -21,20 +23,16 @@ else:
     with open('./assets/uuid.txt', 'w') as f:
         f.write(uuidstr)
 
-high = requests.get("https://maxor.xyz/geneva/highscore.txt")                        
-highscore = high.text
-name = socket.gethostname()
-webhook = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content=name + ' has logged in unique id: ' +  name + ' ' + uuidstr)
-response = webhook.execute()
-
+# INIT COLORS
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 LBLUE =(75, 127, 199)
+
+# INIT FONT
 pygame.font.init()
-pygame.init()
 font = pygame.font.SysFont('Serif', 170)
 font2 = pygame.font.SysFont('Serif', 140)
 font3 = pygame.font.SysFont('Serif', 40)
@@ -43,14 +41,25 @@ font4 = pygame.font.SysFont('Serif', 30)
 font7 = pygame.font.SysFont('Serif', 100)
 font8 = pygame.font.SysFont('Serif', 10)
 
+# GET HIGHSCORE
+high = requests.get("https://maxor.xyz/geneva/highscore.txt")                        
+highscore = high.text
+
+name = socket.gethostname()
+webhook = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content=name + ' has logged in unique id: ' +  name + ' ' + uuidstr)
+response = webhook.execute()
+
+# SIZE
 size = (1320,737)
 win = pygame.display.set_mode(size)
 
+# VERSION
 version = '0.16'
 versioncheck = '16'
 
 wintxt = font.render("NEW ROUND", (0, 5), BLACK)
 
+# GAME CONTROLLER
 class GameController():
     def __init__(self, rnd, points, client):
         self.rnd = rnd
@@ -82,9 +91,14 @@ class GameController():
         self.username = ''
         self.password = ''
 
+# INIT GAME CONTROLLER
 gc = GameController(1,1,0)
 
+# REMOVE DEFAULT WINDOWS MOUSE
 pygame.mouse.set_visible(False)
+
+# CLASSES
+
 class VariableStorage():
     def __init__(self):
         self.value = 0
@@ -208,6 +222,8 @@ class projectile(object):
     def draw(self,win):
         pygame.draw.circle(win, self.color, (self.x,self.y), self.radius)
 
+# Found this on the internet <3
+
 class Button():
 	def __init__(self, x, y, image, scale):
 		width = image.get_width()
@@ -281,6 +297,7 @@ yeezusimg = {
     'yeezus6' :  pygame.transform.flip(pygame.image.load(os.path.join(currentdir + './Assets/yeezus/', 'yeezus2.png')), True, False).convert_alpha(),
     'deezz' : pygame.image.load(os.path.join(currentdir + './Assets/', 'ground.png')).convert_alpha(),
     'deez' : pygame.transform.scale(pygame.image.load(os.path.join(currentdir + './Assets/', 'ground.png')),(1320,140)).convert_alpha(),
+    'deez2' : pygame.transform.scale(pygame.image.load(os.path.join(currentdir + './Assets/', 'ground.png')),(1460,140)).convert_alpha(),
     'cloudx' : pygame.image.load(os.path.join(currentdir + './Assets/', 'cloud.png')).convert_alpha(),
     'cloud' : pygame.transform.scale(pygame.image.load(os.path.join(currentdir + './Assets/', 'cloud.png')),(300,200)).convert_alpha(),
 }
@@ -324,17 +341,19 @@ p3 = EnemyPlayer(players['PlayerBLUE'], 0, 455, 5, 1, 0, 3, -1, 1)
 # - SHOP -
 s = Shop(1,2,3,10,30,20,10,50,14,75,10.5,245,70)
 
-erect = pygame.Rect(p2.x, p2.y, p2.img.get_width(), p2.img.get_height())
+enemyRect = pygame.Rect(p2.x, p2.y, p2.img.get_width(), p2.img.get_height())
 prect = pygame.Rect(p.x, p.y, p.img.get_width(), p.img.get_height())
-erect2 = pygame.Rect(p3.x, p3.y, p3.img.get_width(), p3.img.get_height())
+enemyRect2 = pygame.Rect(p3.x, p3.y, p3.img.get_width(), p3.img.get_height())
 
-
-mouserect = pygame.Rect((300, 300),(20,20))
+# Rects
+mousenemyRect = pygame.Rect((300, 300),(20,20))
 grassRect = pygame.Rect((0,520),(1320,300))
 statsrect = pygame.Rect((900, 100),(330,220))
-consoleRect = pygame.Rect((700, 50),(230,230))
+consolenemyRect = pygame.Rect((700, 50),(230,230))
 
+# Bullets List
 bullets = []
+
 # MAIN MENU
 settings_button = Button(500,200,button_imgs['settings_button'],3)
 start = Button(500,100,button_imgs['start'],3)
@@ -349,9 +368,12 @@ login_button = Button(500,100,button_imgs['login'],3)
 restart = Button(500,300,button_imgs['restart'],3)
 DC4 = Button(500,500,button_imgs['DC'],3)
 
+# RESOLUTIOn
 resolution = Button(500,100,button_imgs['resolution'],3)
-resolution1 = Button(500,2-0,button_imgs['resolution1'],3)
+resolution1 = Button(500,200,button_imgs['resolution1'],3)
 resolution2 = Button(500,300,button_imgs['resolution2'],3)
+
+# OTHER
 back = Button(900,350,button_imgs['back'],3)
 mp1 = Button(500,50,button_imgs['multi1'],3)
 mp2 = Button(500,150,button_imgs['multi2'],3)
@@ -423,7 +445,7 @@ def update():
         gc.BULLCOLOR = maxor3
     main()
 
-
+# Reset Resolution
 def resetRes():
     grassRect.width = 0
     grassRect.height = 0
@@ -471,6 +493,7 @@ def getAbility():
         else:
             getAbility()            
 
+# RESET 'SERVER' 
 def resetServer():
 
     with open(currentdir + '/multiplayer/server/maxor2.txt', 'w') as f:
@@ -513,8 +536,38 @@ def main():
     # main
     while run:
 
+        # TEXT VARIABLES
+        shoptxt = font2.render("SHOP", (0, 5), BLUE)
+        shoptxt3 = font3.render("Speed: KEY 2 PRC:" + str(s.two), (0, 5), BLACK)
+        shoptxt2 = font3.render("HP: KEY 1 PRC:" + str(s.one), (0, 5), BLACK)
+        shoptxt4 = font3.render("DMG: KEY: 3 PRC:" + str(s.three), (0, 5), BLACK)
+        shoptxt5 = font3.render("WEAPON: KEY: 4 PRC:" + str(s.four), (0, 5), BLACK)
+        shoptxt6 = font3.render("CC: KEY: 5 PRC:" + str(s.five), (0, 5), BLACK)
+        shoptxt7 = font3.render("Ability: KEY: 6 PRC:" + str(s.six), (0, 5), BLACK)
+        shoptxt8 = font3.render("Points: KEY: 7 PRC:" + str(s.seven), (0, 5), BLACK)
+        
+        if p.speed >= 11:
+            shoptxt3 = font3.render("Speed: KEY 2 PRC:" + str(s.two), (0, 5), GREEN)
+        if p.dmg >= 250:
+            shoptxt4 = font3.render("DMG: KEY: 3 PRC:" + str(s.three), (0, 5), GREEN)
+        if p.bulletcnt >= 15:
+            shoptxt5 = font3.render("WEAPON: KEY: 4 PRC:" + str(s.four), (0, 5), GREEN)
+        if p.cc >= 80:
+            shoptxt6 = font3.render("CC: KEY: 5 PRC:" + str(s.five), (0, 5), GREEN)
+        if p.abilitycount >= 4:
+            shoptxt7 = font3.render("ABILITY: KEY: 6 PRC:" + str(s.six), (0, 5), GREEN)
+
+
+        weaponstats = font6.render("Weapon Stats", (0, 5), BLACK)
+        weaponstats2= font3.render("Bullet Count: " + str(p.bulletcnt), (0, 5), BLACK)
+        weaponstats3 = font3.render("BulletSpeed: " + str(p.speed), (0, 5), BLACK)
+        rounds = font3.render("rnd: " + str(gc.rnd), (0, 5), BLACK)
+
+        weaponselect = font7.render("Weapon Select", (0, 5), BLACK)
+        weaponselect2 = font6.render("Weapon Select", (0, 5), BLACK)
+
         if console:
-            pygame.draw.rect(win, (70,70,70),consoleRect)
+            pygame.draw.rect(win, (70,70,70),consolenemyRect)
             ctxt = font4.render(consoletxt, (0,5), BLACK)
             win.blit(ctxt,(710,70))
 
@@ -577,7 +630,10 @@ def main():
 
         # GROUND AND CLOUD
         if gc.startclicked:
-            win.blit(yeezusimg['deez'],(0,425))
+            if grassRect.width == 1460:
+                win.blit(yeezusimg['deez2'],(0,425))
+            else:    
+                win.blit(yeezusimg['deez'],(0,425))
             if not console:
                 win.blit(yeezusimg['cloud'],(cloudx,30))
             if cloudx > 1050: 
@@ -585,7 +641,25 @@ def main():
             cloudx += 0.1
             pygame.draw.rect(win, (0,0,0),grassRect)
             if d.dialogue == True:
-                d.draw()    
+                d.draw()
+                
+            # SHOP
+            if gc.shop and gc.won and not paused:
+                win.blit(shoptxt, (20, 10))
+                win.blit(shoptxt2, (20, 150))
+                win.blit(shoptxt3, (20, 190))
+                win.blit(shoptxt4, (20, 230))
+                win.blit(shoptxt5, (20, 270))
+                win.blit(shoptxt6, (20, 310))
+                win.blit(shoptxt7, (20, 350))         
+                win.blit(shoptxt8, (20, 390))         
+
+                win.blit(points, (985, 10))
+                pygame.draw.rect(win, (120,120,120),statsrect)
+                win.blit(weaponstats, (900, 100))
+                win.blit(weaponstats2, (920, 190))
+                win.blit(weaponstats3, (920, 240))    
+
 
         if gc.singleplayerpromp and not v.classelect:
             SpeedRun.draw(win)
@@ -710,35 +784,6 @@ def main():
         points = font3.render("points: " + str(round(gc.points)), (0, 5), BLACK)
         cc = font3.render("critchance: " + str(p.cc), (0, 5), BLACK)
 
-
-        if p.speed == 10:
-            shoptxt3 = font3.render("Speed: KEY 2 PRC:" + str(s.two), (0, 5), GREEN)
-        if p.dmg == 250:
-            shoptxt4 = font3.render("DMG: KEY: 3 PRC:" + str(s.three), (0, 5), GREEN)
-        if p.bulletcnt == 15:
-            shoptxt5 = font3.render("WEAPON: KEY: 4 PRC:" + str(s.four), (0, 5), GREEN)
-        if p.cc == 80:
-            shoptxt6 = font3.render("CC: KEY: 5 PRC:" + str(s.five), (0, 5), GREEN)
-        if p.abilitycount == 10:
-            shoptxt7 = font3.render("ABILITY: KEY: 6 PRC:" + str(s.six), (0, 5), GREEN)
-
-        shoptxt = font2.render("SHOP", (0, 5), BLUE)
-        shoptxt3 = font3.render("Speed: KEY 2 PRC:" + str(s.two), (0, 5), BLACK)
-        shoptxt2 = font3.render("HP: KEY 1 PRC:" + str(s.one), (0, 5), BLACK)
-        shoptxt4 = font3.render("DMG: KEY: 3 PRC:" + str(s.three), (0, 5), BLACK)
-        shoptxt5 = font3.render("WEAPON: KEY: 4 PRC:" + str(s.four), (0, 5), BLACK)
-        shoptxt6 = font3.render("CC: KEY: 5 PRC:" + str(s.five), (0, 5), BLACK)
-        shoptxt7 = font3.render("Ability: KEY: 6 PRC:" + str(s.six), (0, 5), BLACK)
-        shoptxt8 = font3.render("Points: KEY: 7 PRC:" + str(s.seven), (0, 5), BLACK)
-
-
-        weaponstats = font6.render("Weapon Stats", (0, 5), BLACK)
-        weaponstats2= font3.render("Bullet Count: " + str(p.bulletcnt), (0, 5), BLACK)
-        weaponstats3 = font3.render("BulletSpeed: " + str(p.speed), (0, 5), BLACK)
-        rounds = font3.render("rnd: " + str(gc.rnd), (0, 5), BLACK)
-
-        weaponselect = font7.render("Weapon Select", (0, 5), BLACK)
-        weaponselect2 = font6.render("Weapon Select", (0, 5), BLACK)
 
         if gc.inlobby and not gc.lobbystarted:
             if gc.client == 2:
@@ -881,7 +926,7 @@ def main():
 
 
             if event.type == pygame.MOUSEBUTTONDOWN and gc.startclicked:
-                        if mouserect.x > p.x:
+                        if mousenemyRect.x > p.x:
                             p.facing = 1
                             p.changeImg(players['PlayerRED2'])
                         else:
@@ -1133,22 +1178,6 @@ def main():
         if passtime and paused:
             pas = font3.render(gc.password, True, (BLACK))
             win.blit(pas, (20,60))
-
-        if gc.shop and gc.won and not paused and gc.startclicked:
-            win.blit(shoptxt, (20, 10))
-            win.blit(shoptxt2, (20, 150))
-            win.blit(shoptxt3, (20, 190))
-            win.blit(shoptxt4, (20, 230))
-            win.blit(shoptxt5, (20, 270))
-            win.blit(shoptxt6, (20, 310))
-            win.blit(shoptxt7, (20, 350))         
-            win.blit(shoptxt8, (20, 390))         
-
-            win.blit(points, (985, 10))
-            pygame.draw.rect(win, (120,120,120),statsrect)
-            win.blit(weaponstats, (900, 100))
-            win.blit(weaponstats2, (920, 190))
-            win.blit(weaponstats3, (920, 240))
             
 
         if p.hp <= 0:
@@ -1217,21 +1246,21 @@ def main():
         prect.x = p.x
         prect.y = p.y
         if(p.x < p2.x):
-         erect.x = (p2.x + 80)
+         enemyRect.x = (p2.x + 80)
         if(p.x > p2.x):
-         erect.x = (p2.x - 80)
+         enemyRect.x = (p2.x - 80)
         if(p.x < p3.x):
-         erect2.x = (p3.x + 80)
+         enemyRect2.x = (p3.x + 80)
         if(p.x > p3.x):
-         erect2.x = (p3.x - 80)
+         enemyRect2.x = (p3.x - 80)
 
-        erect2.y = p3.y
-        erect.y = p2.y
+        enemyRect2.y = p3.y
+        enemyRect.y = p2.y
         
         # HITBOXES
         p2.hitbox = (p2.x + 17, p2.y + 11, 29, 52) # NEW
         p3.hitbox = (p3.x + 17, p3.y + 11, 29, 52) # NEW
-        if (erect2.colliderect(prect)):
+        if (enemyRect2.colliderect(prect)):
             p2.attack = True
             if gc.rnd < 49:
                 value2 += 1
@@ -1244,7 +1273,7 @@ def main():
             p2.attack = False
             value2 = 0
 
-        if (erect.colliderect(prect)):
+        if (enemyRect.colliderect(prect)):
             p2.attack = True
             if gc.rnd < 49:
                 v.value += 1
@@ -1281,8 +1310,8 @@ def main():
 
             if not gc.lost and not gc.won and not paused:
                 if gc.rnd >= 40:
-                    if bullet.y + bullet.radius < p3.hitbox[1] + 60 + p3.hitbox[3] and bullet.y + bullet.radius > p3.hitbox[1] - 60 or prect.colliderect(erect2):
-                                        if bullet.x + bullet.radius > p3.hitbox[0] + 13 and bullet.x - bullet.radius < p3.hitbox[0] + p2.hitbox[2] - 13 or prect.colliderect(erect2):
+                    if bullet.y + bullet.radius < p3.hitbox[1] + 60 + p3.hitbox[3] and bullet.y + bullet.radius > p3.hitbox[1] - 60 or prect.colliderect(enemyRect2):
+                                        if bullet.x + bullet.radius > p3.hitbox[0] + 13 and bullet.x - bullet.radius < p3.hitbox[0] + p2.hitbox[2] - 13 or prect.colliderect(enemyRect2):
                                             if(randint(1, 100) <= p.cc):
                                                 p3.hp -= (p.dmg * 2)
                                                 crit = True
@@ -1300,8 +1329,8 @@ def main():
 
                                                 p3.hp -= p.dmg            
                                                         
-                if bullet.y + bullet.radius < p2.hitbox[1] + 60 + p2.hitbox[3] and bullet.y + bullet.radius > p2.hitbox[1] - 60 or prect.colliderect(erect):
-                    if bullet.x + bullet.radius > p2.hitbox[0] + 13 and bullet.x - bullet.radius < p2.hitbox[0] + p2.hitbox[2] - 13 or prect.colliderect(erect):
+                if bullet.y + bullet.radius < p2.hitbox[1] + 60 + p2.hitbox[3] and bullet.y + bullet.radius > p2.hitbox[1] - 60 or prect.colliderect(enemyRect):
+                    if bullet.x + bullet.radius > p2.hitbox[0] + 13 and bullet.x - bullet.radius < p2.hitbox[0] + p2.hitbox[2] - 13 or prect.colliderect(enemyRect):
                         if(randint(1, 100) <= p.cc):
                             p2.hp -= (p.dmg * 2)
                             crit = True
@@ -1502,8 +1531,8 @@ def main():
             if not p.invinc:
                 p.hp -= p3.dmg
 
-        mouserect.x ,mouserect.y = pygame.mouse.get_pos()
-        pygame.draw.rect(win, (0,0,0),mouserect)
+        mousenemyRect.x ,mousenemyRect.y = pygame.mouse.get_pos()
+        pygame.draw.rect(win, (0,0,0),mousenemyRect)
 
         pygame.display.flip()
 
