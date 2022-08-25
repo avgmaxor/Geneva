@@ -90,6 +90,7 @@ class GameController():
         self.finaltime = 0
         self.username = ''
         self.password = ''
+        self.chooseclass1 = False
 
 # INIT GAME CONTROLLER
 gc = GameController(1,1,0)
@@ -324,6 +325,10 @@ button_imgs = {
     'Speedrun': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'SpeedRun.png')).convert_alpha(),
     'Rifle': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'Rifle.png')).convert_alpha(),
     'Shotgun': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'ShotGun.png')).convert_alpha(),
+    'ShotgunClass1': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'PreciseShot.png')).convert_alpha(),
+    'ShotgunClass2': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'MultiShot.png')).convert_alpha(),  
+    'RifleClass1': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'SMG.png')).convert_alpha(),
+    'RifleClass2': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'LaserGun.png')).convert_alpha(),        
 
 }
 
@@ -384,11 +389,17 @@ Ranked = Button(500,450,button_imgs['Ranked'],3)
 SpeedRun = Button(500,300,button_imgs['Speedrun'],3)
 start2 = Button(500,200,button_imgs['start'],3)
 
+# Class Select
 rifle = Button(500,400,button_imgs['Rifle'],3)
 shotgun = Button(500,500,button_imgs['Shotgun'],3)
 rifle2 = Button(900,150,button_imgs['Rifle'],3)
 shotgun2 = Button(900,250,button_imgs['Shotgun'],3) 
 
+shotgunclass1 = Button(350,250,button_imgs['ShotgunClass1'],3) 
+shotgunclass2 = Button(650,250,button_imgs['ShotgunClass2'],3) 
+
+rifleclass1 = Button(350,250,button_imgs['RifleClass1'],3) 
+rifleclass2 = Button(650,250,button_imgs['RifleClass2'],3) 
 
 v = VariableStorage() 
 
@@ -938,6 +949,26 @@ def main():
                             bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60), 6, (gc.BULLCOLOR), p.facing, 1))                            
                             bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60) - 5, 6, (gc.BULLCOLOR), p.facing, 2))                            
                             bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60) + 5, 6, (gc.BULLCOLOR), p.facing, 3))                            
+                        if p.playerclass == 3 and len(bullets) < p.bulletcnt and not paused and p.hp > 0:
+                            bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60), 6, (gc.BULLCOLOR), p.facing, 0))                            
+                            bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60) - 5, 6, (gc.BULLCOLOR), p.facing, 0))                            
+                            bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60) + 5, 6, (gc.BULLCOLOR), p.facing, 0))                            
+                        if p.playerclass == 4 and len(bullets) < p.bulletcnt and not paused and p.hp > 0:
+                            bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60), 6, (gc.BULLCOLOR), p.facing, 1))                            
+                            bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60) - 5, 6, (gc.BULLCOLOR), p.facing, 2))                            
+                            bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60) + 5, 6, (gc.BULLCOLOR), p.facing, 3)) 
+                            bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60) - 10, 6, (gc.BULLCOLOR), p.facing, 4)) 
+                            bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60) + 10, 6, (gc.BULLCOLOR), p.facing, 5)) 
+                        if p.playerclass == 5 and len(bullets) < p.bulletcnt and not paused and p.hp > 0:
+                            bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60), 6, (gc.BULLCOLOR), p.facing, 1))
+                            if p.facing == 1:
+                                bullets.append(projectile(round(prect.x+prect.width//2 + 10), round(prect.y + prect.height//2 - 60), 6, (gc.BULLCOLOR), p.facing, 1))
+                            else:
+                                bullets.append(projectile(round(prect.x+prect.width//2 - 10), round(prect.y + prect.height//2 - 60), 6, (gc.BULLCOLOR), p.facing, 1))
+
+                        if p.playerclass == 6 and len(bullets) < p.bulletcnt and not paused and p.hp > 0:
+                            bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60), 7, (GREEN), p.facing, 1))
+
 
             else:
                 if event.type == pygame.KEYDOWN:
@@ -962,7 +993,7 @@ def main():
                                 with open(currentdir + './multiplayer/server/userinfo.txt', 'w') as f:
                                     f.write(v.namelol)
                     if console:
-                        if(event.key == pygame.K_c and loggedin):
+                        if(event.key == pygame.K_ESCAPE and loggedin):
                             console = False
                                 
                         if event.key is not pygame.K_RETURN and event.key is not pygame.K_ESCAPE and event.key is not pygame.K_SPACE and event.key is not pygame.K_BACKSPACE:
@@ -985,6 +1016,9 @@ def main():
                                 consoletxt = ''
                             if consoletxt == 'godmode' and gc.consolestage == 0:
                                 p.invinc = True
+                            if consoletxt == 'class' and gc.consolestage == 0:
+                                consoletxt = ''
+                                gc.consolestage = 4    
 
                             if gc.consolestage == 1 and consoletxt != '':
                                 p.hp = int(consoletxt)
@@ -996,6 +1030,10 @@ def main():
                                 consoletxt = ''
                             if gc.consolestage == 3 and consoletxt != '':
                                 gc.points = int(consoletxt)
+                                gc.consolestage = 0        
+                                consoletxt = ''
+                            if gc.consolestage == 4 and consoletxt != '':
+                                p.playerclass = int(consoletxt)
                                 gc.consolestage = 0        
                                 consoletxt = ''
                      
@@ -1062,7 +1100,7 @@ def main():
                                     with open(currentdir + './multiplayer/server/userinfo.txt', 'w') as f:
                                         f.write(v.namelol)
 
-                        if event.key == pygame.K_n:
+                        if event.key == pygame.K_n and not gc.chooseclass1:
                             if(gc.won):
                                 gc.won = False
                                 if gc.rnd < 40:
@@ -1217,6 +1255,32 @@ def main():
         if(gc.won and not gc.shop and not paused and not console):
             win.blit(wintxt, (180, 20))
 
+        if gc.chooseclass1:
+            if p.playerclass == 2:
+                shotgunclass1.draw(win)
+                shotgunclass2.draw(win)
+                if shotgunclass1.clicked:
+                    gc.chooseclass1 = False
+                    p.playerclass = 3 
+
+                if shotgunclass2.clicked:
+                    gc.chooseclass1 = False               
+                    p.playerclass = 4 
+            if p.playerclass == 1:
+                rifleclass1.draw(win)
+                rifleclass2.draw(win)
+                if rifleclass1.clicked:
+                    gc.chooseclass1 = False
+                    p.playerclass = 5 
+                    p.faceval2 -= 3
+                    p.faceval1 += 3
+
+                if rifleclass2.clicked:
+                    gc.chooseclass1 = False               
+                    p.playerclass = 6                 
+                    p.faceval2 -= 1
+                    p.faceval1 += 1
+
         # KEY HANDLING 2
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a] or keys[pygame.K_LEFT]:
@@ -1258,7 +1322,7 @@ def main():
         enemyRect.y = p2.y
         
         # HITBOXES
-        p2.hitbox = (p2.x + 17, p2.y + 11, 29, 52) # NEW
+        p2.hitbox = (p2.x + 17, p2.y + 11, 29, 52) # NEW\
         p3.hitbox = (p3.x + 17, p3.y + 11, 29, 52) # NEW
         if (enemyRect2.colliderect(prect)):
             p2.attack = True
@@ -1292,13 +1356,19 @@ def main():
 
             bullet.draw(win)
 
-            if bullet.x < 1240 and bullet.x > 0: 
-                if p.playerclass == 2:
+            if bullet.x < 1320 and bullet.x > 0: 
+                if p.playerclass >= 2 and p.playerclass <= 4:
                     if bullet.bulletid == 2:
                         bullet.y += 0.75
                     if bullet.bulletid == 1:
                         bullet.y -= 0.75   
                     if bullet.bulletid == 3:
+                        bullet.y += 0.75
+                        if bullet.y > 500:
+                            bullets.pop(bullets.index(bullet)) 
+                    if bullet.bulletid == 4:
+                        bullet.y -= 0.75
+                    if bullet.bulletid == 5:
                         bullet.y += 0.75
                         if bullet.y > 500:
                             bullets.pop(bullets.index(bullet)) 
@@ -1326,6 +1396,9 @@ def main():
                                                     if v.darkvalue == 20:
                                                         p3.hp = 0
                                                         v.darkvalue = 0
+                                                        
+                                                if p.playerclass == 6:
+                                                    p3.hp -= 20           
 
                                                 p3.hp -= p.dmg            
                                                         
@@ -1346,6 +1419,9 @@ def main():
                                     p2.hp = 0
                                     v.darkvalue = 0
 
+                            if p.playerclass == 6:
+                                p2.hp -= 20     
+
                             p2.hp -= p.dmg
 
                         if not gc.won:
@@ -1361,6 +1437,9 @@ def main():
                                     p2.speed += 0.05
 
                                 gc.rnd += 1
+                                if gc.rnd == 30:
+                                    gc.chooseclass1 = True
+                                    
                                 if gc.speedrun:
                                     if gc.rnd >= 50:
                                         gc.moment2 = time.time() * 1000
