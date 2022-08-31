@@ -6,6 +6,9 @@ from os.path import exists
 from pathlib import Path
 pygame.init()
 
+# SET GAME NAME
+pygame.display.set_caption("Geneva")
+
 currentdir = str(Path().absolute())
 
 file_exists = exists(currentdir + './assets/uuid.txt')
@@ -29,7 +32,7 @@ WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
-LBLUE =(75, 127, 199)
+LBLUE = (75, 127, 199)
 
 # INIT FONT
 pygame.font.init()
@@ -116,6 +119,7 @@ class VariableStorage():
         self.startrecentlyclicked = False
         self.classelect = False
         self.modeRecentlyChosen = False
+        self.showHitbox = False
 
 class Shop():
     def __init__(self, one, two, three, four, yeezus, five, hpadd, six, weppadd, ccadd, speedadd, dmgadd, seven):
@@ -196,6 +200,7 @@ class Player():
         self.dashstate = 0
         self.dashstate2 = 0
         self.playerclass = 0
+        self.facingX = 10
 
 
     def changeImg(self, newimg):
@@ -203,7 +208,7 @@ class Player():
 
     def checkFacing(self):
 
-        if(self.img == players["PlayerRED"]):
+        if(self.img == players["PlayerRED"] or self.img == players["PlayerGREEN"] ):
             self.facing = self.faceval2
         else:
             self.facing = self.faceval1
@@ -272,13 +277,13 @@ class dialogue():
         self.text = t1
         self.text1 = t2
 
-# SET GAME NAME
-pygame.display.set_caption("Geneva")
 
 # IMAGES
 players = {
     'PlayerRED' :  pygame.image.load(os.path.join(currentdir + './Assets/character/', 'player.png')).convert_alpha(),
     'PlayerRED2' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/character/', 'player.png')), True, False).convert_alpha(),
+    'PlayerGREEN' :  pygame.image.load(os.path.join(currentdir + './Assets/character/', 'shotgunPlayer.png')).convert_alpha(),
+    'PlayerGREEN2' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/character/', 'shotgunPlayer.png')), True, False).convert_alpha(),    
     'PlayerBLUE' :  pygame.image.load(os.path.join(currentdir + './Assets/character/', 'enemy.png')).convert_alpha(),
     'PlayerBLUEswing' :  pygame.image.load(os.path.join(currentdir + './Assets/character/', 'enemy2.png')).convert_alpha(),
     'PlayerBLUEswing2' :  pygame.image.load(os.path.join(currentdir + './Assets/character/', 'enemy3.png')).convert_alpha(),
@@ -346,12 +351,12 @@ p3 = EnemyPlayer(players['PlayerBLUE'], 0, 455, 5, 1, 0, 3, -1, 1)
 # - SHOP -
 s = Shop(1,2,3,10,30,20,10,50,14,75,10.5,245,70)
 
-enemyRect = pygame.Rect(p2.x, p2.y, p2.img.get_width(), p2.img.get_height())
-prect = pygame.Rect(p.x, p.y, p.img.get_width(), p.img.get_height())
-enemyRect2 = pygame.Rect(p3.x, p3.y, p3.img.get_width(), p3.img.get_height())
+enemyRect = pygame.Rect(p2.x, p2.y, p2.img.get_width()- 50, p2.img.get_height())
+prect = pygame.Rect(p.x, p.y, p.img.get_width() - 50, p.img.get_height())
+enemyRect2 = pygame.Rect(p3.x, p3.y, p3.img.get_width() - 50, p3.img.get_height())
 
 # Rects
-mousenemyRect = pygame.Rect((300, 300),(20,20))
+mouseRect = pygame.Rect((300, 300),(20,20))
 grassRect = pygame.Rect((0,520),(1320,300))
 statsrect = pygame.Rect((900, 100),(330,220))
 consolenemyRect = pygame.Rect((700, 50),(230,230))
@@ -701,6 +706,8 @@ def main():
                 if gc.speedrun:
                     gc.moment1 = time.time() * 1000
                 p.playerclass = 2
+                p.changeImg(players['PlayerGREEN'])
+
                 p.bulletcnt = 4
                 v.classelect = False
                 gc.startclicked = True
@@ -937,37 +944,49 @@ def main():
 
 
             if event.type == pygame.MOUSEBUTTONDOWN and gc.startclicked:
-                        if mousenemyRect.x > p.x:
+                        if mouseRect.x > p.x:
                             p.facing = 1
-                            p.changeImg(players['PlayerRED2'])
+                            p.facingX = -10
+                            if p.playerclass == 1 or p.playerclass == 5 or p.playerclass == 6:
+                                p.changeImg(players['PlayerRED2'])
+                            else:
+                                p.changeImg(players['PlayerGREEN2'])
+
                         else:
                             p.facing = -1
-                            p.changeImg(players['PlayerRED'])
-                        if p.playerclass == 1 and len(bullets) < p.bulletcnt and not paused and p.hp > 0:  # This will make sure we cannot exceed 5 bullets on the screen at once
-                            bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60), 6, (gc.BULLCOLOR), p.facing, 1))
-                        if p.playerclass == 2 and len(bullets) < p.bulletcnt and not paused and p.hp > 0:
-                            bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60), 6, (gc.BULLCOLOR), p.facing, 1))                            
-                            bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60) - 5, 6, (gc.BULLCOLOR), p.facing, 2))                            
-                            bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60) + 5, 6, (gc.BULLCOLOR), p.facing, 3))                            
-                        if p.playerclass == 3 and len(bullets) < p.bulletcnt and not paused and p.hp > 0:
-                            bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60), 6, (gc.BULLCOLOR), p.facing, 0))                            
-                            bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60) - 5, 6, (gc.BULLCOLOR), p.facing, 0))                            
-                            bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60) + 5, 6, (gc.BULLCOLOR), p.facing, 0))                            
-                        if p.playerclass == 4 and len(bullets) < p.bulletcnt and not paused and p.hp > 0:
-                            bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60), 6, (gc.BULLCOLOR), p.facing, 1))                            
-                            bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60) - 5, 6, (gc.BULLCOLOR), p.facing, 2))                            
-                            bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60) + 5, 6, (gc.BULLCOLOR), p.facing, 3)) 
-                            bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60) - 10, 6, (gc.BULLCOLOR), p.facing, 4)) 
-                            bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60) + 10, 6, (gc.BULLCOLOR), p.facing, 5)) 
-                        if p.playerclass == 5 and len(bullets) < p.bulletcnt and not paused and p.hp > 0:
-                            bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60), 6, (gc.BULLCOLOR), p.facing, 1))
-                            if p.facing == 1:
-                                bullets.append(projectile(round(prect.x+prect.width//2 + 10), round(prect.y + prect.height//2 - 60), 6, (gc.BULLCOLOR), p.facing, 1))
+                            p.facingX = 10
+
+                            if p.playerclass == 1 or p.playerclass == 5 or p.playerclass == 6:
+                                p.changeImg(players['PlayerRED'])
                             else:
-                                bullets.append(projectile(round(prect.x+prect.width//2 - 10), round(prect.y + prect.height//2 - 60), 6, (gc.BULLCOLOR), p.facing, 1))
+                                p.changeImg(players['PlayerGREEN'])
+
+
+                        if p.playerclass == 1 and len(bullets) < p.bulletcnt and not paused and p.hp > 0:  # This will make sure we cannot exceed 5 bullets on the screen at once
+                            bullets.append(projectile(round(prect.x+prect.width//2 - p.facingX), round(prect.y + prect.height//2 - 10), 6, (gc.BULLCOLOR), p.facing, 1))
+                        if p.playerclass == 2 and len(bullets) < p.bulletcnt and not paused and p.hp > 0:
+                            bullets.append(projectile(round(prect.x+prect.width//2 - p.facingX), round(prect.y + prect.height//2 - 10), 6, (gc.BULLCOLOR), p.facing, 1))                            
+                            bullets.append(projectile(round(prect.x+prect.width//2 - p.facingX), round(prect.y + prect.height//2 - 10) - 5, 6, (gc.BULLCOLOR), p.facing, 2))                            
+                            bullets.append(projectile(round(prect.x+prect.width//2 - p.facingX0), round(prect.y + prect.height//2 - 10) + 5, 6, (gc.BULLCOLOR), p.facing, 3))                            
+                        if p.playerclass == 3 and len(bullets) < p.bulletcnt and not paused and p.hp > 0:
+                            bullets.append(projectile(round(prect.x+prect.width//2 - p.facingX), round(prect.y + prect.height//2 - 10), 6, (gc.BULLCOLOR), p.facing, 0))                            
+                            bullets.append(projectile(round(prect.x+prect.width//2 - p.facingX), round(prect.y + prect.height//2 - 10) - 5, 6, (gc.BULLCOLOR), p.facing, 0))                            
+                            bullets.append(projectile(round(prect.x+prect.width//2 - p.facingX), round(prect.y + prect.height//2 - 10) + 5, 6, (gc.BULLCOLOR), p.facing, 0))                            
+                        if p.playerclass == 4 and len(bullets) < p.bulletcnt and not paused and p.hp > 0:
+                            bullets.append(projectile(round(prect.x+prect.width//2 - p.facingX), round(prect.y + prect.height//2 - 10), 6, (gc.BULLCOLOR), p.facing, 1))                            
+                            bullets.append(projectile(round(prect.x+prect.width//2 - p.facingX), round(prect.y + prect.height//2 - 10) - 5, 6, (gc.BULLCOLOR), p.facing, 2))                            
+                            bullets.append(projectile(round(prect.x+prect.width//2 - p.facingX), round(prect.y + prect.height//2 - 10) + 5, 6, (gc.BULLCOLOR), p.facing, 3)) 
+                            bullets.append(projectile(round(prect.x+prect.width//2 - p.facingX), round(prect.y + prect.height//2 - 10) - 10, 6, (gc.BULLCOLOR), p.facing, 4)) 
+                            bullets.append(projectile(round(prect.x+prect.width//2 - p.facingX), round(prect.y + prect.height//2 - 10) + 10, 6, (gc.BULLCOLOR), p.facing, 5)) 
+                        if p.playerclass == 5 and len(bullets) < p.bulletcnt and not paused and p.hp > 0:
+                            bullets.append(projectile(round(prect.x+prect.width//2 - p.facingX), round(prect.y + prect.height//2 - 60), 6, (gc.BULLCOLOR), p.facing, 1))
+                            if p.facing == 1:
+                                bullets.append(projectile(round(prect.x+prect.width//2 + 20), round(prect.y + prect.height//2 - 60), 6, (gc.BULLCOLOR), p.facing, 1))
+                            else:
+                                bullets.append(projectile(round(prect.x+prect.width//2 - 20), round(prect.y + prect.height//2 - 60), 6, (gc.BULLCOLOR), p.facing, 1))
 
                         if p.playerclass == 6 and len(bullets) < p.bulletcnt and not paused and p.hp > 0:
-                            bullets.append(projectile(round(prect.x+prect.width//2), round(prect.y + prect.height//2 - 60), 7, (GREEN), p.facing, 1))
+                            bullets.append(projectile(round(prect.x+prect.width//2 - p.facingX), round(prect.y + prect.height//2 - 60), 7, (GREEN), p.facing, 1))
 
 
             else:
@@ -1016,9 +1035,13 @@ def main():
                                 consoletxt = ''
                             if consoletxt == 'godmode' and gc.consolestage == 0:
                                 p.invinc = True
+                            if consoletxt == 'showhitboxes' and gc.consolestage == 0:
+                                v.showHitbox = True
+
                             if consoletxt == 'class' and gc.consolestage == 0:
                                 consoletxt = ''
                                 gc.consolestage = 4    
+
 
                             if gc.consolestage == 1 and consoletxt != '':
                                 p.hp = int(consoletxt)
@@ -1289,13 +1312,19 @@ def main():
                 if yeezus:
                     p.changeImg(yeezusimg['yeezus'])
                 else:
-                 p.changeImg(players['PlayerRED']) 
+                    if p.playerclass == 1 or p.playerclass == 5 or p.playerclass == 6:
+                        p.changeImg(players['PlayerRED'])
+                    else:
+                        p.changeImg(players['PlayerGREEN'])
         if keys[pygame.K_d] or keys[pygame.K_RIGHT] :
             if(p.x < 1240):
                 if yeezus:
                     p.changeImg(yeezusimg['yeezus2'])
                 else:
-                    p.changeImg(players['PlayerRED2'])
+                    if p.playerclass == 1 or p.playerclass == 5 or p.playerclass == 6:
+                        p.changeImg(players['PlayerRED2'])
+                    else:
+                        p.changeImg(players['PlayerGREEN2'])
                 p.x += p.speed
 
         if crit:
@@ -1308,19 +1337,22 @@ def main():
                 crit = False
 
         prect.x = p.x
-        prect.y = p.y
+        prect.y = (p.y - 40)
         if(p.x < p2.x):
-         enemyRect.x = (p2.x + 80)
+         enemyRect.x = (p2.x + 20)
         if(p.x > p2.x):
-         enemyRect.x = (p2.x - 80)
+         enemyRect.x = (p2.x - 20)
         if(p.x < p3.x):
-         enemyRect2.x = (p3.x + 80)
+         enemyRect2.x = (p3.x + 20)
         if(p.x > p3.x):
-         enemyRect2.x = (p3.x - 80)
+         enemyRect2.x = (p3.x - 20)
 
-        enemyRect2.y = p3.y
-        enemyRect.y = p2.y
-        
+        enemyRect2.y = p3.y - 40
+        enemyRect.y = p2.y - 40
+        if v.showHitbox:
+            pygame.draw.rect(win, (0,0,0),enemyRect)
+            pygame.draw.rect(win, (0,0,0),prect)
+
         # HITBOXES
         p2.hitbox = (p2.x + 17, p2.y + 11, 29, 52) # NEW\
         p3.hitbox = (p3.x + 17, p3.y + 11, 29, 52) # NEW
@@ -1610,8 +1642,8 @@ def main():
             if not p.invinc:
                 p.hp -= p3.dmg
 
-        mousenemyRect.x ,mousenemyRect.y = pygame.mouse.get_pos()
-        pygame.draw.rect(win, (0,0,0),mousenemyRect)
+        mouseRect.x ,mouseRect.y = pygame.mouse.get_pos()
+        pygame.draw.rect(win, (0,0,0),mouseRect)
 
         pygame.display.flip()
 
