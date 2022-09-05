@@ -20,4 +20,5 @@ class MyClient(discord.Client):
             f.write(message.content)
 
 client = MyClient()
-client.run('MTAwNjc0MDgyMTUzMTQzNTAwOA.G6J2M7.sGDlQMkBlYbAWy2twG_J4fJarqNd6EIBt7cne4')
+# Token Removed [and changed]
+client.run('')
