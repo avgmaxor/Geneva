@@ -25,3 +25,7 @@
 - jusuf - playtester/bugfinder
 
 - groses - art
+
+# Contact
+- avg#3851
+- avgjewmail@gmail.com

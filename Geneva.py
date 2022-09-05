@@ -1,3 +1,6 @@
+# Code by Maxor
+# Commits by William, Art from Archer
+# DM avg#3851 on discord for Questions
 import pygame, os, requests, webbrowser, socket, time
 from pygame import K_BACKSPACE , font
 from random import randint
@@ -280,27 +283,27 @@ class dialogue():
 
 # IMAGES
 players = {
-    'PlayerRED' :  pygame.image.load(os.path.join(currentdir + './Assets/character/', 'player.png')).convert_alpha(),
-    'PlayerRED2' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/character/', 'player.png')), True, False).convert_alpha(),
-    'PlayerGREEN' :  pygame.image.load(os.path.join(currentdir + './Assets/character/', 'shotgunPlayer.png')).convert_alpha(),
-    'PlayerGREEN2' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/character/', 'shotgunPlayer.png')), True, False).convert_alpha(),    
-    'PlayerBLUE' :  pygame.image.load(os.path.join(currentdir + './Assets/character/', 'enemy.png')).convert_alpha(),
-    'PlayerBLUEswing' :  pygame.image.load(os.path.join(currentdir + './Assets/character/', 'enemy2.png')).convert_alpha(),
-    'PlayerBLUEswing2' :  pygame.image.load(os.path.join(currentdir + './Assets/character/', 'enemy3.png')).convert_alpha(),
-    'PlayerBLUEswing3' :  pygame.image.load(os.path.join(currentdir + './Assets/character/', 'enemy4.png')).convert_alpha(),
-    'PlayerBLUE2' :  pygame.transform.flip(pygame.image.load(os.path.join(currentdir + './Assets/character/', 'enemy.png')), True, False).convert_alpha(),
-    'PlayerBLUEswing22' :  pygame.transform.flip(pygame.image.load(os.path.join(currentdir + './Assets/character/', 'enemy3.png')), True, False).convert_alpha(),
-    'PlayerBLUEswing32' :  pygame.transform.flip(pygame.image.load(os.path.join(currentdir + './Assets/character/', 'enemy4.png')), True, False).convert_alpha(),
-    'PlayerBLUEswing23' :  pygame.transform.flip(pygame.image.load(os.path.join(currentdir + './Assets/character/', 'enemy2.png')), True, False).convert_alpha(),
+    'PlayerRED' :  pygame.image.load(os.path.join(currentdir + './Assets/character/Player', 'player.png')).convert_alpha(),
+    'PlayerRED2' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/character/Player', 'player.png')), True, False).convert_alpha(),
+    'PlayerGREEN' :  pygame.image.load(os.path.join(currentdir + './Assets/character/Player', 'shotgunPlayer.png')).convert_alpha(),
+    'PlayerGREEN2' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/character/Player', 'shotgunPlayer.png')), True, False).convert_alpha(),    
+    'PlayerBLUE' :  pygame.image.load(os.path.join(currentdir + './Assets/character/Enemy', 'enemy.png')).convert_alpha(),
+    'PlayerBLUEswing' :  pygame.image.load(os.path.join(currentdir + './Assets/character/Enemy', 'enemy2.png')).convert_alpha(),
+    'PlayerBLUEswing2' :  pygame.image.load(os.path.join(currentdir + './Assets/character/Enemy', 'enemy3.png')).convert_alpha(),
+    'PlayerBLUEswing3' :  pygame.image.load(os.path.join(currentdir + './Assets/character/Enemy', 'enemy4.png')).convert_alpha(),
+    'PlayerBLUE2' :  pygame.transform.flip(pygame.image.load(os.path.join(currentdir + './Assets/character/Enemy', 'enemy.png')), True, False).convert_alpha(),
+    'PlayerBLUEswing22' :  pygame.transform.flip(pygame.image.load(os.path.join(currentdir + './Assets/character/Enemy', 'enemy3.png')), True, False).convert_alpha(),
+    'PlayerBLUEswing32' :  pygame.transform.flip(pygame.image.load(os.path.join(currentdir + './Assets/character/Enemy', 'enemy4.png')), True, False).convert_alpha(),
+    'PlayerBLUEswing23' :  pygame.transform.flip(pygame.image.load(os.path.join(currentdir + './Assets/character/Enemy', 'enemy2.png')), True, False).convert_alpha(),
 
 }
 yeezusimg = {
-    'yeezus' :  pygame.image.load(os.path.join(currentdir + './Assets/yeezus/', 'yeezuz.png')).convert_alpha(),
-    'yeezus2' :  pygame.transform.flip(pygame.image.load(os.path.join(currentdir + './Assets/yeezus/', 'yeezuz.png')), True, False).convert_alpha(),
-    'yeezus3' :  pygame.image.load(os.path.join(currentdir + './Assets/yeezus/', 'yeezus2.png')).convert_alpha(),
-    'yeezusswing2' :  pygame.image.load(os.path.join(currentdir + './Assets/yeezus/', 'yeezusSwing2.png')).convert_alpha(),
-    'yeezusswing' :  pygame.image.load(os.path.join(currentdir + './Assets/yeezus/', 'yeezusSwing.png')).convert_alpha(),
-    'yeezus6' :  pygame.transform.flip(pygame.image.load(os.path.join(currentdir + './Assets/yeezus/', 'yeezus2.png')), True, False).convert_alpha(),
+    'yeezus' :  pygame.image.load(os.path.join(currentdir + './Assets/character/yeezus/', 'yeezuz.png')).convert_alpha(),
+    'yeezus2' :  pygame.transform.flip(pygame.image.load(os.path.join(currentdir + './Assets/character/yeezus/', 'yeezuz.png')), True, False).convert_alpha(),
+    'yeezus3' :  pygame.image.load(os.path.join(currentdir + './Assets/character/yeezus/', 'yeezus2.png')).convert_alpha(),
+    'yeezusswing2' :  pygame.image.load(os.path.join(currentdir + './Assets/character/yeezus/', 'yeezusSwing2.png')).convert_alpha(),
+    'yeezusswing' :  pygame.image.load(os.path.join(currentdir + './Assets/character/yeezus/', 'yeezusSwing.png')).convert_alpha(),
+    'yeezus6' :  pygame.transform.flip(pygame.image.load(os.path.join(currentdir + './Assets/character/yeezus/', 'yeezus2.png')), True, False).convert_alpha(),
     'deezz' : pygame.image.load(os.path.join(currentdir + './Assets/', 'ground.png')).convert_alpha(),
     'deez' : pygame.transform.scale(pygame.image.load(os.path.join(currentdir + './Assets/', 'ground.png')),(1320,140)).convert_alpha(),
     'deez2' : pygame.transform.scale(pygame.image.load(os.path.join(currentdir + './Assets/', 'ground.png')),(1460,140)).convert_alpha(),
@@ -967,7 +970,7 @@ def main():
                         if p.playerclass == 2 and len(bullets) < p.bulletcnt and not paused and p.hp > 0:
                             bullets.append(projectile(round(prect.x+prect.width//2 - p.facingX), round(prect.y + prect.height//2 - 10), 6, (gc.BULLCOLOR), p.facing, 1))                            
                             bullets.append(projectile(round(prect.x+prect.width//2 - p.facingX), round(prect.y + prect.height//2 - 10) - 5, 6, (gc.BULLCOLOR), p.facing, 2))                            
-                            bullets.append(projectile(round(prect.x+prect.width//2 - p.facingX0), round(prect.y + prect.height//2 - 10) + 5, 6, (gc.BULLCOLOR), p.facing, 3))                            
+                            bullets.append(projectile(round(prect.x+prect.width//2 - p.facingX), round(prect.y + prect.height//2 - 10) + 5, 6, (gc.BULLCOLOR), p.facing, 3))                            
                         if p.playerclass == 3 and len(bullets) < p.bulletcnt and not paused and p.hp > 0:
                             bullets.append(projectile(round(prect.x+prect.width//2 - p.facingX), round(prect.y + prect.height//2 - 10), 6, (gc.BULLCOLOR), p.facing, 0))                            
                             bullets.append(projectile(round(prect.x+prect.width//2 - p.facingX), round(prect.y + prect.height//2 - 10) - 5, 6, (gc.BULLCOLOR), p.facing, 0))                            
@@ -1661,3 +1664,6 @@ if int(versioncheck) < int(float(versi)):
     update()
 else:
     main()
+
+# END
+# PLEASE FIX ALL MY MONKEY CODE PLS - MAXOR
