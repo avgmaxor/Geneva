@@ -22,4 +22,4 @@ class MyClient(discord.Client):
 
 client = MyClient()
 # Token Removed [and changed]
-client.run('')
+client.run('ODQzNTE3MzM1MTM0NjY2NzYy.Gbk_S1.0146lqBhe4jUa10WluMIxQyvBEf2OfC7YIMXB0')

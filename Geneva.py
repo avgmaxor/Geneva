@@ -1,7 +1,7 @@
 # Code by Maxor
 # Commits by William, Art from Archer
 # DM avg#3851 on discord for Questions
-import pygame, os, requests, webbrowser, socket, time
+import pygame, os, requests, webbrowser, time
 from pygame import K_BACKSPACE , font
 from random import randint
 from discord_webhook import DiscordWebhook
@@ -16,18 +16,6 @@ currentdir = str(Path().absolute())
 
 file_exists = exists(currentdir + './assets/uuid.txt')
 file_exists2 = exists(currentdir + './multiplayer/server/userinfo.txt')
-
-# UUID
-uuid = randint(1,999)
-uuidstr = str(uuid)
-
-if file_exists:
-    with open('./assets/uuid.txt') as f:
-        uuidstr = f.read()
-        print(uuidstr)
-else:
-    with open('./assets/uuid.txt', 'w') as f:
-        f.write(uuidstr)
 
 # INIT COLORS
 BLACK = (0, 0, 0)
@@ -51,8 +39,7 @@ font8 = pygame.font.SysFont('Serif', 10)
 high = requests.get("https://maxor.xyz/geneva/highscore.txt")                        
 highscore = high.text
 
-name = socket.gethostname()
-webhook = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content=name + ' has logged in unique id: ' +  name + ' ' + uuidstr)
+webhook = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content=' Someone has logged into Geneva Original unique id')
 response = webhook.execute()
 
 # SIZE
@@ -371,10 +358,9 @@ bullets = []
 settings_button = Button(500,200,button_imgs['settings_button'],3)
 start = Button(500,100,button_imgs['start'],3)
 discord = Button(20,20,button_imgs['discord'],3)
-Rankings = Button(500,300,button_imgs['Rankings'],3)
-mp = Button(500,400,button_imgs['multi'],3)
-controls = Button(500,500,button_imgs['Controls'],3)
-creditss = Button(500,600,button_imgs['credits'],3)
+mp = Button(500,300,button_imgs['multi'],3)
+controls = Button(500,400,button_imgs['Controls'],3)
+creditss = Button(500,500,button_imgs['credits'],3)
 
 # PAUSE
 login_button = Button(500,100,button_imgs['login'],3)
@@ -542,15 +528,7 @@ def main():
     ranked = False
     value2 = 0
 
-    VARS = requests.get("https://maxor.xyz/geneva/rankings.txt")
-    vars2 = VARS.text
-    switzerland = 'Switzerland: ' + vars2[0:7]
-    top2 = '2: ' + vars2[8:14]
-    top3 = '3: ' + vars2[15:21]        
-    top4 = '4: ' + vars2[22:29]
-    top5 = '5: ' + vars2[30:38]      
-    num1 = font4.render(switzerland, (0,5), BLACK)
-    leaderboard = False            
+        
 
     # main
     while run:
@@ -593,8 +571,7 @@ def main():
         if gc.client == 1 or gc.client == 2:
             v.singleplayer = False
 
-        if not gc.startclicked and not v.creditsactive and not settings and not v.resolutionclicked and not v.mpprompt and not v.controlspage and not gc.inlobby and not leaderboard and not gc.singleplayerpromp and not v.classelect:
-            Rankings.draw(win)
+        if not gc.startclicked and not v.creditsactive and not settings and not v.resolutionclicked and not v.mpprompt and not v.controlspage and not gc.inlobby and not gc.singleplayerpromp and not v.classelect:
             start.draw(win)
             discord.draw(win)
             creditss.draw(win)           
@@ -609,8 +586,7 @@ def main():
             if controls.clicked and not gc.restarted:
                 v.controlspage = True
 
-            if Rankings.clicked:
-                leaderboard = True   
+
     
             if mp.clicked:
                 v.mpprompt = True
@@ -631,21 +607,6 @@ def main():
 
         if gc.restarted:
             paused = False
-            
-        if leaderboard:
-            back.draw(win)     
-
-            win.blit(num1,(10,70))
-            num2 = font4.render(top2, (0,5), BLACK)
-            win.blit(num2,(10,170))
-            num3 = font4.render(top3, (0,5), BLACK)
-            win.blit(num3,(10,270))
-            num4 = font4.render(top4, (0,5), BLACK)
-            win.blit(num4,(10,370))        
-            num5 = font4.render(top5, (0,5), BLACK)
-            win.blit(num5,(10,470))   
-            if back.clicked:
-                leaderboard = False
 
         # GROUND AND CLOUD
         if gc.startclicked:
@@ -906,7 +867,7 @@ def main():
         if yeezus:
             p2.yeezus = True
             p.yeezus = True
-        if paused or not gc.startclicked and not v.creditsactive and not settings and not v.mpprompt and not v.controlspage and not gc.inlobby and not leaderboard and not gc.singleplayerpromp and not v.classelect:
+        if paused or not gc.startclicked and not v.creditsactive and not settings and not v.mpprompt and not v.controlspage and not gc.inlobby and not gc.singleplayerpromp and not v.classelect:
             settings_button.draw(win)
             if(settings_button.clicked):
                 if not settings:
@@ -1119,8 +1080,7 @@ def main():
 
                                 elif (num <= 74 and num > 29 and gc.password != '' and gc.password != 'attributes' and gc.password != 'pass'):
                                     loggedin = True
-                                    name = socket.gethostname()
-                                    webhook4 = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content=name + ' had logged into the admin account: ' + gc.username)
+                                    webhook4 = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content= ' Someone has logged into the admin account: ' + gc.username)
                                     responsaae = webhook4.execute()
                                     v.namelol = gc.username
                                     with open(currentdir + './multiplayer/server/userinfo.txt', 'w') as f:
@@ -1233,8 +1193,8 @@ def main():
         p.checkFacing()
 
         if v.highscoreprompt:
-            hs = font3.render('You have beaten the hs, what would you like your name to appear as?', True, (BLACK))
-            win.blit(hs, (20,20))
+            d.dialogue = True
+            d.changeText('You have beaten the hs, what would you like your name to appear as?!' , 'Good Job')
 
         if gc.login and paused:
             use = font3.render(gc.username, True, (BLACK))
@@ -1245,8 +1205,8 @@ def main():
             
 
         if p.hp <= 0:
-            lost = font.render("Ratio U LOST", (20,20), BLACK)
-            win.blit(lost, (150, 20))                
+            d.dialogue = True
+            d.changeText("Ratio U LOST", ':(((')
             if p.lightspecial == True:
                 if p.lightused == False:
                     p.hp = 100
