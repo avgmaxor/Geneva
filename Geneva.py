@@ -1,21 +1,31 @@
 # Code by Maxor
 # Commits by William, Art from Archer
 # DM avg#3851 on discord for Questions
-import pygame, os, requests, webbrowser, time
+import pygame, os, sys, requests, webbrowser, time
 from pygame import K_BACKSPACE , font
 from random import randint
 from discord_webhook import DiscordWebhook
 from os.path import exists
-from pathlib import Path
+from netplay import Peer
 pygame.init()
 
 # SET GAME NAME
 pygame.display.set_caption("Geneva")
 
-currentdir = str(Path().absolute())
+# Compiled builds (build.py) bundle the assets and save player data in the user's home folder
+if getattr(sys, 'frozen', False):
+    basedir = sys._MEIPASS
+    datadir = os.path.join(os.path.expanduser('~'), '.geneva')
+else:
+    basedir = os.path.dirname(os.path.abspath(__file__))
+    datadir = os.path.join(basedir, 'multiplayer', 'server')
 
-file_exists = exists(currentdir + './assets/uuid.txt')
-file_exists2 = exists(currentdir + './multiplayer/server/userinfo.txt')
+def asset(*parts):
+    return os.path.join(basedir, 'assets', *parts)
+
+os.makedirs(datadir, exist_ok=True)
+userinfopath = os.path.join(datadir, 'userinfo.txt')
+file_exists2 = exists(userinfopath)
 
 # INIT COLORS
 BLACK = (0, 0, 0)
@@ -35,12 +45,28 @@ font4 = pygame.font.SysFont('Serif', 30)
 font7 = pygame.font.SysFont('Serif', 100)
 font8 = pygame.font.SysFont('Serif', 10)
 
-# GET HIGHSCORE
-high = requests.get("https://maxor.xyz/geneva/highscore.txt")                        
-highscore = high.text
+# NETWORK HELPERS (game still works offline)
+def fetch(url, default=''):
+    try:
+        r = requests.get(url, timeout=5)
+        r.raise_for_status()
+        return r.text.strip()
+    except requests.RequestException:
+        return default
 
-webhook = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content=' Someone has logged into Geneva Original unique id')
-response = webhook.execute()
+def sendWebhook(url, content):
+    try:
+        DiscordWebhook(url=url, content=content).execute()
+    except Exception:
+        pass
+
+# GET HIGHSCORE (None when offline, so nobody gets a fake highscore prompt)
+try:
+    highscore = int(fetch("https://maxor.xyz/geneva/highscore.txt"))
+except ValueError:
+    highscore = None
+
+sendWebhook('https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', ' Someone has logged into Geneva Original unique id')
 
 # SIZE
 size = (1320,737)
@@ -104,12 +130,13 @@ class VariableStorage():
         self.goths = False
         self.singleplayer = True
         self.mpprompt = False
-        self.opened = False
         self.controlspage = False    
         self.startrecentlyclicked = False
         self.classelect = False
         self.modeRecentlyChosen = False
         self.showHitbox = False
+        self.ipprompt = False
+        self.joinip = ''
 
 class Shop():
     def __init__(self, one, two, three, four, yeezus, five, hpadd, six, weppadd, ccadd, speedadd, dmgadd, seven):
@@ -270,68 +297,66 @@ class dialogue():
 
 # IMAGES
 players = {
-    'PlayerRED' :  pygame.image.load(os.path.join(currentdir + './Assets/character/Player', 'player.png')).convert_alpha(),
-    'PlayerRED2' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/character/Player', 'player.png')), True, False).convert_alpha(),
-    'PlayerGREEN' :  pygame.image.load(os.path.join(currentdir + './Assets/character/Player', 'shotgunPlayer.png')).convert_alpha(),
-    'PlayerGREEN2' :  pygame.transform.flip(pygame.image.load(os.path.join('./Assets/character/Player', 'shotgunPlayer.png')), True, False).convert_alpha(),    
-    'PlayerBLUE' :  pygame.image.load(os.path.join(currentdir + './Assets/character/Enemy', 'enemy.png')).convert_alpha(),
-    'PlayerBLUEswing' :  pygame.image.load(os.path.join(currentdir + './Assets/character/Enemy', 'enemy2.png')).convert_alpha(),
-    'PlayerBLUEswing2' :  pygame.image.load(os.path.join(currentdir + './Assets/character/Enemy', 'enemy3.png')).convert_alpha(),
-    'PlayerBLUEswing3' :  pygame.image.load(os.path.join(currentdir + './Assets/character/Enemy', 'enemy4.png')).convert_alpha(),
-    'PlayerBLUE2' :  pygame.transform.flip(pygame.image.load(os.path.join(currentdir + './Assets/character/Enemy', 'enemy.png')), True, False).convert_alpha(),
-    'PlayerBLUEswing22' :  pygame.transform.flip(pygame.image.load(os.path.join(currentdir + './Assets/character/Enemy', 'enemy3.png')), True, False).convert_alpha(),
-    'PlayerBLUEswing32' :  pygame.transform.flip(pygame.image.load(os.path.join(currentdir + './Assets/character/Enemy', 'enemy4.png')), True, False).convert_alpha(),
-    'PlayerBLUEswing23' :  pygame.transform.flip(pygame.image.load(os.path.join(currentdir + './Assets/character/Enemy', 'enemy2.png')), True, False).convert_alpha(),
+    'PlayerRED' :  pygame.image.load(asset('character', 'Player', 'player.png')).convert_alpha(),
+    'PlayerRED2' :  pygame.transform.flip(pygame.image.load(asset('character', 'Player', 'player.png')), True, False).convert_alpha(),
+    'PlayerGREEN' :  pygame.image.load(asset('character', 'Player', 'shotgunPlayer.png')).convert_alpha(),
+    'PlayerGREEN2' :  pygame.transform.flip(pygame.image.load(asset('character', 'Player', 'shotgunPlayer.png')), True, False).convert_alpha(),    
+    'PlayerBLUE' :  pygame.image.load(asset('character', 'Enemy', 'enemy.png')).convert_alpha(),
+    'PlayerBLUEswing' :  pygame.image.load(asset('character', 'Enemy', 'enemy2.png')).convert_alpha(),
+    'PlayerBLUEswing2' :  pygame.image.load(asset('character', 'Enemy', 'enemy3.png')).convert_alpha(),
+    'PlayerBLUEswing3' :  pygame.image.load(asset('character', 'Enemy', 'enemy4.png')).convert_alpha(),
+    'PlayerBLUE2' :  pygame.transform.flip(pygame.image.load(asset('character', 'Enemy', 'enemy.png')), True, False).convert_alpha(),
+    'PlayerBLUEswing22' :  pygame.transform.flip(pygame.image.load(asset('character', 'Enemy', 'enemy3.png')), True, False).convert_alpha(),
+    'PlayerBLUEswing32' :  pygame.transform.flip(pygame.image.load(asset('character', 'Enemy', 'enemy4.png')), True, False).convert_alpha(),
+    'PlayerBLUEswing23' :  pygame.transform.flip(pygame.image.load(asset('character', 'Enemy', 'enemy2.png')), True, False).convert_alpha(),
 
 }
 yeezusimg = {
-    'yeezus' :  pygame.image.load(os.path.join(currentdir + './Assets/character/yeezus/', 'yeezuz.png')).convert_alpha(),
-    'yeezus2' :  pygame.transform.flip(pygame.image.load(os.path.join(currentdir + './Assets/character/yeezus/', 'yeezuz.png')), True, False).convert_alpha(),
-    'yeezus3' :  pygame.image.load(os.path.join(currentdir + './Assets/character/yeezus/', 'yeezus2.png')).convert_alpha(),
-    'yeezusswing2' :  pygame.image.load(os.path.join(currentdir + './Assets/character/yeezus/', 'yeezusSwing2.png')).convert_alpha(),
-    'yeezusswing' :  pygame.image.load(os.path.join(currentdir + './Assets/character/yeezus/', 'yeezusSwing.png')).convert_alpha(),
-    'yeezus6' :  pygame.transform.flip(pygame.image.load(os.path.join(currentdir + './Assets/character/yeezus/', 'yeezus2.png')), True, False).convert_alpha(),
-    'deezz' : pygame.image.load(os.path.join(currentdir + './Assets/', 'ground.png')).convert_alpha(),
-    'deez' : pygame.transform.scale(pygame.image.load(os.path.join(currentdir + './Assets/', 'ground.png')),(1320,140)).convert_alpha(),
-    'deez2' : pygame.transform.scale(pygame.image.load(os.path.join(currentdir + './Assets/', 'ground.png')),(1460,140)).convert_alpha(),
-    'cloudx' : pygame.image.load(os.path.join(currentdir + './Assets/', 'cloud.png')).convert_alpha(),
-    'cloud' : pygame.transform.scale(pygame.image.load(os.path.join(currentdir + './Assets/', 'cloud.png')),(300,200)).convert_alpha(),
+    'yeezus' :  pygame.image.load(asset('character', 'yeezus', 'yeezuz.png')).convert_alpha(),
+    'yeezus2' :  pygame.transform.flip(pygame.image.load(asset('character', 'yeezus', 'yeezuz.png')), True, False).convert_alpha(),
+    'yeezus3' :  pygame.image.load(asset('character', 'yeezus', 'yeezus2.png')).convert_alpha(),
+    'yeezusswing2' :  pygame.image.load(asset('character', 'yeezus', 'yeezusswing2.png')).convert_alpha(),
+    'yeezusswing' :  pygame.image.load(asset('character', 'yeezus', 'yeezusswing.png')).convert_alpha(),
+    'yeezus6' :  pygame.transform.flip(pygame.image.load(asset('character', 'yeezus', 'yeezus2.png')), True, False).convert_alpha(),
+    'deezz' : pygame.image.load(asset('ground.png')).convert_alpha(),
+    'deez' : pygame.transform.scale(pygame.image.load(asset('ground.png')),(1320,140)).convert_alpha(),
+    'deez2' : pygame.transform.scale(pygame.image.load(asset('ground.png')),(1460,140)).convert_alpha(),
+    'cloudx' : pygame.image.load(asset('cloud.png')).convert_alpha(),
+    'cloud' : pygame.transform.scale(pygame.image.load(asset('cloud.png')),(300,200)).convert_alpha(),
 }
 
 button_imgs = {
-    'settings_button': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'settings.png')).convert_alpha(),
-    'login': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'Login.png')).convert_alpha(),
-    'restart': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'restart.png')).convert_alpha(),
-    'start': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'start.png')).convert_alpha(),
-    'discord': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'discord.png')).convert_alpha(),
-    'credits': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'credits.png')).convert_alpha(),
-    'resolution': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'resolution.png')).convert_alpha(),
-    'resolution1': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'resolution1.png')).convert_alpha(),
-    'resolution2': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'resolution2.png')).convert_alpha(),
-    'back': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'back.png')).convert_alpha(),
-    'multi': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'multi.png')).convert_alpha(),
-    'multi1': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'client1.png')).convert_alpha(),
-    'multi2': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'client2.png')).convert_alpha(),
-    'DC': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'DC.png')).convert_alpha(),
-    'Controls': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'Controls.png')).convert_alpha(),
-    'Casual': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'Casual.png')).convert_alpha(),
-    'Ranked': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'Ranked.png')).convert_alpha(),
-    'Rankings': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'Rankings.png')).convert_alpha(),
-    'Speedrun': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'SpeedRun.png')).convert_alpha(),
-    'Rifle': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'Rifle.png')).convert_alpha(),
-    'Shotgun': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'ShotGun.png')).convert_alpha(),
-    'ShotgunClass1': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'PreciseShot.png')).convert_alpha(),
-    'ShotgunClass2': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'MultiShot.png')).convert_alpha(),  
-    'RifleClass1': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'SMG.png')).convert_alpha(),
-    'RifleClass2': pygame.image.load(os.path.join(currentdir + './Assets/buttons/', 'LaserGun.png')).convert_alpha(),        
+    'settings_button': pygame.image.load(asset('buttons', 'Settings.png')).convert_alpha(),
+    'login': pygame.image.load(asset('buttons', 'Login.png')).convert_alpha(),
+    'restart': pygame.image.load(asset('buttons', 'restart.png')).convert_alpha(),
+    'start': pygame.image.load(asset('buttons', 'start.png')).convert_alpha(),
+    'discord': pygame.image.load(asset('buttons', 'discord.png')).convert_alpha(),
+    'credits': pygame.image.load(asset('buttons', 'credits.png')).convert_alpha(),
+    'resolution': pygame.image.load(asset('buttons', 'resolution.png')).convert_alpha(),
+    'resolution1': pygame.image.load(asset('buttons', 'resolution1.png')).convert_alpha(),
+    'resolution2': pygame.image.load(asset('buttons', 'resolution2.png')).convert_alpha(),
+    'back': pygame.image.load(asset('buttons', 'back.png')).convert_alpha(),
+    'multi': pygame.image.load(asset('buttons', 'Multi.png')).convert_alpha(),
+    'multi1': pygame.image.load(asset('buttons', 'Client1.png')).convert_alpha(),
+    'multi2': pygame.image.load(asset('buttons', 'Client2.png')).convert_alpha(),
+    'DC': pygame.image.load(asset('buttons', 'DC.png')).convert_alpha(),
+    'Controls': pygame.image.load(asset('buttons', 'Controls.png')).convert_alpha(),
+    'Casual': pygame.image.load(asset('buttons', 'Casual.png')).convert_alpha(),
+    'Ranked': pygame.image.load(asset('buttons', 'Ranked.png')).convert_alpha(),
+    'Rankings': pygame.image.load(asset('buttons', 'Rankings.png')).convert_alpha(),
+    'Speedrun': pygame.image.load(asset('buttons', 'SpeedRun.png')).convert_alpha(),
+    'Rifle': pygame.image.load(asset('buttons', 'Rifle.png')).convert_alpha(),
+    'Shotgun': pygame.image.load(asset('buttons', 'ShotGun.png')).convert_alpha(),
+    'ShotgunClass1': pygame.image.load(asset('buttons', 'PreciseShot.png')).convert_alpha(),
+    'ShotgunClass2': pygame.image.load(asset('buttons', 'MultiShot.png')).convert_alpha(),  
+    'RifleClass1': pygame.image.load(asset('buttons', 'SMG.png')).convert_alpha(),
+    'RifleClass2': pygame.image.load(asset('buttons', 'LaserGun.png')).convert_alpha(),        
 
 }
 
 gsiz = (1320, 300)
 
-one50 = ['1', '2', '3','4', '5', '6','7', '8', '9','10', '11', '12','13', '14', '15','16', '17', '18','19', '20', '21','22', '23', '24','25','26','27','28', '29', '30', '31' '32','33','34', '35','36', '37', '38','39', '40', '41','42','43','44','45', '46', '47', '48' '49','50', '51']
-
-logo = pygame.image.load(os.path.join(currentdir + './Assets/', 'logo.png'))
+logo = pygame.image.load(asset('logo.png'))
 pygame.display.set_icon(logo)
 
 p = Player(players['PlayerRED'], 120, 455, 5, 1, 4.5, -1, 100, 10, 5, 10, 0)
@@ -401,19 +426,51 @@ moving_sprites = pygame.sprite.Group()
 
 d = dialogue('', '')
 
-vers = requests.get("https://maxor.xyz/geneva/version.txt")
-versi = vers.text
+net = Peer()
+
+try:
+    versi = int(float(fetch("https://maxor.xyz/geneva/version.txt", versioncheck)))
+except ValueError:
+    versi = int(versioncheck)
 
 def restartGame():
+    # Drop back from round 30 subclasses to the base weapon
+    if p.playerclass in (3, 4):
+        p.playerclass = 2
+    if p.playerclass in (5, 6):
+        p.playerclass = 1
     p.hp = 100
     p2.hp = 100
+    p3.hp = 0
+    p3.dmg = 1
+    p2.x = 1050
+    p3.x = 0
+    bullets.clear()
+    gc.won = False
+    gc.shop = False
+    gc.chooseclass1 = False
+    gc.ppr = 0
+    gc.moment1 = time.time() * 1000
+    d.dialogue = False
+    p.faceval1 = 1
+    p.faceval2 = -1
+    p.lightspecial = p.darkspecial = p.uncap = p.lightused = False
+    p.hasinvinc = p.invinc = p.hasdash = False
+    p.abilitycount = 0
+    v.darkvalue = 0
+    s.six = 50
+    s.seven = 70
+    s.wepadd = 14
+    s.ccadd = 75
+    s.speedadd = 10.5
+    s.dmgadd = 245
     gc.rnd = 1
     gc.points = 0
     p.speed = 4.5
     p2.speed = 2
     p.dmg = 10
     p2.dmg = 1
-    p.bulletcnt = 5
+    p.bulletcnt = 4 if p.playerclass == 2 else 5
     p.cc = 10
     s.one = 1
     s.two = 2
@@ -425,30 +482,26 @@ def restartGame():
 
 def update():
     pygame.display.set_caption("updating.... " + version)
-    widthreq = requests.get("https://maxor.xyz/geneva/width.txt")
-    width = widthreq.text
-    heightreq = requests.get("https://maxor.xyz/geneva/height.txt")
-    height = heightreq.text
-    gc.size = (int(width), int(height))
-    win = pygame.display.set_mode(gc.size)
-    if(int(versioncheck) < int(versi)):
+    try:
+        gc.size = (int(fetch("https://maxor.xyz/geneva/width.txt")), int(fetch("https://maxor.xyz/geneva/height.txt")))
+    except ValueError:
+        gc.size = size
+    pygame.display.set_mode(gc.size)
+    if(int(versioncheck) < versi):
         pygame.display.set_caption("Geneva OUTDATED beta " + version)
     else:
         pygame.display.set_caption("Geneva")
-    VARS = requests.get("https://maxor.xyz/geneva/vars.txt")
-    vars2 = VARS.text
-    maxor2 = vars2[0:5]
-    maxor5 = vars2[6:8]
-    maxor6 = vars2[9:11]
-    s.hpadd = int(maxor5)
-    s.yeezus = maxor6
-
-    if maxor2 == 'BLACK':
-        gc.BULLCOLOR = BLACK
-    else:
-        maxor3 = maxor2.translate({ord('-'): None})
-        gc.BULLCOLOR = maxor3
-    main()
+    vars2 = fetch("https://maxor.xyz/geneva/vars.txt")
+    try:
+        maxor2 = vars2[0:5]
+        s.hpadd = int(vars2[6:8])
+        s.yeezus = int(vars2[9:11])
+        if maxor2 == 'BLACK':
+            gc.BULLCOLOR = BLACK
+        else:
+            gc.BULLCOLOR = pygame.Color(maxor2.translate({ord('-'): None}))
+    except ValueError:
+        pass
 
 # Reset Resolution
 def resetRes():
@@ -497,14 +550,6 @@ def getAbility():
             p.abilitycount += 1
         else:
             getAbility()            
-
-# RESET 'SERVER' 
-def resetServer():
-
-    with open(currentdir + '/multiplayer/server/maxor2.txt', 'w') as f:
-        f.write('1')
-    with open(currentdir + '/multiplayer/server/maxor1.txt', 'w') as f:
-        f.write('1')   
 
 def main():
 
@@ -571,7 +616,7 @@ def main():
         if gc.client == 1 or gc.client == 2:
             v.singleplayer = False
 
-        if not gc.startclicked and not v.creditsactive and not settings and not v.resolutionclicked and not v.mpprompt and not v.controlspage and not gc.inlobby and not gc.singleplayerpromp and not v.classelect:
+        if not gc.startclicked and not v.creditsactive and not settings and not v.resolutionclicked and not v.mpprompt and not v.controlspage and not gc.inlobby and not gc.singleplayerpromp and not v.classelect and not v.ipprompt:
             start.draw(win)
             discord.draw(win)
             creditss.draw(win)           
@@ -595,9 +640,9 @@ def main():
                 v.creditsactive = True
 
             if discord.clicked:
-                disc = requests.get("https://maxor.xyz/geneva/discord.txt")                        
-                disco = disc.text
-                webbrowser.open(str(disco))  # Go to example.com
+                disco = fetch("https://maxor.xyz/geneva/discord.txt")
+                if disco:
+                    webbrowser.open(disco)
 
             if start.clicked:
                 gc.singleplayerpromp = True
@@ -651,6 +696,7 @@ def main():
                 v.modeRecentlyChosen = True         
             if Casual.clicked and not v.startrecentlyclicked:
                 v.classelect = True
+                gc.speedrun = False
                 gc.singleplayerpromp = False
                 
         
@@ -663,6 +709,8 @@ def main():
             shotgun.draw(win)
             win.blit(weaponselect,(380,60))
             if rifle.clicked:
+                if gc.speedrun:
+                    gc.moment1 = time.time() * 1000
                 p.playerclass = 1
                 v.classelect = False
                 gc.startclicked = True
@@ -713,7 +761,7 @@ def main():
             if Ranked.clicked:
                 ranked = True
                 if file_exists2:
-                    with open(currentdir + './multiplayer/server/userinfo.txt') as f:
+                    with open(userinfopath) as f:
                         v.namelol = f.read()
                         gc.loggedinasnonadmin = True
                 else:
@@ -728,10 +776,20 @@ def main():
                 gc.inlobby = True
                 gc.client = 1
                 v.mpprompt = False
+                net.host()
             if mp2.clicked:
-                gc.inlobby = True
-                gc.client = 2
+                v.ipprompt = True
                 v.mpprompt = False
+
+        if v.ipprompt:
+            iptxt = font6.render("Enter host IP and press Enter", (0, 5), BLACK)
+            iptxt2 = font6.render(v.joinip + '_', (0, 5), BLACK)
+            win.blit(iptxt,(200,150))
+            win.blit(iptxt2,(200,250))
+            back.draw(win)
+            if back.clicked:
+                v.ipprompt = False
+                v.mpprompt = True
 
         if settings and not v.resolutionclicked:
             resolution.draw(win)           
@@ -779,25 +837,23 @@ def main():
                     p.playerclass = 2
                     p.bulletcnt = 4
                 if DC2.clicked:
+                    net.close()
+                    gc.client = 0
                     gc.startclicked = False
                     v.singleplayer = True
                     gc.inlobby = False
 
-                inl = font3.render("in lobby... waiting for host to start", (0, 5), BLACK)
-                win.blit(inl,(300,100))       
-                
+                inl = font3.render(net.status, (0, 5), BLACK)
+                win.blit(inl,(100,100))       
 
-                with open(currentdir + '/multiplayer/server/maxor2.txt') as f:
-                    ernd = f.read()
-                    inl21 = font3.render(ernd,(0,5), BLACK)
-
-                    if ernd == 'startlobby':
-                        resetServer()                        
-                        gc.inlobby = False
-                        gc.startclicked = True
-                        gc.lobbystarted = True            
-                        p2.x = 1050
-                        p.hp = 100
+                if net.started:
+                    if p.playerclass == 0:
+                        p.playerclass = 1
+                    gc.inlobby = False
+                    gc.startclicked = True
+                    gc.lobbystarted = True            
+                    p2.x = 1050
+                    p.hp = 100
 
             if gc.client == 1:
                 DC2.draw(win)
@@ -810,25 +866,24 @@ def main():
                     p.playerclass = 2
                     p.bulletcnt = 4
                 if DC2.clicked:
+                    net.close()
+                    gc.client = 0
                     gc.startclicked = False
                     v.singleplayer = True
                     gc.inlobby = False
                     v.mpprompt = False
 
-                with open(currentdir + '/multiplayer/server/maxor1.txt') as f:
-                    ernd = f.read()
-                    inl21 = font3.render(ernd,(0,5), BLACK)
-
-                    win.blit(inl21,(300,100))
-  
+                inl21 = font3.render(net.status, (0, 5), BLACK)
+                win.blit(inl21,(100,100))
 
                 inl = font3.render("You are hosting the game!", (0, 5), BLACK)
-                start2.draw(win)
-                if start2.clicked:
+                if net.connected:
+                    start2.draw(win)
+                if net.connected and start2.clicked:
+                    if p.playerclass == 0:
+                        p.playerclass = 1
                     p.hp = 100
-                    resetServer()                    
-                    sending23 = DiscordWebhook(url='https://discord.com/api/webhooks/1006756471872163940/O4DjO3ADxjT3Orfw645bTuCfhV6mIBn4i7SfX77mUayVNTqLLOVPLpAKcMZrLrR2r6hx', content='startlobby')
-                    sent23 = sending23.execute()        
+                    net.send(type='start')
                     gc.inlobby = False
                     gc.startclicked = True
                     gc.lobbystarted = True            
@@ -854,12 +909,16 @@ def main():
             else:
                 wmp = font6.render("You Won this game!", (0, 5), GREEN)
                 if ranked and not gc.sentrankedwin:
-                    sending24 = DiscordWebhook(url='https://discord.com/api/webhooks/1007335442917621760/VsmtTUpYO0GS27_iJosLRAuw0Fqyrs_MhC0S9vQ_IyvIizIPBVG_ieJLsHzTNSgbppTy', content=v.namelol + ' has won a ranked game!')
-                    sent24 = sending24.execute()   
+                    sendWebhook('https://discord.com/api/webhooks/1007335442917621760/VsmtTUpYO0GS27_iJosLRAuw0Fqyrs_MhC0S9vQ_IyvIizIPBVG_ieJLsHzTNSgbppTy', v.namelol + ' has won a ranked game!')
                     gc.sentrankedwin = True
 
             win.blit(wmp,(400,300))
             if DC.clicked:
+                net.close()
+                gc.client = 0
+                gc.lobbystarted = False
+                gc.wonmp = False
+                gc.lostmp = False
                 gc.startclicked = False
                 v.singleplayer = True
                 restartGame()
@@ -867,7 +926,7 @@ def main():
         if yeezus:
             p2.yeezus = True
             p.yeezus = True
-        if paused or not gc.startclicked and not v.creditsactive and not settings and not v.mpprompt and not v.controlspage and not gc.inlobby and not gc.singleplayerpromp and not v.classelect:
+        if paused or not gc.startclicked and not v.creditsactive and not settings and not v.mpprompt and not v.controlspage and not gc.inlobby and not gc.singleplayerpromp and not v.classelect and not v.ipprompt:
             settings_button.draw(win)
             if(settings_button.clicked):
                 if not settings:
@@ -902,7 +961,7 @@ def main():
 
             if event.type == pygame.QUIT:
 
-                resetServer()
+                net.close()
 
                 run = False
 
@@ -955,6 +1014,16 @@ def main():
 
             else:
                 if event.type == pygame.KEYDOWN:
+                    if v.ipprompt:
+                        if event.key == pygame.K_RETURN:
+                            v.ipprompt = False
+                            gc.inlobby = True
+                            gc.client = 2
+                            net.join(v.joinip or '127.0.0.1')
+                        elif event.key == K_BACKSPACE:
+                            v.joinip = v.joinip[:-1]
+                        elif event.unicode.isprintable() and event.unicode != ' ':
+                            v.joinip += event.unicode
                     if v.highscoreprompt:
                         if event.key is not pygame.K_RETURN and event.key is not pygame.K_ESCAPE and event.key is not pygame.K_SPACE and event.key is not pygame.K_BACKSPACE:
                             v.namelol += event.unicode
@@ -962,8 +1031,7 @@ def main():
                             v.namelol = ''
                         if event.key == pygame.K_RETURN:
                             if v.highscoreprompt:
-                                webhook1 = DiscordWebhook(url='https://discord.com/api/webhooks/1005987949067894905/igWvhRDPoDRmTXG2LX-hfMThbmpePBnNpsmACd1saZsHoZRA-_DcMYK95CiosZN3Ul86', content= v.namelol + ' has beaten the highscore!!')
-                                m = webhook1.execute()
+                                sendWebhook('https://discord.com/api/webhooks/1005987949067894905/igWvhRDPoDRmTXG2LX-hfMThbmpePBnNpsmACd1saZsHoZRA-_DcMYK95CiosZN3Ul86', v.namelol + ' has beaten the highscore!!')
                                 v.highscoreprompt = False
                     if gc.rankednameprompt and ranked and not file_exists2:
                             if event.key is not pygame.K_RETURN and event.key is not pygame.K_ESCAPE and event.key is not pygame.K_SPACE and event.key is not pygame.K_BACKSPACE:
@@ -973,7 +1041,7 @@ def main():
                             if event.key == pygame.K_RETURN:
                                 gc.rankednameprompt = False
                                 gc.loggedinasnonadmin = True
-                                with open(currentdir + './multiplayer/server/userinfo.txt', 'w') as f:
+                                with open(userinfopath, 'w') as f:
                                     f.write(v.namelol)
                     if console:
                         if(event.key == pygame.K_ESCAPE and loggedin):
@@ -999,29 +1067,29 @@ def main():
                                 consoletxt = ''
                             if consoletxt == 'godmode' and gc.consolestage == 0:
                                 p.invinc = True
+                                consoletxt = ''
                             if consoletxt == 'showhitboxes' and gc.consolestage == 0:
                                 v.showHitbox = True
+                                consoletxt = ''
 
                             if consoletxt == 'class' and gc.consolestage == 0:
                                 consoletxt = ''
                                 gc.consolestage = 4    
 
 
-                            if gc.consolestage == 1 and consoletxt != '':
-                                p.hp = int(consoletxt)
+                            if gc.consolestage != 0 and consoletxt != '':
+                                try:
+                                    if gc.consolestage == 1:
+                                        p.hp = int(consoletxt)
+                                    if gc.consolestage == 2:
+                                        gc.rnd = int(consoletxt)
+                                    if gc.consolestage == 3:
+                                        gc.points = int(consoletxt)
+                                    if gc.consolestage == 4:
+                                        p.playerclass = int(consoletxt)
+                                except ValueError:
+                                    pass
                                 gc.consolestage = 0
-                                consoletxt = ''
-                            if gc.consolestage == 2 and consoletxt != '':
-                                gc.rnd = int(consoletxt)
-                                gc.consolestage = 0     
-                                consoletxt = ''
-                            if gc.consolestage == 3 and consoletxt != '':
-                                gc.points = int(consoletxt)
-                                gc.consolestage = 0        
-                                consoletxt = ''
-                            if gc.consolestage == 4 and consoletxt != '':
-                                p.playerclass = int(consoletxt)
-                                gc.consolestage = 0        
                                 consoletxt = ''
                      
                     else:
@@ -1035,7 +1103,7 @@ def main():
                                 p.dashstate = 0
                         if event.key == pygame.K_d:
                             if p.hasdash and p.dashstate2 < 1:
-                                    p.dashstate += 1
+                                    p.dashstate2 += 1
                             elif p.hasdash and p.dashstate2 >= 1:
                                     p.x += 50
                                     if p.x > 1240:
@@ -1068,8 +1136,7 @@ def main():
                                     
                         if event.key == pygame.K_RETURN:
                             if passtime and not loggedin:
-                                logins = requests.get("https://maxor.xyz/geneva/logins.json")
-                                data = logins.text
+                                data = fetch("https://maxor.xyz/geneva/logins.json")
                                 maxor = data.find(gc.username, 0, 340)
                                 maxor2 = data.find(gc.password, 0, 340)
                                 num = maxor2 - maxor
@@ -1080,10 +1147,9 @@ def main():
 
                                 elif (num <= 74 and num > 29 and gc.password != '' and gc.password != 'attributes' and gc.password != 'pass'):
                                     loggedin = True
-                                    webhook4 = DiscordWebhook(url='https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', content= ' Someone has logged into the admin account: ' + gc.username)
-                                    responsaae = webhook4.execute()
+                                    sendWebhook('https://discord.com/api/webhooks/1005947184207892620/MdrkcgX-XJd4z55TfZcHoCzy7jVSOZz2OwyrMloE6FF8fl0aQ89m1f4dTZQeJPfFnU-p', ' Someone has logged into the admin account: ' + gc.username)
                                     v.namelol = gc.username
-                                    with open(currentdir + './multiplayer/server/userinfo.txt', 'w') as f:
+                                    with open(userinfopath, 'w') as f:
                                         f.write(v.namelol)
 
                         if event.key == pygame.K_n and not gc.chooseclass1:
@@ -1150,11 +1216,11 @@ def main():
                                     p.faceval2 -= 0.25
                                     p.faceval1 += 0.25
 
-                            if(event.key == pygame.K_5 and p.cc <= s.ccadd):
+                            if(event.key == pygame.K_5):
                                 if(p.uncap):
                                     s.ccadd += 5
                                     p.uncap = False                                
-                                if(gc.points >= s.five):
+                                if(gc.points >= s.five and p.cc <= s.ccadd):
                                     gc.points -= s.five
                                     s.five += 10 
                                     p.cc += 5
@@ -1204,19 +1270,18 @@ def main():
             win.blit(pas, (20,60))
             
 
-        if p.hp <= 0:
+        if p.hp <= 0 and not gc.lost:
             d.dialogue = True
-            d.changeText("Ratio U LOST", ':(((')
-            if p.lightspecial == True:
-                if p.lightused == False:
-                    p.hp = 100
-                    gc.won = True
-                    p.lightused = True
-                else:
-                    gc.lost = True
-            elif v.goths:
-                webhook3 = DiscordWebhook(url='https://discord.com/api/webhooks/1005987949067894905/igWvhRDPoDRmTXG2LX-hfMThbmpePBnNpsmACd1saZsHoZRA-_DcMYK95CiosZN3Ul86', content=v.namelol + 'had died in their hs run with a final score of' + str(gc.rnd))
-                ad = webhook3.execute()      
+            if p.lightspecial and not p.lightused:
+                d.changeText("Ability light saved you!", 'press N to keep fighting')
+                p.hp = 100
+                gc.won = True
+                p.lightused = True
+            else:
+                d.changeText("Ratio U LOST", 'ESC then restart to play again :(((')
+                gc.lost = True
+                if v.goths:
+                    sendWebhook('https://discord.com/api/webhooks/1005987949067894905/igWvhRDPoDRmTXG2LX-hfMThbmpePBnNpsmACd1saZsHoZRA-_DcMYK95CiosZN3Ul86', v.namelol + ' had died in their hs run with a final score of ' + str(gc.rnd))
                            
         # MOVE PLAYER 2
         if not paused or not v.singleplayer and gc.lobbystarted and not paused and not v.classelect:
@@ -1320,7 +1385,7 @@ def main():
         p2.hitbox = (p2.x + 17, p2.y + 11, 29, 52) # NEW\
         p3.hitbox = (p3.x + 17, p3.y + 11, 29, 52) # NEW
         if (enemyRect2.colliderect(prect)):
-            p2.attack = True
+            p3.attack = True
             if gc.rnd < 49:
                 value2 += 1
             else:
@@ -1329,14 +1394,14 @@ def main():
             if(value2 >= 70):
                 value2 = 0
         else:
-            p2.attack = False
+            p3.attack = False
             value2 = 0
 
         if (enemyRect.colliderect(prect)):
             p2.attack = True
             if gc.rnd < 49:
                 v.value += 1
-            if gc.rnd >= 49 and gc.rnd < 100:
+            elif gc.rnd < 100:
                 v.value += 2
             else:
                 v.value += 2.5
@@ -1347,7 +1412,7 @@ def main():
             p2.attack = False
             v.value = 0
 
-        for bullet in bullets:
+        for bullet in bullets[:]:
 
             bullet.draw(win)
 
@@ -1360,13 +1425,13 @@ def main():
                     if bullet.bulletid == 3:
                         bullet.y += 0.75
                         if bullet.y > 500:
-                            bullets.pop(bullets.index(bullet)) 
+                            bullets.remove(bullet)
                     if bullet.bulletid == 4:
                         bullet.y -= 0.75
                     if bullet.bulletid == 5:
                         bullet.y += 0.75
                         if bullet.y > 500:
-                            bullets.pop(bullets.index(bullet)) 
+                            bullets.remove(bullet)
 
                 bullet.x += bullet.vel  # Moves the bullet by its vel
             else:
@@ -1374,9 +1439,9 @@ def main():
                     bullets.pop(bullets.index(bullet))  # This will remove the bullet if it is off 
 
             if not gc.lost and not gc.won and not paused:
-                if gc.rnd >= 40:
+                if gc.rnd >= 40 and p3.hp > 0:
                     if bullet.y + bullet.radius < p3.hitbox[1] + 60 + p3.hitbox[3] and bullet.y + bullet.radius > p3.hitbox[1] - 60 or prect.colliderect(enemyRect2):
-                                        if bullet.x + bullet.radius > p3.hitbox[0] + 13 and bullet.x - bullet.radius < p3.hitbox[0] + p2.hitbox[2] - 13 or prect.colliderect(enemyRect2):
+                                        if bullet.x + bullet.radius > p3.hitbox[0] + 13 and bullet.x - bullet.radius < p3.hitbox[0] + p3.hitbox[2] - 13 or prect.colliderect(enemyRect2):
                                             if(randint(1, 100) <= p.cc):
                                                 p3.hp -= (p.dmg * 2)
                                                 crit = True
@@ -1397,7 +1462,7 @@ def main():
 
                                                 p3.hp -= p.dmg            
                                                         
-                if bullet.y + bullet.radius < p2.hitbox[1] + 60 + p2.hitbox[3] and bullet.y + bullet.radius > p2.hitbox[1] - 60 or prect.colliderect(enemyRect):
+                if p2.hp > 0 and (bullet.y + bullet.radius < p2.hitbox[1] + 60 + p2.hitbox[3] and bullet.y + bullet.radius > p2.hitbox[1] - 60 or prect.colliderect(enemyRect)):
                     if bullet.x + bullet.radius > p2.hitbox[0] + 13 and bullet.x - bullet.radius < p2.hitbox[0] + p2.hitbox[2] - 13 or prect.colliderect(enemyRect):
                         if(randint(1, 100) <= p.cc):
                             p2.hp -= (p.dmg * 2)
@@ -1422,109 +1487,73 @@ def main():
                         if not gc.won:
                             if bullet in bullets:
                                 bullets.pop(bullets.index(bullet))
-                        # SCALE ENEMY
-                        if not gc.won:
-                            if(p2.hp <= 0 and p3.hp <= 0):
-                                gc.won = True
-                                if(p.speed >= p2.speed):
-                                    p2.speed += 0.15
-                                elif p.speed <= p2.speed and p.speed <= 9.5:
-                                    p2.speed += 0.05
 
-                                gc.rnd += 1
-                                if gc.rnd == 30:
-                                    gc.chooseclass1 = True
-                                    
-                                if gc.speedrun:
-                                    if gc.rnd >= 50:
-                                        gc.moment2 = time.time() * 1000
-                                        gc.finaltime =  gc.moment2 - gc.moment1
-                                        gc.finaltime /= 1000
-                                        d.dialogue = True
-                                        d.text = 'Final Time ' + str(round(gc.finaltime)) + ' seconds'
+        # SCALE ENEMY
+        if gc.startclicked and not gc.won and not gc.lost and not paused and p2.hp <= 0 and p3.hp <= 0:
+            gc.won = True
+            if(p.speed >= p2.speed):
+                p2.speed += 0.15
+            elif p.speed <= p2.speed and p.speed <= 9.5:
+                p2.speed += 0.05
 
-                                        gc.wonmp = True
+            gc.rnd += 1
+            if gc.rnd == 30:
+                gc.chooseclass1 = True
 
-                                if not v.singleplayer:
-                                    if gc.client == 2:
-                                        sending = DiscordWebhook(url='https://discord.com/api/webhooks/1006739051082166373/0C-x9_DMsqD8-5KtdtQIheDmVQUtsrU2Ml4ktNh5vpoYKfHZdSI4_JowVUrqhinTgsrd', content=str(gc.rnd))
-                                        sent = sending.execute()         
-                                    if gc.client == 1:
-                                        sending2 = DiscordWebhook(url='https://discord.com/api/webhooks/1006756471872163940/O4DjO3ADxjT3Orfw645bTuCfhV6mIBn4i7SfX77mUayVNTqLLOVPLpAKcMZrLrR2r6hx', content=str(gc.rnd))
-                                        sent2 = sending2.execute()      
-                                if p.invinc:
-                                    p.hasinvinc = False
-                                    p.invinc = False        
+            if gc.speedrun:
+                if gc.rnd >= 50:
+                    gc.moment2 = time.time() * 1000
+                    gc.finaltime =  gc.moment2 - gc.moment1
+                    gc.finaltime /= 1000
+                    d.dialogue = True
+                    d.text = 'Final Time ' + str(round(gc.finaltime)) + ' seconds'
 
-                                if gc.rnd < 140:
-                                    p2.hp += 100 
-                                    if gc.rnd >= 40:
-                                        p3.hp += 100
-                                        p3.hp += (gc.rnd * 15)
+                    gc.wonmp = True
 
-                                    p2.hp += (gc.rnd * 15)
-                                else:
-                                    p2.hp + 250
-                                    if gc.rnd > 40:
-                                        p3.hp += 250
-                                        p3.hp += (gc.rnd * 20) 
-                                    p2.hp += (gc.rnd * 20)
+            if not v.singleplayer:
+                net.send(type='rnd', value=gc.rnd)
+            if p.invinc:
+                p.hasinvinc = False
+                p.invinc = False        
 
-                                if gc.rnd >= 40:
-                                    p3.dmg += 0.1
+            if gc.rnd < 140:
+                p2.hp += 100 
+                if gc.rnd >= 40:
+                    p3.hp += 100
+                    p3.hp += (gc.rnd * 15)
 
-                                p2.dmg += 0.2
-                                if gc.rnd < 100:
-                                    gc.points += gc.ppr + (1 + (gc.rnd * 0.1)) 
-                                else:
-                                    gc.points += gc.ppr + (1 + (gc.rnd * 0.05))                               
-                                
-                                if int(highscore) < gc.rnd and not v.goths and not loggedin:
-                                    v.highscoreprompt = True
-                                    v.goths = True
+                p2.hp += (gc.rnd * 15)
+            else:
+                p2.hp += 250
+                if gc.rnd > 40:
+                    p3.hp += 250
+                    p3.hp += (gc.rnd * 20) 
+                p2.hp += (gc.rnd * 20)
 
-        if not v.singleplayer:
-            if gc.client == 1:
-                if v.opened == False:
-                    os.startfile(currentdir + '/multiplayer/client1.exe')
-                    v.opened = True
-                if gc.lobbystarted:
-                    with open(currentdir + '/multiplayer/server/maxor1.txt') as f:
-                        ernd = f.read()
-                        gc.ernd = ernd
-                        if gc.rnd == 1:
-                            resetServer()
+            if gc.rnd >= 40:
+                p3.dmg += 0.1
 
-                        erounds = font3.render("ernd: " + str(ernd), (0, 5), RED)
-                        if ernd in one50:
-                            if int(ernd) >= 50 and gc.rnd < 50:
-                                gc.lostmp = True
-                                gc.wonmp = False
+            p2.dmg += 0.2
+            if gc.rnd < 100:
+                gc.points += gc.ppr + (1 + (gc.rnd * 0.1)) 
+            else:
+                gc.points += gc.ppr + (1 + (gc.rnd * 0.05))                               
 
-                            if int(ernd) < 50 and gc.rnd >= 50:
-                                gc.lostmp = False
-                                gc.wonmp = True
+            if highscore is not None and highscore < gc.rnd and not v.goths and not loggedin:
+                v.highscoreprompt = True
+                v.goths = True
 
-            if gc.client == 2:
-                if v.opened == False:
-                    os.startfile(currentdir + '/multiplayer/client2.exe')
-                    v.opened = True
-                if gc.lobbystarted:
-                    with open(currentdir + '/multiplayer/server/maxor2.txt') as f:
-                        ernd = f.read()
-                        gc.ernd = ernd
-                    
-                        if gc.rnd == 1:
-                           resetServer()
-
-                        erounds = font3.render("ernd: " + str(ernd), (0, 5), RED)
-                        if ernd in one50:
-                            if int(ernd) >= 50 and gc.rnd < 50:
-                                gc.lostmp = True
-                                gc.wonmp = False
-                            if not gc.lostmp  and gc.rnd >= 50:
-                                gc.lostmp = False
-                                gc.wonmp = True
+        if not v.singleplayer and gc.lobbystarted:
+            gc.ernd = net.peerrnd
+            if net.connected:
+                erounds = font3.render("ernd: " + str(gc.ernd), (0, 5), RED)
+            else:
+                erounds = font3.render(net.status, (0, 5), RED)
+            if gc.ernd >= 50 and gc.rnd < 50:
+                gc.lostmp = True
+                gc.wonmp = False
+            if not gc.lostmp and gc.rnd >= 50:
+                gc.wonmp = True
 
         if not paused and gc.startclicked and not v.highscoreprompt:
             win.blit(hp, (hptxtx, 10))
@@ -1540,7 +1569,7 @@ def main():
         if not gc.lost and gc.startclicked:         
           win.blit(p.img, (p.x, p.y - 40))
 
-        if not gc.won and not paused and not gc.lost and gc.startclicked or not v.singleplayer and gc.lobbystarted and not gc.won and not paused and not gc.lost and gc.startclicked:
+        if p2.hp > 0 and (not gc.won and not paused and not gc.lost and gc.startclicked or not v.singleplayer and gc.lobbystarted and not gc.won and not paused and not gc.lost and gc.startclicked):
           if(v.value <= 25):
             win.blit(p2.img, (p2.x, p2.y - 40))
           if(v.value > 25 and v.value <= 55):
@@ -1589,18 +1618,18 @@ def main():
             if yeezus:
                 win.blit(yeezusimg['yeezusswing2'], (p3.x, p3.y - 40))
             else:
-                if(p2.facing < 0):                
+                if(p3.facing < 0):                
                     win.blit(players['PlayerBLUEswing22'], (p3.x, p3.y - 40))
-                if(p2.facing > 0):
+                if(p3.facing > 0):
                     win.blit(players['PlayerBLUEswing2'], (p3.x, p3.y - 40))
 
           if(value2 > 60 and value2 <= 70 and p3.hp > 0):
             if yeezus:
                 win.blit(yeezusimg['yeezusswing2'], (p3.x, p3.y - 40))
             else:
-                if(p2.facing < 0):
+                if(p3.facing < 0):
                     win.blit(players['PlayerBLUEswing32'], (p3.x, p3.y - 40))
-                if(p2.facing > 0):
+                if(p3.facing > 0):
                     win.blit(players['PlayerBLUEswing3'], (p3.x, p3.y - 40))                
             if not p.invinc:
                 p.hp -= p3.dmg
@@ -1620,10 +1649,9 @@ def main():
 
     pygame.quit()
 
-if int(versioncheck) < int(float(versi)):
+if int(versioncheck) < versi:
     update()
-else:
-    main()
+main()
 
 # END
 # PLEASE FIX ALL MY MONKEY CODE PLS - MAXOR
