@@ -1,21 +1,9 @@
-geneva.spec
-__pycache__/geneva.cpython-310.pyc
-build/geneva/Analysis-00.toc
-build/geneva/base_library.zip
-build/geneva/xref-main.html
-build/geneva/Tree-02.toc
-build/geneva/PYZ-00.pyz
-build/geneva/geneva.exe.manifest
-build/geneva/EXE-00.toc
-dist/geneva.exe
-build/geneva/warn-geneva.txt
-build/geneva/Tree-01.toc
-build/geneva/Tree-00.toc
-build/geneva/PYZ-00.toc
-build/geneva/PKG-00.toc
-build/main/geneva.pkg
-dist/Geneva.zip
-assets/uuid.txt
+# Build output (python build.py)
+build/
+dist/
+*.spec
+__pycache__/
 
-build/Geneva/Geneva.exe.manifest
+# Local player data
+assets/uuid.txt
 multiplayer/server/userinfo.txt
